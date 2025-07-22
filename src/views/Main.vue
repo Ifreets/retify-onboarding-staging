@@ -27,6 +27,7 @@ import Step3 from '@/views/OnBoarding/Step3.vue'
 const STEPS = [Step1, Step2, Step3]
 /** bước hiện tại */
 const current_step = ref(1)
+/** loại animation */
 const transition_name = ref('slide-left')
 
 watch(current_step, (newVal, oldVal) => {
