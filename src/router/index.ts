@@ -18,7 +18,16 @@ const router = createRouter({
       children: [
         {
           path: 'order',
-          component: () => import('@/views/HomeView/Orders.vue'),
+          children: [
+            {
+              path: '',
+              component: () => import('@/views/HomeView/Orders.vue'),
+            },
+            {
+              path: ':id',
+              component: () => import('@/views/HomeView/order/OrderDetail.vue'),
+            },
+          ],
         },
       ],
     },

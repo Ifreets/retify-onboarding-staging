@@ -64,7 +64,9 @@
     </section>
 
     <footer class="flex justify-between font-semibold">
-      <button @click="back" class="py-1.5 px-10 rounded-md bg-slate-200">Back</button>
+      <button @click="back" class="py-1.5 px-10 rounded-md bg-slate-200 text-slate-700">
+        Back
+      </button>
       <button
         @click="next"
         class="py-1.5 px-10 rounded-md bg-blue-700 text-white disabled:bg-blue-200 disabled:text-blue-700"

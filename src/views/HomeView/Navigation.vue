@@ -1,5 +1,5 @@
 <template>
-  <nav class="p-2 text-2xs text-slate-700 flex">
+  <nav class="p-2 text-2xs text-slate-700 flex shadow-[0_-2px_20px_rgba(0,0,0,0.1)]">
     <RouterLink
       v-for="item in NAVS"
       :key="item.name"

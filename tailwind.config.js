@@ -6,6 +6,9 @@ export default {
       fontSize: {
         '2xs': ['0.625rem', '0.75rem'],
       },
+      spacing: {
+        21: '5.25rem',
+      },
     },
   },
   plugins: [],
