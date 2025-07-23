@@ -56,31 +56,29 @@
         </div>
       </section>
 
-      <section class="border py-3 px-4 rounded-lg flex flex-col gap-3">
-        <div class="w-full flex justify-between text-base">
-          <p class="font-semibold">Ordered Items</p>
-          <p>Total Items: <span class="font-medium text-sm">7</span></p>
-        </div>
-        <div class="w-full h-px bg-slate-200"></div>
-        <ProductItem v-for="i in 3" :key="i" />
-      </section>
+      <ProductList title="Ordered Items" />
     </main>
   </article>
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router';
 
-import { CheckBadgeIcon,
-  PhoneIcon as SolidPhoneIcon,
-  ChatBubbleOvalLeftEllipsisIcon
-} from '@heroicons/vue/24/solid'
-import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from '@heroicons/vue/24/outline'
 import ProductItem from '@/components/common/ProductItem.vue';
 
+import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from '@heroicons/vue/24/outline';
+import {
+  ChatBubbleOvalLeftEllipsisIcon,
+  CheckBadgeIcon,
+  PhoneIcon as SolidPhoneIcon
+} from '@heroicons/vue/24/solid';
+import ProductList from '@/components/common/ProductList.vue';
+
+// router
 const router = useRouter()
 const route = useRoute()
 
+/** hàm trở lại màn danh sách đơn hàng */
 function back() {
   router.push('/home/order')
 }

@@ -21,13 +21,26 @@ const router = createRouter({
           children: [
             {
               path: '',
-              component: () => import('@/views/HomeView/Orders.vue'),
+              component: () => import('@/views/HomeView/order/Order.vue'),
             },
             {
               path: ':id',
               component: () => import('@/views/HomeView/order/OrderDetail.vue'),
             },
           ],
+        },
+        {
+          path: 'customer',
+          children: [
+            {
+              path: '',
+              component: () => import('@/views/HomeView/customer/Customer.vue'),
+            },
+            {
+              path: ':id',
+              component: () => import('@/views/HomeView/customer/CustomerDetail.vue'),
+            },
+          ]
         },
       ],
     },

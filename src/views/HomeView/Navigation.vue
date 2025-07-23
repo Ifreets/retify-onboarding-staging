@@ -3,7 +3,7 @@
     <RouterLink
       v-for="item in NAVS"
       :key="item.name"
-      :to="item.path"
+      :to="{ path: item.path }"
       class="flex-grow flex flex-col items-center gap-0.5"
       :class="{
         'text-blue-700 font-semibold': isActive(item.path),
@@ -37,31 +37,31 @@ import {
 const NAVS = [
   {
     name: 'Orders',
-    path: 'order',
+    path: '/home/order',
     icon: ShoppingBagIcon,
     active_icon: ActiveShoppingBagIcon,
   },
   {
     name: 'Customers',
-    path: 'customer',
+    path: '/home/customer',
     icon: UsersIcon,
     active_icon: ActiveUsersIcon,
   },
   {
     name: 'Conversations',
-    path: 'conversation',
+    path: '/home/conversation',
     icon: ChatBubbleOvalLeftEllipsisIcon,
     active_icon: ActiveChatBubbleOvalLeftEllipsisIcon,
   },
   {
     name: 'Reports',
-    path: 'report',
+    path: '/home/report',
     icon: ChartPieIcon,
     active_icon: ActiveChartPieIcon,
   },
   {
     name: 'Settings',
-    path: 'setting',
+    path: '/home/setting',
     icon: Cog6ToothIcon,
     active_icon: ActiveCog6ToothIcon,
   },
