@@ -71,6 +71,8 @@
   </section>
 </template>
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+
 import QRImage from '@/assets/image/qr.png'
 import GlobalIcon from '@/assets/icons/global.png'
 import WhatsappIcon from '@/components/icons/WhatsappIcon.vue'
@@ -80,6 +82,8 @@ import TiktokIcon from '@/components/icons/TiktokIcon.vue'
 import WebsiteIcon from '@/components/icons/WebsiteIcon.vue'
 
 const $emit = defineEmits(['next', 'back'])
+
+const router = useRouter()
 
 const SOCIALS = [
   {
@@ -106,7 +110,8 @@ const SOCIALS = [
 
 /** tiến trước */
 function next() {
-  $emit('next')
+  // $emit('next')
+  router.push('/home')
 }
 
 /** quay lại */

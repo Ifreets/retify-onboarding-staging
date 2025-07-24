@@ -14,7 +14,11 @@
       <p class="text-base font-semibold">Business Name</p>
       <input
         type="text"
-        class="w-full border border-slate-200 rounded-md px-3 py-2 outline-none placeholder:text-slate-400"
+        class="w-full border rounded-md px-3 py-2 outline-none placeholder:text-slate-400"
+        :class="{
+          'border-red-500': !business_info.name?.trim() && is_check,
+          'border-slate-200': business_info.name?.trim() || !is_check,
+        }"
         placeholder="e.g., The Cozy Corner Cafe"
         v-model="business_info.name"
       />
@@ -33,6 +37,10 @@
           class="w-full border border-slate-200 rounded-md px-3 py-2 outline-none placeholder:text-slate-400"
           placeholder="https://www.yourcafe.com/menu"
           v-model="business_info.web_url"
+          :class="{
+            'border-red-500': !(valid_web_url || valid_menu_url) && is_check,
+            'border-slate-200': valid_web_url || valid_menu_url || !is_check,
+          }"
         />
         <p class="text-slate-700">
           We'll fetch your menu from this link, or you can upload photos.
@@ -40,15 +48,20 @@
       </div>
     </section>
 
-    <section class="py-3 px-6 border rounded-xl flex flex-col gap-1">
+    <section class="py-3 px-6 border rounded-xl flex flex-col gap-1"
+      :class="{
+        'border-red-500': !(valid_web_url || valid_menu_url) && is_check,
+        'border-slate-200': valid_web_url || valid_menu_url || !is_check,
+      }"
+    >
       <p class="font-semibold text-base">Upload Menu Photos</p>
       <p>Upload images of your menu pages. Supported formats: JPG, PNG, PDF.</p>
       <label
         v-if="!business_info.menu_url"
-        class="cursor-pointer flex flex-col items-center w-full"
+        class="cursor-pointer flex flex-col items-center w-full text-slate-700"
       >
-        <CameraIcon class="w-14 h-14 text-blue-700" />
-        <p class="text-slate-700">Choose file or take picture</p>
+        <CameraIcon class="w-14 h-14" />
+        <p class="">Choose file or take picture</p>
         <input type="file" class="hidden" accept="image/*" @change="handleImageUpload" />
       </label>
       <template v-else class="flex flex-col gap-1 items-center">
@@ -69,8 +82,11 @@
       </button>
       <button
         @click="next"
-        class="py-1.5 px-10 rounded-md bg-blue-700 text-white disabled:bg-blue-200 disabled:text-blue-700"
-        :disabled="!valid_to_next"
+        class="py-1.5 px-10 rounded-md"
+        :class="{
+          'bg-blue-200 text-blue-700': !valid_to_next,
+          'bg-blue-700 text-white': valid_to_next,
+        }"
       >
         Next
       </button>
@@ -92,14 +108,30 @@ const business_info = ref({
   menu_url: '',
 })
 
+/** cờ check dữ liệu để hiển thị ui */
+const is_check = ref(false)
+
 /** đủ điều kiện để sang bước tiếp */
 const valid_to_next = computed(() => {
-  return (
-    business_info.value.name.trim() &&
-    business_info.value.menu_url.trim() &&
-    business_info.value.web_url.trim()
-  )
+  return business_info.value.name.trim() && (valid_menu_url.value || valid_web_url.value)
 })
+
+const valid_menu_url = computed(() => {
+  return isValidURL(business_info.value.menu_url.trim())
+})
+
+const valid_web_url = computed(() => {
+  return isValidURL(business_info.value.web_url.trim())
+})
+
+function isValidURL(url: string) {
+  try {
+    new URL(url)
+    return true
+  } catch (_) {
+    return false
+  }
+}
 
 /** Hàm xử lý khi người dùng chọn ảnh */
 function handleImageUpload(event: Event) {
@@ -137,6 +169,8 @@ function handleImageUpload(event: Event) {
 
 /** tiến trước */
 function next() {
+  is_check.value = true
+  if (!valid_to_next.value) return
   $emit('next')
 }
 

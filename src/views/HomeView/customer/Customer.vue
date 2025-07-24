@@ -1,6 +1,6 @@
 <template>
   <article class="h-full flex flex-col items-center justify-center relative">
-    <header class="flex justify-between w-full px-2">
+    <header class="flex justify-between w-full px-2 pt-2">
       <div class="w-20"></div>
       <h3 class="text-2xl font-semibold">Customers</h3>
       <CreateButton />
