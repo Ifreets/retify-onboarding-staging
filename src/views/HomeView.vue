@@ -1,5 +1,5 @@
 <template>
-  <main class="h-dvh w-dvw flex bg-white flex-col max-w-md mx-auto text-sm py-2">
+  <main class="h-dvh w-dvw flex bg-white flex-col max-w-md mx-auto text-sm pt-2">
     <div class="h-full overflow-hidden">
       <RouterView />
     </div>
