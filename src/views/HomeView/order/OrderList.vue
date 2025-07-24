@@ -1,7 +1,7 @@
 <template>
   <section class="overflow-auto">
     <ul 
-      v-for="item in 5" class="flex flex-col gap-2 pb-5 cursor-pointer"
+      v-for="item in 5" class="flex flex-col px-2 gap-2 last-of-type:pb-0 pb-5 cursor-pointer"
       @click="openOrder()"
     >
       <div class="sticky top-0 bg-white">

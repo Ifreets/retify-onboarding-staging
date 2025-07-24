@@ -1,5 +1,5 @@
 <template>
-  <section class="overflow-auto">
+  <section class="overflow-auto px-2">
     <ul 
       v-for="item in ['A','B', 'C', 'D']" class="flex flex-col gap-2 pb-5 cursor-pointer"
       @click="openCustomer()"

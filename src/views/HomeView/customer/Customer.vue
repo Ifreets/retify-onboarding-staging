@@ -1,12 +1,12 @@
 <template>
   <article class="h-full flex flex-col items-center justify-center relative">
-    <header class="flex justify-between w-full px-2 pt-2">
+    <header class="flex justify-between w-full px-2">
       <div class="w-20"></div>
       <h3 class="text-2xl font-semibold">Customers</h3>
       <CreateButton />
     </header>
-    <section class="w-full h-full p-2 flex flex-col overflow-hidden">
-      <InputSearch placeholder="Search customers..." />
+    <section class="w-full h-full py-2 flex flex-col overflow-hidden">
+      <InputSearch placeholder="Search Customers..." />
       <CustomerList />
       <!-- <EmptyState 
         add_content="New Customer"

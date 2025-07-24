@@ -1,5 +1,5 @@
 <template>
-  <div class="relative border rounded-lg bg-slate-50 border-slate-200 mb-3">
+  <div class="relative border rounded-lg bg-slate-50 border-slate-200 mb-3 mx-2">
     <MagnifyingGlassIcon
       class="text-slate-500 size-5 absolute left-4 top-0 bottom-0 my-auto pointer-events-none"
     />

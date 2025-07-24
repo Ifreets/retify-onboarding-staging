@@ -42,6 +42,33 @@ const router = createRouter({
             },
           ]
         },
+        {
+          path: 'conversation',
+          children: [
+            {
+              path: '',
+              component: () => import('@/views/HomeView/conversation/Conversation.vue'),
+            },
+          ]
+        },
+        {
+          path: 'report',
+          children: [
+            {
+              path: '',
+              component: () => import('@/views/HomeView/report/Report.vue'),
+            },
+          ]
+        },
+        {
+          path: 'setting',
+          children: [
+            {
+              path: '',
+              component: () => import('@/views/HomeView/setting/Setting.vue'),
+            },
+          ]
+        },
       ],
     },
   ],

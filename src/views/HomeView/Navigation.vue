@@ -4,12 +4,15 @@
       v-for="item in NAVS"
       :key="item.name"
       :to="{ path: item.path }"
-      class="flex-grow flex flex-col items-center gap-0.5"
+      class="flex-grow flex flex-col items-center gap-0.5 duration-300 transition-all font-semibold"
       :class="{
-        'text-blue-700 font-semibold': isActive(item.path),
+        'text-blue-700': isActive(item.path),
       }"
     >
-      <component :is="isActive(item.path) ? item.active_icon : item.icon" class="w-6 h-6" />
+      <div class="relative">
+        <component :is="isActive(item.path) ? item.active_icon : item.icon" class="w-6 h-6" />
+        <BagdeDot v-if="item.path === '/home/conversation'" class="absolute -top-1 -right-2.5" :number="3" />
+      </div>
       <span>{{ item.name }}</span>
     </RouterLink>
   </nav>
@@ -32,6 +35,7 @@ import {
   ChartPieIcon as ActiveChartPieIcon,
   Cog6ToothIcon as ActiveCog6ToothIcon,
 } from '@heroicons/vue/24/solid'
+import BagdeDot from '@/components/common/BagdeDot.vue';
 
 /** danh sách các danh mục */
 const NAVS = [
