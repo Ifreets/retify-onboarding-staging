@@ -8,22 +8,72 @@
         <section class="border border-slate-200 rounded-lg p-3 flex flex-col gap-3">
           <p class="text-base font-semibold">Action Items</p>
           <div class="bg-slate-200 h-px"></div>
-          <div class="flex gap-3 text-red-500 font-semibold border bg-red-50 p-3 border-red-500 rounded-lg">
+          <div
+            class="flex gap-3 text-red-500 font-semibold border bg-red-50 p-3 border-red-500 rounded-lg"
+          >
             <ExclamationCircleIcon class="size-6 flex-shrink-0" />
             <p class="flex-grow overflow-hidden">2 New Negative Feedbacks!</p>
-            <button class="py-1 px-2 rounded bg-red-500 text-white flex-shrink-0 h-fit">Review</button>
+            <button class="py-1 px-2 rounded bg-red-500 text-white flex-shrink-0 h-fit">
+              Review
+            </button>
           </div>
-          <div class="flex gap-3 text-red-500 font-semibold border bg-red-50 p-3 border-red-500 rounded-lg">
+          <div
+            class="flex gap-3 text-red-500 font-semibold border bg-red-50 p-3 border-red-500 rounded-lg"
+          >
             <ExclamationCircleIcon class="size-6 flex-shrink-0" />
             <p class="flex-grow overflow-hidden">3 New Orders Need Confirmation</p>
-            <button class="py-1 px-2 rounded bg-red-500 text-white flex-shrink-0 h-fit">Confirm</button>
+            <button class="py-1 px-2 rounded bg-red-500 text-white flex-shrink-0 h-fit">
+              Confirm
+            </button>
           </div>
-          <div class="flex gap-3 text-blue-700 font-semibold border bg-blue-50 p-3 border-blue-700 rounded-lg">
+          <div
+            class="flex gap-3 text-blue-700 font-semibold border bg-blue-50 p-3 border-blue-700 rounded-lg"
+          >
             <LightBulbIcon class="size-6 flex-shrink-0" />
             <p class="flex-grow overflow-hidden">3 New Orders Need Confirmation</p>
-            <button class="py-1 px-2 rounded bg-blue-700 text-white flex-shrink-0 h-fit">Confirm</button>
+            <button class="py-1 px-2 rounded bg-blue-700 text-white flex-shrink-0 h-fit">
+              Confirm
+            </button>
           </div>
         </section>
+
+        <section class="flex flex-col gap-2 items-center w-full px-3">
+          <div class="min-h-96 w-full overflow-auto">
+            <div class="h-full" :style="{ width: `${LINE_DATA.labels.length * 80}px` }">
+              <Line :data="LINE_DATA" :options="LINE_OPTIONS" />
+            </div>
+          </div>
+          <p class="text-slate-700">Rate of increase and decrease of emotions over time</p>
+        </section>
+
+        <section class="flex flex-col gap-2 items-center w-full px-3">
+          <div class="min-h-96 overflow-auto w-full">
+            <div class="h-full" :style="{ width: `${BAR_DATA.labels.length * 50}px` }">
+              <Bar :data="BAR_DATA" :options="BAR_OPTIONS" />
+            </div>
+          </div>
+          <p class="text-slate-700">Emotion chart</p>
+          <table>
+            <thead>
+              <tr>
+                <th class="p-2 w-1/2 text-start">Emotion</th>
+                <th class="p-2 w-1/4 text-end">Num</th>
+                <th class="p-2 w-1/4 text-end">Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr >
+                <td>😀 Happy</td>
+                <td>163</td>
+                <td>26.9%</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+        <div class="mx-10">
+          <Pie :data="PIE_CHART" :options="PIE_OPTIONS" />
+        </div>
+
         <ul class="flex flex-col gap-5 mx-3">
           <li class="flex gap-3 py-2 px-3 bg-slate-100 rounded-lg items-center">
             <div class="bg-slate-200 rounded-lg p-2">
@@ -65,8 +115,190 @@
 </template>
 
 <script setup lang="ts">
-import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue';
-import LightBulbIcon from '@/components/icons/LightBulbIcon.vue';
+import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
+import LightBulbIcon from '@/components/icons/LightBulbIcon.vue'
 import { ExclamationCircleIcon } from '@heroicons/vue/24/outline'
-import { ChatBubbleLeftRightIcon, FaceFrownIcon, FaceSmileIcon } from '@heroicons/vue/24/solid';
+import { ChatBubbleLeftRightIcon, FaceFrownIcon, FaceSmileIcon } from '@heroicons/vue/24/solid'
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  BarElement,
+  PointElement,
+  ArcElement,
+  RadialLinearScale,
+  CategoryScale,
+  LinearScale,
+  type ChartOptions,
+} from 'chart.js'
+
+import { Line, Bar, Pie } from 'vue-chartjs'
+
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  BarElement,
+  PointElement,
+  ArcElement,
+  CategoryScale,
+  LinearScale,
+  RadialLinearScale,
+)
+
+const LINE_OPTIONS: ChartOptions<'line'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    title: { display: false },
+    colors: {
+      forceOverride: true,
+    },
+  },
+  scales: {
+    y: {
+      ticks: {
+        display: false,
+      },
+      grid: {
+        display: true,
+        drawTicks: false,
+      },
+    },
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        align: 'center',
+        labelOffset: 0,
+      },
+      offset: true,
+    },
+  },
+}
+
+const BAR_OPTIONS: ChartOptions<'bar'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    title: { display: false },
+  },
+  scales: {
+    y: {
+      ticks: {
+        display: false,
+      },
+      grid: {
+        display: true,
+        drawTicks: false,
+      },
+    },
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        align: 'center',
+        labelOffset: 0,
+        maxRotation: 0,
+        minRotation: 0,
+        callback: function (value, index, values) {
+          const label = this.getLabelForValue(value as number)
+          return label.split(' ')
+        },
+      },
+      offset: true,
+    },
+  },
+}
+
+const PIE_OPTIONS: ChartOptions<'pie'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    title: { display: false },
+  },
+}
+
+const LINE_DATA = {
+  labels: [
+    '2024-07-19',
+    '2024-07-20',
+    '2024-07-21',
+    '2024-07-22',
+    '2024-07-23',
+    '2024-07-24',
+    '2024-07-25',
+  ],
+  datasets: [
+    {
+      pointBorderColor: 'transparent',
+      pointBackgroundColor: 'transparent',
+      borderColor: '#00b8db',
+      data: [15, 9, 10, 92, 9, 26, 15],
+    },
+  ],
+}
+
+const BAR_DATA = {
+  labels: [
+    'Vui vẻ',
+    'Giận dữ',
+    'Buồn bã',
+    'Sợ hãi',
+    'Ngạc nhiên',
+    'Ghê tởm',
+    'Yêu thương',
+    'Ghen tỵ',
+    'Xấu hổ',
+    'Tự hào',
+    'Không rõ',
+  ],
+  datasets: [
+    {
+      backgroundColor: '#2b7fff',
+      data: [40, 20, 10, 5, 5, 3, 10, 2, 3, 2, 0],
+    },
+  ],
+}
+
+const PIE_CHART = {
+  labels: [
+    'Vui vẻ',
+    'Giận dữ',
+    'Buồn bã',
+    'Sợ hãi',
+    'Ngạc nhiên',
+    'Ghê tởm',
+    'Yêu thương',
+    'Ghen tỵ',
+    'Xấu hổ',
+    'Tự hào',
+    'Không rõ',
+  ],
+  datasets: [
+    {
+      backgroundColor: [
+        '#ffdf20',
+        '#fb2c36',
+        '#733e0a',
+        '#7008e7',
+        '#bbf451',
+        '#00b8db',
+        '#f87979',
+        '#ffe2e2',
+        '#008236',
+        '#cccccc',
+      ],
+      data: [40, 20, 10, 5, 5, 3, 10, 2, 3, 2, 0],
+    },
+  ],
+}
 </script>

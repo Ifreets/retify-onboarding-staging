@@ -32,26 +32,36 @@
       </div>
       <div class="flex flex-col gap-1">
         <p class="font-medium">Menu Website URL (Optional)</p>
-        <input
-          type="text"
-          class="w-full border border-slate-200 rounded-md px-3 py-2 outline-none placeholder:text-slate-400"
-          placeholder="https://www.yourcafe.com/menu"
-          v-model="business_info.web_url"
-          :class="{
-            'border-red-500': !(valid_web_url || valid_menu_url) && is_check,
-            'border-slate-200': valid_web_url || valid_menu_url || !is_check,
-          }"
-        />
+        <div class="relative">
+          <input
+            type="text"
+            class="w-full border rounded-md px-3 py-2 outline-none placeholder:text-slate-400"
+            placeholder="https://www.yourcafe.com/menu"
+            v-model="business_info.web_url"
+            :class="{
+              'border-red-500': !(valid_web_url || valid_menu_url) && is_check,
+              'border-slate-200': valid_web_url || valid_menu_url || !is_check,
+              'bg-slate-200 opacity-75 pointer-events-none': business_info.menu_url,
+            }"
+          />
+          <XCircleIcon
+            v-if="business_info.web_url"
+            @click="business_info.web_url = ''"
+            class="text-red-500 size-5 absolute right-3 top-0 bottom-0 my-auto cursor-pointer"
+          />
+        </div>
         <p class="text-slate-700">
           We'll fetch your menu from this link, or you can upload photos.
         </p>
       </div>
     </section>
 
-    <section class="py-3 px-6 border rounded-xl flex flex-col gap-1"
+    <section
+      class="py-3 px-6 border rounded-xl flex flex-col gap-1"
       :class="{
-        'border-red-500': !(valid_web_url || valid_menu_url) && is_check,
-        'border-slate-200': valid_web_url || valid_menu_url || !is_check,
+        'border-red-500': !(business_info.web_url || valid_menu_url) && is_check,
+        'border-slate-200': business_info.web_url || valid_menu_url || !is_check,
+        'bg-slate-200 opacity-75 pointer-events-none': business_info.web_url,
       }"
     >
       <p class="font-semibold text-base">Upload Menu Photos</p>
@@ -95,17 +105,23 @@
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useOnBoardingStore } from '@/stores'
 
 import CameraIcon from '@/components/icons/CameraIcon.vue'
 import TrashIcon from '@/components/icons/TrashIcon.vue'
+import { XCircleIcon } from '@heroicons/vue/24/solid'
 
 const $emit = defineEmits(['next', 'back'])
 
+// store
+const onBoardingStore = useOnBoardingStore()
+
 /** thông tin công ty */
-const business_info = ref({
-  name: '',
-  web_url: '',
-  menu_url: '',
+const business_info = computed({
+  get: () => onBoardingStore.business_info,
+  set: (value) => {
+    onBoardingStore.business_info = value
+  },
 })
 
 /** cờ check dữ liệu để hiển thị ui */

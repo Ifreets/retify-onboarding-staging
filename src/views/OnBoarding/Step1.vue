@@ -25,9 +25,7 @@
       </li>
     </ul>
     <footer class="flex justify-between font-semibold">
-      <button @click="back" class="py-1.5 px-10 rounded-md bg-slate-200 text-slate-700">
-        Back
-      </button>
+      <div></div>
       <button
         @click="next"
         class="py-1.5 px-10 rounded-md bg-blue-700 text-white disabled:bg-blue-200 disabled:text-blue-700"
@@ -39,42 +37,45 @@
   </section>
 </template>
 <script setup lang="ts">
+import { useOnBoardingStore } from '@/stores'
+import { computed } from 'vue'
+
 import BakeryPatisserieIcon from '@/components/icons/BakeryPatisserieIcon.vue'
 import CafeBarIcon from '@/components/icons/CafeBarIcon.vue'
 import CateringServiceIcon from '@/components/icons/CateringServiceIcon.vue'
 import FoodTruckIcon from '@/components/icons/FoodTruckIcon.vue'
 import PizzeriaIcon from '@/components/icons/PizzeriaIcon.vue'
 import RestaurantIcon from '@/components/icons/RestaurantIcon.vue'
-import { ref } from 'vue'
 
+/** các loại doanh nghiệp */
 const BUSINESS_TYPES = [
   {
-    id: 1,
+    id: 'restaurant',
     name: 'Restaurant',
     icon: RestaurantIcon,
   },
   {
-    id: 2,
+    id: 'cafe-bar',
     name: 'Cafe & Bar',
     icon: CafeBarIcon,
   },
   {
-    id: 3,
+    id: 'bakery-patisserie',
     name: 'Bakery & Patisserie',
     icon: BakeryPatisserieIcon,
   },
   {
-    id: 4,
+    id: 'food-truck',
     name: 'Food Truck',
     icon: FoodTruckIcon,
   },
   {
-    id: 5,
+    id: 'catering-service',
     name: 'Catering Service',
     icon: CateringServiceIcon,
   },
   {
-    id: 6,
+    id: 'pizzeria',
     name: 'Pizzeria',
     icon: PizzeriaIcon,
   },
@@ -82,15 +83,18 @@ const BUSINESS_TYPES = [
 
 const $emit = defineEmits(['next', 'back'])
 
-const business_type = ref<number | undefined>()
+// store
+const onBoardingStore = useOnBoardingStore()
+
+const business_type = computed({
+  get: () => onBoardingStore.business_info.type,
+  set: (value) => {
+    onBoardingStore.business_info.type = value
+  }
+})
 
 /** tiến trước */
 function next() {
   $emit('next')
-}
-
-/** quay lại */
-function back() {
-  $emit('back')
 }
 </script>
