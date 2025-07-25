@@ -49,27 +49,64 @@
         <section class="flex flex-col gap-2 items-center w-full px-3">
           <div class="min-h-96 overflow-auto w-full">
             <div class="h-full" :style="{ width: `${BAR_DATA.labels.length * 50}px` }">
-              <Bar :data="BAR_DATA" :options="BAR_OPTIONS" />
+              <Bar :data="BAR_DATA" :options="BAR_OPTIONS" :plugins="[ChartDataLabels]" />
             </div>
           </div>
           <p class="text-slate-700">Emotion chart</p>
-          <table>
-            <thead>
-              <tr>
-                <th class="p-2 w-1/2 text-start">Emotion</th>
-                <th class="p-2 w-1/4 text-end">Num</th>
-                <th class="p-2 w-1/4 text-end">Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr >
-                <td>😀 Happy</td>
-                <td>163</td>
-                <td>26.9%</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="rounded-xl border border-slate-200 overflow-hidden w-full">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-slate-100">
+                  <th
+                    class="font-semibold border-b border-slate-200 p-2 w-1/2 text-start bg-slate-200"
+                  >
+                    Emotion
+                  </th>
+                  <th class="font-semibold border-b border-slate-200 p-2 w-1/4 text-end">Num</th>
+                  <th class="font-semibold border-b border-slate-200 p-2 w-1/4 text-end">Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="font-medium">
+                  <td class="border-b border-slate-200 bg-slate-50">
+                    <div class="flex items-center justify-between p-2 text-blue-700">
+                      😀 Happy
+                      <ExternalLinkIcon class="size-4 flex-shrink-0" />
+                    </div>
+                  </td>
+                  <td class="border-b border-slate-200 p-2 text-end">163</td>
+                  <td class="border-b border-slate-200 p-2 text-end">26.9%</td>
+                </tr>
+                <tr class="font-medium">
+                  <td class="border-b border-slate-200 bg-slate-50">
+                    <div class="flex items-center justify-between p-2">
+                      😡 Angry
+                      <ExternalLinkIcon class="size-4 flex-shrink-0" />
+                    </div>
+                  </td>
+                  <td class="border-b border-slate-200 p-2 text-end">1.592</td>
+                  <td class="border-b border-slate-200 p-2 text-end">26.9%</td>
+                </tr>
+                <tr class="font-medium">
+                  <td class="border-b border-slate-200 bg-slate-50">
+                    <div class="flex items-center justify-between p-2">
+                      😢 Sad
+                      <ExternalLinkIcon class="size-4 flex-shrink-0" />
+                    </div>
+                  </td>
+                  <td class="border-b border-slate-200 p-2 text-end">291</td>
+                  <td class="border-b border-slate-200 p-2 text-end">26.9%</td>
+                </tr>
+                <tr class="font-semibold bg-slate-100">
+                  <td class="border-slate-200 p-2 text-center bg-slate-200">Total</td>
+                  <td class="border-slate-200 p-2 text-end">1.893</td>
+                  <td class="border-slate-200 p-2 text-end">100%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </section>
+
         <div class="mx-10">
           <Pie :data="PIE_CHART" :options="PIE_OPTIONS" />
         </div>
@@ -115,27 +152,31 @@
 </template>
 
 <script setup lang="ts">
+import {
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  layouts,
+  Legend,
+  LinearScale,
+  LineElement,
+  plugins,
+  PointElement,
+  RadialLinearScale,
+  Title,
+  Tooltip,
+  type ChartOptions,
+} from 'chart.js'
+import { Bar, Line, Pie } from 'vue-chartjs'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
+
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import LightBulbIcon from '@/components/icons/LightBulbIcon.vue'
 import { ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import { ChatBubbleLeftRightIcon, FaceFrownIcon, FaceSmileIcon } from '@heroicons/vue/24/solid'
-import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  LineElement,
-  BarElement,
-  PointElement,
-  ArcElement,
-  RadialLinearScale,
-  CategoryScale,
-  LinearScale,
-  type ChartOptions,
-} from 'chart.js'
 
-import { Line, Bar, Pie } from 'vue-chartjs'
-
+// import các plugin của chart.js
 ChartJS.register(
   Title,
   Tooltip,
@@ -147,8 +188,10 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   RadialLinearScale,
+  ChartDataLabels,
 )
 
+/** thiết lập của biểu đồ đường */
 const LINE_OPTIONS: ChartOptions<'line'> = {
   responsive: true,
   maintainAspectRatio: false,
@@ -158,6 +201,7 @@ const LINE_OPTIONS: ChartOptions<'line'> = {
     colors: {
       forceOverride: true,
     },
+    datalabels: { display: false },
   },
   scales: {
     y: {
@@ -181,52 +225,7 @@ const LINE_OPTIONS: ChartOptions<'line'> = {
     },
   },
 }
-
-const BAR_OPTIONS: ChartOptions<'bar'> = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false },
-    title: { display: false },
-  },
-  scales: {
-    y: {
-      ticks: {
-        display: false,
-      },
-      grid: {
-        display: true,
-        drawTicks: false,
-      },
-    },
-    x: {
-      grid: {
-        display: false,
-      },
-      ticks: {
-        align: 'center',
-        labelOffset: 0,
-        maxRotation: 0,
-        minRotation: 0,
-        callback: function (value, index, values) {
-          const label = this.getLabelForValue(value as number)
-          return label.split(' ')
-        },
-      },
-      offset: true,
-    },
-  },
-}
-
-const PIE_OPTIONS: ChartOptions<'pie'> = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false },
-    title: { display: false },
-  },
-}
-
+/** dữ liệu của biểu đồ line */
 const LINE_DATA = {
   labels: [
     '2024-07-19',
@@ -247,6 +246,45 @@ const LINE_DATA = {
   ],
 }
 
+/** thiết lập của biểu đồ cột */
+const BAR_OPTIONS: ChartOptions<'bar'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    title: { display: false },
+    datalabels: { display: true, anchor: 'end', clamp: true, align: 'top', color: '#2b7fff' },
+  },
+  scales: {
+    y: {
+      ticks: {
+        display: false,
+      },
+      grid: {
+        display: true,
+        drawTicks: false,
+      },
+      suggestedMax: 45
+    },
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        align: 'center',
+        labelOffset: 0,
+        maxRotation: 0,
+        minRotation: 0,
+        callback: function (value, index, values) {
+          const label = this.getLabelForValue(value as number)
+          return label.split(' ')
+        },
+      },
+      offset: true,
+    },
+  },
+}
+/** dữ liệu của biểu đồ cột */
 const BAR_DATA = {
   labels: [
     'Vui vẻ',
@@ -269,6 +307,17 @@ const BAR_DATA = {
   ],
 }
 
+/** thiết lập của biểu đồ tròn */
+const PIE_OPTIONS: ChartOptions<'pie'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    title: { display: false },
+    datalabels: { display: false },
+  },
+}
+/** dữ liệu của biểu đồ tròn */
 const PIE_CHART = {
   labels: [
     'Vui vẻ',
