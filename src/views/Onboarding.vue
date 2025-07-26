@@ -1,13 +1,22 @@
 <template>
   <main class="h-dvh w-dvw max-w-md mx-auto linear-gradient px-3 py-10 text-sm">
-    <ul v-if="organizations.length >= 2 && !appStore.org_id" class="flex flex-col gap-2">
-      <li v-for="organization in organizations"
+    <ul
+      v-if="organizations.length >= 2 && !appStore.org_id"
+      class="flex flex-col gap-3"
+    >
+      <li class="text-2xl font-semibold text-center">Select Organization</li>
+      <li
+        v-for="organization in organizations"
         @click="selectOrg(organization?.org_id)"
+        class="text-base py-2 px-4 rounded-md cursor-pointer bg-white hover:bg-blue-100 border border-transparent hover:border-blue-500"
       >
         {{ organization?.org_info?.org_name }}
       </li>
     </ul>
-    <article v-if="appStore.org_id" class="bg-white h-full rounded-xl py-5 px-3 flex flex-col gap-3">
+    <article
+      v-if="appStore.org_id"
+      class="bg-white h-full rounded-xl py-5 px-3 flex flex-col gap-3"
+    >
       <Tabs :current_tab="current_step" :total_tabs="3" />
       <div class="relative h-full overflow-hidden">
         <Transition :name="transition_name" mode="out-in">
@@ -41,7 +50,7 @@ const MOCK_TOKEN =
 const appStore = useAppStore()
 
 // composable
-const { createTokenMerchant } = useCreateTokenMerchant()
+const { getPartnerToken, createTokenMerchant } = useCreateTokenMerchant()
 
 /** danh sách các các bước */
 const STEPS = [Step1, Step2, Step3]
@@ -120,6 +129,13 @@ async function selectOrg(org_id: string) {
   appStore.org_id = org_id
   // lấy page retify
   await getPageRetify()
+
+  // lấy partner token
+  await getPartnerToken()
+
+  // lấy client id
+  // await getClientID()
+
   // tạo token merchant
   createTokenMerchant()
 }
@@ -127,15 +143,14 @@ async function selectOrg(org_id: string) {
 /** tạo page chatbot của retify */
 async function getPageRetify() {
   try {
-    let page_id:string | undefined = await getExistingPageID()
+    /** id page retify */
+    let page_id: string | undefined = await getExistingPageID()
 
     /** kiểm tra xem đã tạo page nào trước đó chưa */
-    if(page_id) {
+    if (page_id) {
       /** lưu vào store */
       appStore.page_id = page_id || ''
     }
-
-
   } catch (e) {
     console.error(e)
   }
@@ -148,17 +163,14 @@ async function getExistingPageID() {
     if (!appStore.org_id) return
 
     /** danh sách các page */
-    const RES:any = await $chatbot.getPages(appStore.org_id)
+    const RES: any = await $chatbot.getPages(appStore.org_id)
 
-    RES?.filter((item: any) =>
-      item?.page_info?.name.includes(".retify.ai")
-    )
+    /** lọc ra page retify */
+    RES?.filter((item: any) => item?.page_info?.name.includes('.retify.ai'))
 
+    // trả về id của page retify
     return RES?.[0]?.page_id
-  } catch (error) {
-    
-  }
-  
+  } catch (error) {}
 }
 
 /** tăng bước */
