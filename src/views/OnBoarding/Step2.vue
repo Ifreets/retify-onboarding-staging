@@ -104,17 +104,25 @@
   </section>
 </template>
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { $chatbot } from '@/api/chatbot'
 import { useOnBoardingStore } from '@/stores'
+import { useAppStore } from '@/stores/app'
+import { useCreateTokenMerchant } from '@/views/OnBoarding/composable/useCreateTokenMerchant'
+import { computed, ref } from 'vue'
 
 import CameraIcon from '@/components/icons/CameraIcon.vue'
 import TrashIcon from '@/components/icons/TrashIcon.vue'
 import { XCircleIcon } from '@heroicons/vue/24/solid'
+import { toRenderDomain } from '@/utils'
 
 const $emit = defineEmits(['next', 'back'])
 
 // store
+const appStore = useAppStore()
 const onBoardingStore = useOnBoardingStore()
+
+// composable
+const { createTokenMerchant } = useCreateTokenMerchant()
 
 /** thông tin công ty */
 const business_info = computed({
@@ -183,11 +191,41 @@ function handleImageUpload(event: Event) {
   READER.readAsDataURL(FILE)
 }
 
+/** tạo page chatbot */
+async function createPageChatbot() {
+  try {
+    /** dữ liệu của page mới được tạo */
+    const RES:any = await $chatbot.createPage({
+      org_id: appStore.org_id,
+      name: toRenderDomain(business_info.value.name),
+    })
+    // lưu lại id page vào store
+    appStore.page_id =  RES?.fb_page_id
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 /** tiến trước */
-function next() {
-  is_check.value = true
-  if (!valid_to_next.value) return
-  $emit('next')
+async function next() {
+  try {
+    // bật check
+    is_check.value = true
+
+    // nếu dữ liệu của hợp lệ thì dừng lại
+    if (!valid_to_next.value) return
+  
+    if(!appStore.page_id) {
+      // tạo page mới nếu của có page
+      await createPageChatbot()
+    }
+
+    createTokenMerchant()
+  
+    $emit('next')
+  } catch (error) {
+    
+  }
 }
 
 /** quay lại */

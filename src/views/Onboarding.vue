@@ -1,6 +1,13 @@
 <template>
   <main class="h-dvh w-dvw max-w-md mx-auto linear-gradient px-3 py-10 text-sm">
-    <article class="bg-white h-full rounded-xl py-5 px-3 flex flex-col gap-3">
+    <ul v-if="organizations.length >= 2 && !appStore.org_id" class="flex flex-col gap-2">
+      <li v-for="organization in organizations"
+        @click="selectOrg(organization?.org_id)"
+      >
+        {{ organization?.org_info?.org_name }}
+      </li>
+    </ul>
+    <article v-if="appStore.org_id" class="bg-white h-full rounded-xl py-5 px-3 flex flex-col gap-3">
       <Tabs :current_tab="current_step" :total_tabs="3" />
       <div class="relative h-full overflow-hidden">
         <Transition :name="transition_name" mode="out-in">
@@ -16,12 +23,25 @@
   </main>
 </template>
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { $chatbot } from '@/api/chatbot'
+import { useAppStore } from '@/stores/app'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import Tabs from '@/views/OnBoarding/Tabs.vue'
 import Step1 from '@/views/OnBoarding/Step1.vue'
 import Step2 from '@/views/OnBoarding/Step2.vue'
 import Step3 from '@/views/OnBoarding/Step3.vue'
+import { useCreateTokenMerchant } from './OnBoarding/composable/useCreateTokenMerchant'
+
+/** fake token chat bot để chạy trên pc */
+const MOCK_TOKEN =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiOTEzOTM3MTZiYzE1NDUxNDk3ZTZjOGIwNjQzYmY1MjIiLCJmYl9zdGFmZl9pZCI6IjEyMjEyMTczMDYzNDMzMjQ0MiIsIl9pZCI6IjY2ZjdhYzE2MjE0Mzg4MTFiNjVjZTI5OCIsImlhdCI6MTc1MDk5OTg2MSwiZXhwIjozMTU1MzUwOTk5ODYxfQ.A4jHrb4Mviyr1UQ_P0O62f_QBnW1Qih0h6Z05_8bluQ'
+
+// store
+const appStore = useAppStore()
+
+// composable
+const { createTokenMerchant } = useCreateTokenMerchant()
 
 /** danh sách các các bước */
 const STEPS = [Step1, Step2, Step3]
@@ -29,10 +49,117 @@ const STEPS = [Step1, Step2, Step3]
 const current_step = ref(1)
 /** loại animation */
 const transition_name = ref('slide-left')
+/** danh sách các tổ chức */
+const organizations = ref<any[]>([])
 
-watch(current_step, (newVal, oldVal) => {
-  transition_name.value = newVal > oldVal ? 'slide-left' : 'slide-right'
+onMounted(() => {
+  /** lấy token chatbot */
+  getChatbotToken()
+  /** lấy danh sách các tổ chức */
+  getOrganizations()
 })
+
+onUnmounted(() => {
+  window.removeEventListener('message', handleMessage)
+})
+
+// lắng nghe chuyển tiếp hay quay lại để thêm hiệu ứng
+watch(current_step, (new_val, old_val) => {
+  transition_name.value = new_val > old_val ? 'slide-left' : 'slide-right'
+})
+
+/** lấy token chatbot */
+function getChatbotToken() {
+  // lấy token fake
+  appStore.chatbot_token = MOCK_TOKEN
+  /** Add event listener */
+  window.addEventListener('message', handleMessage)
+  /** lưu lại token vào service api */
+  $chatbot.setChatbotToken()
+}
+
+/** Nhận Message từ Mobile */
+function handleMessage(event: MessageEvent) {
+  /** Tạo biến data */
+  let data: any
+  try {
+    /**  Cố gắng parse nếu là JSON */
+    data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data
+  } catch (error) {
+    console.warn('Không phải JSON, bỏ qua:', event.data)
+    return
+  }
+
+  /** Kiem tra event data */
+  if (data?.type === 'page.token_chatbox') {
+    console.log(data, 'event data')
+    appStore.chatbot_token = data.payload?.token
+  }
+}
+
+/** lấy danh sách các tổ chức */
+async function getOrganizations() {
+  try {
+    /** danh sách các tổ chức */
+    const RES = await $chatbot.getOrganizations()
+
+    /** lưu lại danh sách */
+    organizations.value = RES as any[]
+
+    /** nếu chỉ có 1 tổ chức thì chọn id tổ chức đó luôn */
+    if (organizations.value?.length === 1) {
+      selectOrg(organizations.value[0].org_id)
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+/** chọn tổ chức */
+async function selectOrg(org_id: string) {
+  appStore.org_id = org_id
+  // lấy page retify
+  await getPageRetify()
+  // tạo token merchant
+  createTokenMerchant()
+}
+
+/** tạo page chatbot của retify */
+async function getPageRetify() {
+  try {
+    let page_id:string | undefined = await getExistingPageID()
+
+    /** kiểm tra xem đã tạo page nào trước đó chưa */
+    if(page_id) {
+      /** lưu vào store */
+      appStore.page_id = page_id || ''
+    }
+
+
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+/** lấy id page retify đã tạo */
+async function getExistingPageID() {
+  try {
+    // nếu không có id tổ chức thì thôi
+    if (!appStore.org_id) return
+
+    /** danh sách các page */
+    const RES:any = await $chatbot.getPages(appStore.org_id)
+
+    RES?.filter((item: any) =>
+      item?.page_info?.name.includes(".retify.ai")
+    )
+
+    return RES?.[0]?.page_id
+  } catch (error) {
+    
+  }
+  
+}
 
 /** tăng bước */
 function nextStep() {
