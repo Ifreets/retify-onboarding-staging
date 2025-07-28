@@ -3,4 +3,6 @@ export interface IEnv {
   chatbot_service: string
   chatbot_public: string
   merchant: string
+  merchant_product: string
+  llm_no_proxy: string,
 }

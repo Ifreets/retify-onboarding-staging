@@ -1,7 +1,7 @@
 import { Request } from '@/api/axios'
 import { ENV } from '@/env'
 import type { IEnv } from '@/interfaces'
-import { useAppStore } from '@/stores/app'
+import { useAppStore } from '@/stores'
 
 /** Đường dẫn host của merchant */
 const $HOST: IEnv = ENV[import.meta.env.VITE_APP_ENV || 'development']
@@ -28,12 +28,25 @@ export class ChatbotServiceAPI {
 
   /** Gửi request đến server chatbot service */
   #postService(url: string, data: any, headers?: object) {
-    return this.REQUEST.post(`${this.HOST.chatbot_service}/${url}`, data, headers)
+    return this.REQUEST.post(
+      `${this.HOST.chatbot_service}/${url}`,
+      data,
+      headers,
+    )
   }
 
   /** Gửi request đến server chatbot public */
   #postPublic(url: string, data: any, headers?: object) {
-    return this.REQUEST.post(`${this.HOST.chatbot_public}/${url}`, data, headers)
+    return this.REQUEST.post(
+      `${this.HOST.chatbot_public}/${url}`,
+      data,
+      headers,
+    )
+  }
+
+  /** Gửi request đến server LLM chatbot */
+  #postLLM(url: string, data: any, headers?: object) {
+    return this.REQUEST.post(`${this.HOST.llm_no_proxy}/${url}`, data, headers)
   }
 
   /** set chatbot token vào header */
@@ -75,16 +88,59 @@ export class ChatbotServiceAPI {
   public async sendMessage(data: {
     org_id: string
     client_id: string
+    page_id: string
     text: string
   }) {
-    return await this.#postPublic('embed/message/send_message', data)
+    return await this.#postPublic('embed/message/send_message', {
+      ...data,
+      from: 'PAGE',
+    })
   }
 
   /** tạo 1 hội thoại mới */
-  public async createConversation(data: {
-    page_id: string
-  }) {
+  public async createConversation(data: { page_id: string }) {
     return await this.#postPublic('app/conversation/create_conversation', data)
+  }
+
+  /** lấy danh sách AI agent */
+  public async getAIAgents(org_id: string) {
+    return await this.#postLLM('app/agent/get_agent', {
+      org_id,
+    })
+  }
+
+  /** tạo 1 AI agent */
+  public async createAIAgent(org_id: string) {
+    return await this.#postLLM(`app/agent/create_agent?org_id=${org_id}`, {
+      ai_agent_name: 'Agent 1',
+      description: 'Agent 1',
+    })
+  }
+
+  /** cập nhật thiết lập trang */
+  public async updateSettingPage(data: {
+    page_id: string
+    ai_agent_id: string
+  }) {
+    return await this.#postService('app/page/update_page_setting', {
+      ...data,
+      ai_agent_custom_prompt:
+        'Nếu nội dung câu hỏi mang ý nghĩa đặt lịch hẹn, kiểm tra lịch hẹn, chỉ trả lời "@retion-shedule", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xừ lý\nNếu nội dung câu hỏi mang ý nghĩa đặt hàng, mua hàng, chỉ trả lời "@retion-order", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu nội dung câu hỏi mang ý nghĩa hỏi sản phẩm, kiểm tra sản phẩm, kiểm tra món ăn, quần áo, chỉ trả lời "@retion-product", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu khách hàng hỏi hoặc nói bằng tiếng anh thì tư vấn và trả lời lại bằng tiếng anh.',
+      ai_agent_is_custom_prompt: true,
+      is_active_ai_agent: true,
+      ai_agent_working_hour_answer: {
+        in_working_hour: {
+          type: 'SEND_DIRECTLY',
+          time: 900000,
+        },
+        out_working_hour: {
+          type: 'SEND_DIRECTLY',
+          time: 0,
+        },
+      },
+      page_language: 'en',
+      default_language: 'en',
+    })
   }
 }
 

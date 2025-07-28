@@ -35,7 +35,7 @@
         <div class="relative">
           <input
             type="text"
-            class="w-full border rounded-md px-3 py-2 outline-none placeholder:text-slate-400"
+            class="w-full border rounded-md px-3 py-2 pr-10 outline-none placeholder:text-slate-400"
             placeholder="https://www.yourcafe.com/menu"
             v-model="business_info.web_url"
             :class="{
@@ -105,15 +105,15 @@
 </template>
 <script setup lang="ts">
 import { $chatbot } from '@/api/chatbot'
-import { useOnBoardingStore } from '@/stores'
-import { useAppStore } from '@/stores/app'
+import { useAppStore, useOnBoardingStore } from '@/stores'
 import { useCreateTokenMerchant } from '@/views/OnBoarding/composable/useCreateTokenMerchant'
 import { computed, ref } from 'vue'
 
 import CameraIcon from '@/components/icons/CameraIcon.vue'
 import TrashIcon from '@/components/icons/TrashIcon.vue'
-import { XCircleIcon } from '@heroicons/vue/24/solid'
 import { toRenderDomain } from '@/utils'
+import { XCircleIcon } from '@heroicons/vue/24/solid'
+import { $merchant } from '@/api/merchant'
 
 const $emit = defineEmits(['next', 'back'])
 
@@ -206,6 +206,11 @@ async function createPageChatbot() {
   }
 }
 
+/** quay lại */
+function back() {
+  $emit('back')
+}
+
 /** tiến trước */
 async function next() {
   try {
@@ -215,12 +220,20 @@ async function next() {
     // nếu dữ liệu của hợp lệ thì dừng lại
     if (!valid_to_next.value) return
   
-    if(!appStore.page_id) {
-      // tạo page mới nếu của có page
-      await createPageChatbot()
-    }
+    // if(!appStore.page_id) {
+    //   // tạo page mới nếu của có page
+    //   await createPageChatbot()
+    // }
 
-    createTokenMerchant()
+    // createTokenMerchant()
+
+    $merchant.createProductFromImage({
+      type: 'image',
+      url: business_info.value.web_url
+    })
+
+    // setup trợ lý ảo bên chat bot
+    setupAIAgentChatbot()
   
     $emit('next')
   } catch (error) {
@@ -228,8 +241,69 @@ async function next() {
   }
 }
 
-/** quay lại */
-function back() {
-  $emit('back')
+/** setup trợ lý ảo bên chat bot */
+async function setupAIAgentChatbot(){
+  try { 
+    /** ID của trợ lý ảo */
+    let id_ai_agent = await getFirstAIAgent(appStore.org_id)
+
+    // nếu không có trợ lý ảo thì tạo mới
+    if(!id_ai_agent) {
+      /** kết quả tạo */
+      const RESULT_CREATE = await createAIAgent()
+
+      // nếu tạo thành công thì gọi lại api lấy danh sách để lấy id
+      if(RESULT_CREATE) {
+        id_ai_agent = getFirstAIAgent(appStore.org_id)
+      }
+    }
+
+    // cập nhật cài đặt trang
+    await $chatbot.updateSettingPage({
+      page_id: appStore.page_id,
+      ai_agent_id: id_ai_agent,
+    })
+
+  } catch (e) {
+    console.log(e);
+    
+  }
 }
+
+/** tạo mới trợ lý ảo */
+async function createAIAgent() {
+  try {
+    // nếu không có id tổ chức thì thôi
+    if(!appStore.org_id) {
+      console.log('chưa có id tổ chức')
+      return
+    }
+
+    // tạo trợ lý ảo
+    const RES = await $chatbot.createAIAgent(appStore.org_id)
+
+    /** Nếu code !== 200 thì throw lỗi */
+    if (RES?.code !== 200) {
+      throw RES?.message;
+    }
+    return true;
+  } catch (e) {
+    throw e
+  }
+}
+
+/** lấy id của agent đầu tiên */
+async function getFirstAIAgent(org_id: string) {
+  try {
+    // lấy danh sách trợ lý ảo
+    const RES = await $chatbot.getAIAgents(org_id)
+    /** ID của trợ lý ảo */
+    return RES?.[0]?.fb_page_id
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+
+
 </script>

@@ -33,7 +33,7 @@
 </template>
 <script setup lang="ts">
 import { $chatbot } from '@/api/chatbot'
-import { useAppStore } from '@/stores/app'
+import { useAppStore } from '@/stores'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import Tabs from '@/views/OnBoarding/Tabs.vue'
@@ -50,7 +50,7 @@ const MOCK_TOKEN =
 const appStore = useAppStore()
 
 // composable
-const { getPartnerToken, createTokenMerchant } = useCreateTokenMerchant()
+const { getPartnerToken, createTokenMerchant, getClientID } = useCreateTokenMerchant()
 
 /** danh sách các các bước */
 const STEPS = [Step1, Step2, Step3]
@@ -130,12 +130,6 @@ async function selectOrg(org_id: string) {
   // lấy page retify
   await getPageRetify()
 
-  // lấy partner token
-  await getPartnerToken()
-
-  // lấy client id
-  // await getClientID()
-
   // tạo token merchant
   createTokenMerchant()
 }
@@ -166,11 +160,13 @@ async function getExistingPageID() {
     const RES: any = await $chatbot.getPages(appStore.org_id)
 
     /** lọc ra page retify */
-    RES?.filter((item: any) => item?.page_info?.name.includes('.retify.ai'))
+    const RETIFY_PAGES = RES?.filter((item: any) => item?.page_info?.name.includes('.retify.ai'))
 
     // trả về id của page retify
-    return RES?.[0]?.page_id
-  } catch (error) {}
+    return RETIFY_PAGES?.[0]?.page_id
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 /** tăng bước */

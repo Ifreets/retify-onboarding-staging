@@ -20,7 +20,7 @@
       <div class="flex flex-col items-center">
         <div class="flex gap-1 w-full">
           <p class="flex-1 font-medium py-2 px-3 bg-slate-100 rounded truncate">
-            https://corner-cafe.retify.ai
+            {{ `https://retify.ai/c/${appStore.page_id}` }}
           </p>
           <button
             class="py-1.5 px-6 border border-blue-700 rounded-md font-semibold text-blue-700 bg-blue-100"
@@ -71,19 +71,16 @@
   </section>
 </template>
 <script setup lang="ts">
+import { useAppStore } from '@/stores'
 import { useRouter } from 'vue-router'
 
-import QRImage from '@/assets/image/qr.png'
 import GlobalIcon from '@/assets/icons/global.png'
-import WhatsappIcon from '@/components/icons/WhatsappIcon.vue'
-import InstagramIcon from '@/components/icons/InstagramIcon.vue'
+import QRImage from '@/assets/image/qr.png'
 import FacebookIcon from '@/components/icons/FacebookIcon.vue'
+import InstagramIcon from '@/components/icons/InstagramIcon.vue'
 import TiktokIcon from '@/components/icons/TiktokIcon.vue'
 import WebsiteIcon from '@/components/icons/WebsiteIcon.vue'
-
-const $emit = defineEmits(['next', 'back'])
-
-const router = useRouter()
+import WhatsappIcon from '@/components/icons/WhatsappIcon.vue'
 
 const SOCIALS = [
   {
@@ -107,6 +104,14 @@ const SOCIALS = [
     icon: WebsiteIcon,
   },
 ]
+
+const $emit = defineEmits(['next', 'back'])
+
+// store
+const appStore = useAppStore()
+
+// router
+const router = useRouter()
 
 /** tiến trước */
 function next() {

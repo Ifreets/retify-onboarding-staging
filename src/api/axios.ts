@@ -16,7 +16,7 @@ export class Request {
         url: string,
         data: any,
         headers?: object
-    ): Promise<T> {
+    ): Promise<any> {
         try {
 
             /** Gửi request */
