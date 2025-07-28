@@ -195,7 +195,7 @@ function handleImageUpload(event: Event) {
 async function createPageChatbot() {
   try {
     /** dữ liệu của page mới được tạo */
-    const RES:any = await $chatbot.createPage({
+    const RES = await $chatbot.createPage({
       org_id: appStore.org_id,
       name: toRenderDomain(business_info.value.name),
     })
@@ -220,13 +220,28 @@ async function next() {
     // nếu dữ liệu của hợp lệ thì dừng lại
     if (!valid_to_next.value) return
   
-    // if(!appStore.page_id) {
-    //   // tạo page mới nếu của có page
-    //   await createPageChatbot()
-    // }
+    if(!appStore.page_id) {
+      // tạo page mới nếu của có page
+      await createPageChatbot()
 
-    // createTokenMerchant()
+      // delay 2s mới chạy tiếp
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(true)
+        }, 15000)
+      })
+    }
 
+    // tạo token merchant
+    await createTokenMerchant()
+
+    // nếu không có token merchant thì thôi
+    if(!appStore.merchant_token) {
+      console.log('chưa có token merchant')
+      return
+    }
+
+    // tạo danh sách sản phẩm từ ảnh
     $merchant.createProductFromImage({
       type: 'image',
       url: business_info.value.web_url
@@ -254,7 +269,7 @@ async function setupAIAgentChatbot(){
 
       // nếu tạo thành công thì gọi lại api lấy danh sách để lấy id
       if(RESULT_CREATE) {
-        id_ai_agent = getFirstAIAgent(appStore.org_id)
+        id_ai_agent = await getFirstAIAgent(appStore.org_id)
       }
     }
 
@@ -262,6 +277,11 @@ async function setupAIAgentChatbot(){
     await $chatbot.updateSettingPage({
       page_id: appStore.page_id,
       ai_agent_id: id_ai_agent,
+    })
+
+    // cập nhật cài đặt trợ lý ảo
+    await $chatbot.updateSettingAIAgent({
+      page_id: id_ai_agent,
     })
 
   } catch (e) {
@@ -297,6 +317,10 @@ async function getFirstAIAgent(org_id: string) {
   try {
     // lấy danh sách trợ lý ảo
     const RES = await $chatbot.getAIAgents(org_id)
+
+    console.log(RES);
+    
+
     /** ID của trợ lý ảo */
     return RES?.[0]?.fb_page_id
   } catch (error) {

@@ -50,7 +50,7 @@ const MOCK_TOKEN =
 const appStore = useAppStore()
 
 // composable
-const { getPartnerToken, createTokenMerchant, getClientID } = useCreateTokenMerchant()
+const { createTokenMerchant } = useCreateTokenMerchant()
 
 /** danh sách các các bước */
 const STEPS = [Step1, Step2, Step3]

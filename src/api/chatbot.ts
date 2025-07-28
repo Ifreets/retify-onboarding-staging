@@ -68,7 +68,7 @@ export class ChatbotServiceAPI {
 
   /** api tạo page chatbot */
   public async createPage(data: { org_id: string; name: string }) {
-    return await this.#postBilling('app/page/create_website_page', data)
+    return await this.#postService('app/page/create_website_page', data)
   }
 
   /** lấy partner token */
@@ -93,13 +93,13 @@ export class ChatbotServiceAPI {
   }) {
     return await this.#postPublic('embed/message/send_message', {
       ...data,
-      from: 'PAGE',
+      // from: 'PAGE',
     })
   }
 
   /** tạo 1 hội thoại mới */
-  public async createConversation(data: { page_id: string }) {
-    return await this.#postPublic('app/conversation/create_conversation', data)
+  public async createConversation(data: { page_id: string; name: string }) {
+    return await this.#postPublic('embed/conversation/init_identify', data)
   }
 
   /** lấy danh sách AI agent */
@@ -124,9 +124,6 @@ export class ChatbotServiceAPI {
   }) {
     return await this.#postService('app/page/update_page_setting', {
       ...data,
-      ai_agent_custom_prompt:
-        'Nếu nội dung câu hỏi mang ý nghĩa đặt lịch hẹn, kiểm tra lịch hẹn, chỉ trả lời "@retion-shedule", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xừ lý\nNếu nội dung câu hỏi mang ý nghĩa đặt hàng, mua hàng, chỉ trả lời "@retion-order", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu nội dung câu hỏi mang ý nghĩa hỏi sản phẩm, kiểm tra sản phẩm, kiểm tra món ăn, quần áo, chỉ trả lời "@retion-product", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu khách hàng hỏi hoặc nói bằng tiếng anh thì tư vấn và trả lời lại bằng tiếng anh.',
-      ai_agent_is_custom_prompt: true,
       is_active_ai_agent: true,
       ai_agent_working_hour_answer: {
         in_working_hour: {
@@ -142,6 +139,20 @@ export class ChatbotServiceAPI {
       default_language: 'en',
     })
   }
+
+  /** cập nhật thiết lập trợ lý ảo */
+  public async updateSettingAIAgent(data: { page_id: string }) {
+    return await this.#postService('app/page/update_page_setting', {
+      ...data,
+      ai_agent_use_external_knowledge: { is_active: true },
+      ai_agent_typing_wait: 1,
+      ai_agent_custom_prompt:
+        `Nếu nội dung câu hỏi mang ý nghĩa đặt lịch hẹn, kiểm tra lịch hẹn, chỉ trả lời "@retion-shedule", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xừ lý\nNếu nội dung câu hỏi mang ý nghĩa đặt hàng, mua hàng, chỉ trả lời "@retion-order", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu nội dung câu hỏi mang ý nghĩa hỏi sản phẩm, kiểm tra sản phẩm, kiểm tra món ăn, quần áo, chỉ trả lời "@retion-product", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu khách hàng hỏi hoặc nói bằng tiếng anh thì tư vấn và trả lời lại bằng tiếng anh.`,
+      ai_agent_is_custom_prompt: true,
+    })
+  }
 }
+
+
 
 export const $chatbot = new ChatbotServiceAPI()

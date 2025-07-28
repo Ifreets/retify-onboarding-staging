@@ -24,6 +24,7 @@
           </p>
           <button
             class="py-1.5 px-6 border border-blue-700 rounded-md font-semibold text-blue-700 bg-blue-100"
+            @click="copyLink()"
           >
             Copy
           </button>
@@ -112,6 +113,14 @@ const appStore = useAppStore()
 
 // router
 const router = useRouter()
+
+/** copy link chat */
+async function copyLink() {
+  await navigator.clipboard.writeText(`https://retify.ai/c/${appStore.page_id}`)
+
+  // báo copy thành công
+  alert('Copied')
+}
 
 /** tiến trước */
 function next() {
