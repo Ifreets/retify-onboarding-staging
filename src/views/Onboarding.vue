@@ -62,10 +62,11 @@ const transition_name = ref('slide-left')
 const organizations = ref<any[]>([])
 
 onMounted(() => {
+  /** Add event listener */
+  window.addEventListener('message', handleMessage)
+
   /** lấy token chatbot */
-  getChatbotToken()
-  /** lấy danh sách các tổ chức */
-  getOrganizations()
+  // getChatbotToken(MOCK_TOKEN)
 })
 
 onUnmounted(() => {
@@ -78,13 +79,15 @@ watch(current_step, (new_val, old_val) => {
 })
 
 /** lấy token chatbot */
-function getChatbotToken() {
+function getChatbotToken(token: string) {
   // lấy token fake
-  appStore.chatbot_token = MOCK_TOKEN
-  /** Add event listener */
-  window.addEventListener('message', handleMessage)
+  appStore.chatbot_token = token
+  // nếu không có chatbot token thì dừng lại
+    if (!appStore.chatbot_token) return
   /** lưu lại token vào service api */
   $chatbot.setChatbotToken()
+  /** lấy danh sách các tổ chức */
+  getOrganizations()
 }
 
 /** Nhận Message từ Mobile */
@@ -102,7 +105,7 @@ function handleMessage(event: MessageEvent) {
   /** Kiem tra event data */
   if (data?.type === 'page.token_chatbox') {
     console.log(data, 'event data')
-    appStore.chatbot_token = data.payload?.token
+    getChatbotToken(data.payload?.token)
   }
 }
 
