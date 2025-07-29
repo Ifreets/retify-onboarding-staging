@@ -1,7 +1,7 @@
 import { $chatbot } from '@/api/chatbot'
 import { $merchant } from '@/api/merchant'
 import { useAppStore } from '@/stores'
-import { find, get, has, keys } from 'lodash'
+import { find, get, has, keys, values } from 'lodash'
 
 export function useCreateTokenMerchant() {
   // store
@@ -30,13 +30,29 @@ export function useCreateTokenMerchant() {
         has(DATA[key], 'partner_token'),
       )
 
+      /** dữ liệu của key nào chứa `partner_token` */
+      const KEY_WITH_PARTNER_TOKEN_DATA = KEY_WITH_PARTNER_TOKEN
+        ? DATA[KEY_WITH_PARTNER_TOKEN]
+        : null
+
       /** Nếu tìm thấy `partner_token`, lấy giá trị của nó */
       const PARTNER_TOKEN = KEY_WITH_PARTNER_TOKEN
-        ? get(DATA, `${KEY_WITH_PARTNER_TOKEN}.partner_token`, null)
+        ? get(KEY_WITH_PARTNER_TOKEN_DATA, 'partner_token', null)
         : null
 
       /** lưu lại partner token vào store */
       appStore.partner_token = PARTNER_TOKEN
+
+      /** danh sách nhân sự */
+      const USER_LIST = KEY_WITH_PARTNER_TOKEN 
+        ? get(DATA, `${KEY_WITH_PARTNER_TOKEN}.staff_list`, {})
+        : {}
+
+      /** id của nhân sự đầu tiên */
+      const FIRST_USER_ID = values(USER_LIST)?.[0]?._id
+
+      /** lưu lại id của nhân sự đầu tiên vào store */
+      appStore.user_id = FIRST_USER_ID || ''
     } catch (e) {
       console.error(e)
     }
@@ -55,6 +71,7 @@ export function useCreateTokenMerchant() {
       const DATA_READ: any = await $chatbot.getClientID({
         org_id: appStore.org_id,
         page_id: appStore.page_id,
+        search: "Welcome to Retify"
       })
 
       /** Kiểm tra đã có hội thoại chưa */

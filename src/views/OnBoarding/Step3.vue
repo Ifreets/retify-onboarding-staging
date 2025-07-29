@@ -8,44 +8,50 @@
       </p>
       <p class="font-semibold">Connect Your Audience</p>
       <p class="text-slate-700">
-        Select the platforms where your customers can easily connect with your business.
+        Select the platforms where your customers can easily connect with your
+        business.
       </p>
     </header>
-
-    <section class="flex flex-col gap-3 p-3 border rounded-lg">
-      <div class="flex gap-2 items-center">
-        <img :src="GlobalIcon" class="size-7" />
-        <p class="text-base font-semibold">Link connect your Audience</p>
-      </div>
-      <div class="flex flex-col items-center">
-        <div class="flex gap-1 w-full">
-          <p class="flex-1 font-medium py-2 px-3 bg-slate-100 rounded truncate">
-            {{ `https://retify.ai/c/${appStore.page_id}` }}
-          </p>
+    <main class="flex flex-col gap-3 flex-grow">
+      <section class="flex flex-col gap-3 p-3 border rounded-lg">
+        <div class="flex gap-2 items-center">
+          <img :src="GlobalIcon" class="size-7" />
+          <p class="text-base font-semibold">Link connect your Audience</p>
+        </div>
+        <div class="flex flex-col items-center">
+          <div class="flex gap-1 w-full">
+            <p class="flex-1 font-medium py-2 px-3 bg-slate-100 rounded truncate">
+              {{ `https://retify.ai/c/${appStore.page_id}` }}
+            </p>
+            <button
+              class="py-1.5 px-6 border border-blue-700 rounded-md font-semibold text-blue-700 bg-blue-100"
+              @click="copyLink()"
+            >
+              Copy
+            </button>
+          </div>
+          <canvas class="w-52 h-52" ref="canvas_ref"></canvas>
           <button
-            class="py-1.5 px-6 border border-blue-700 rounded-md font-semibold text-blue-700 bg-blue-100"
-            @click="copyLink()"
+            class="py-1.5 px-12 border border-blue-700 rounded-md font-semibold text-blue-700 bg-blue-100"
+            @click="downloadQR"
           >
-            Copy
+            Save QR Code
           </button>
         </div>
-        <img :src="QRImage" class="w-52 h-52" />
-        <button
-          class="py-1.5 px-12 border border-blue-700 rounded-md font-semibold text-blue-700 bg-blue-100"
-        >
-          Save QR Code
-        </button>
-      </div>
-    </section>
+      </section>
+    </main>
 
-    <section class="flex gap-2 items-center">
+    <!-- <section class="flex gap-2 items-center">
       <div class="flex-1 h-px bg-slate-200"></div>
       <p>OR</p>
       <div class="flex-1 h-px bg-slate-200"></div>
-    </section>
+    </section> -->
 
-    <ul class="flex flex-col gap-2">
-      <li v-for="item in SOCIALS" class="py-1 px-3 flex justify-between font-semibold">
+    <!-- <ul class="flex flex-col gap-2">
+      <li
+        v-for="item in SOCIALS"
+        class="py-1 px-3 flex justify-between font-semibold"
+      >
         <div class="flex gap-2.5 items-center">
           <div class="p-3 rounded-full bg-gray-100">
             <component :is="item.icon" />
@@ -54,12 +60,15 @@
         </div>
         <button class="text-blue-700">Connect</button>
       </li>
-    </ul>
+    </ul> -->
 
-    <div class="w-full h-px bg-slate-200 flex-shrink-0"></div>
+    <!-- <div class="w-full h-px bg-slate-200 flex-shrink-0"></div> -->
 
     <footer class="flex justify-between font-semibold">
-      <button @click="back" class="py-1.5 px-10 rounded-md bg-slate-200 text-slate-700">
+      <button
+        @click="back"
+        class="py-1.5 px-10 rounded-md bg-slate-200 text-slate-700"
+      >
         Back
       </button>
       <button
@@ -72,8 +81,11 @@
   </section>
 </template>
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { useAppStore } from '@/stores'
 import { useRouter } from 'vue-router'
+
+import QRCode from 'qrcode'
 
 import GlobalIcon from '@/assets/icons/global.png'
 import QRImage from '@/assets/image/qr.png'
@@ -114,12 +126,55 @@ const appStore = useAppStore()
 // router
 const router = useRouter()
 
+/** ref tới phần tử hiển thị qr code */
+const canvas_ref = ref<HTMLCanvasElement | null>(null)
+
+onMounted(() => {
+  generateQR()
+})
+
 /** copy link chat */
 async function copyLink() {
   await navigator.clipboard.writeText(`https://retify.ai/c/${appStore.page_id}`)
 
   // báo copy thành công
   alert('Copied')
+}
+
+/** tạo qr code */
+async function generateQR() {
+  try {
+    // nếu không có phần tử canvas thì thôi
+    if (!canvas_ref.value) return
+
+    // tao qr code
+    await QRCode.toCanvas(
+      canvas_ref.value,
+      `https://retify.ai/c/${appStore.page_id}`,
+      {
+        width: 208,
+      },
+    )
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+/** tải xuong qr code */
+function downloadQR() {
+  // nếu không có phần tử canvas thì thôi
+  if (!canvas_ref.value) return
+
+  /** link download */
+  const DATA_URL = canvas_ref.value.toDataURL('image/png')
+
+  /** tạo 1 thẻ a */
+  const LINK = document.createElement('a')
+  // gán cá thuộc tính cho thẻ đó
+  LINK.href = DATA_URL
+  LINK.download = 'qr-code.png'
+  // click để tải xuống
+  LINK.click()
 }
 
 /** tiến trước */

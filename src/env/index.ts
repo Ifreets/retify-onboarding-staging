@@ -5,7 +5,8 @@ export const ENV: {
 } = {
   development: {
     chatbot_billing: 'https://chatbox-billing.botbanhang.vn',
-    chatbot_service: 'https://chatbox-service-v3.botbanhang.vn',
+    chatbot_service: 'https://chatbox-service.botbanhang.vn/v1',
+    chatbot_service_v3: 'https://chatbox-service-v3.botbanhang.vn',
     chatbot_public: 'https://chatbox-public-v2.botbanhang.vn',
     merchant: 'https://api.merchant.vn',
     merchant_product: "https://api-product.merchant.vn",
@@ -13,7 +14,8 @@ export const ENV: {
   },
   production: {
     chatbot_billing: 'https://chatbox-billing.botbanhang.vn',
-    chatbot_service: 'https://chatbox-service-v3.botbanhang.vn',
+    chatbot_service: 'https://chatbox-service.botbanhang.vn/v1',
+    chatbot_service_v3: 'https://chatbox-service-v3.botbanhang.vn',
     chatbot_public: 'https://chatbox-public-v2.botbanhang.vn',
     merchant: 'https://api.merchant.vn',
     merchant_product: "https://api-product.merchant.vn",

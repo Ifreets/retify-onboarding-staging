@@ -228,7 +228,7 @@ async function next() {
       await new Promise((resolve) => {
         setTimeout(() => {
           resolve(true)
-        }, 15000)
+        }, 3000)
       })
     }
 
@@ -247,6 +247,9 @@ async function next() {
       url: business_info.value.web_url
     })
 
+    // bật tự động assign nhân sự
+    $chatbot.autoAssignStaff(appStore.user_id)
+
     // setup trợ lý ảo bên chat bot
     setupAIAgentChatbot()
   
@@ -258,7 +261,8 @@ async function next() {
 
 /** setup trợ lý ảo bên chat bot */
 async function setupAIAgentChatbot(){
-  try { 
+  try {
+    
     /** ID của trợ lý ảo */
     let id_ai_agent = await getFirstAIAgent(appStore.org_id)
 

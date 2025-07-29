@@ -17,6 +17,9 @@ export const useAppStore = defineStore('app', () => {
   /** client id */
   const client_id = ref('')
 
+  /** id của nhân viên */
+  const user_id = ref('')
+
   /** token merchant */
   const merchant_token = ref('')
 
@@ -26,6 +29,7 @@ export const useAppStore = defineStore('app', () => {
     org_id,
     page_id,
     client_id,
+    user_id,
     merchant_token,
   }
 })

@@ -35,6 +35,15 @@ export class ChatbotServiceAPI {
     )
   }
 
+  /** Gửi request đến server chatbot service v3*/
+  #postServiceV3(url: string, data: any, headers?: object) {
+    return this.REQUEST.post(
+      `${this.HOST.chatbot_service_v3}/${url}`,
+      data,
+      headers,
+    )
+  }
+
   /** Gửi request đến server chatbot public */
   #postPublic(url: string, data: any, headers?: object) {
     return this.REQUEST.post(
@@ -68,7 +77,7 @@ export class ChatbotServiceAPI {
 
   /** api tạo page chatbot */
   public async createPage(data: { org_id: string; name: string }) {
-    return await this.#postService('app/page/create_website_page', data)
+    return await this.#postServiceV3('app/page/create_website_page', data)
   }
 
   /** lấy partner token */
@@ -76,12 +85,18 @@ export class ChatbotServiceAPI {
     org_id: string
     list_page_id: string[]
   }) {
-    return await this.#postService('app/page/get_page_info_to_chat', data)
+    return await this.#postServiceV3('app/page/get_page_info_to_chat', data)
   }
 
   /** lấy client id */
-  public async getClientID(data: { org_id: string; page_id: string }) {
-    return await this.#postService('app/conversation/read_conversation', data)
+  public async getClientID(data: {
+    org_id: string
+    page_id: string
+    search: string
+  }) {
+    console.log(data);
+    
+    return await this.#postServiceV3('app/conversation/read_conversation', data)
   }
 
   /** gửi tin nhắn */
@@ -122,7 +137,7 @@ export class ChatbotServiceAPI {
     page_id: string
     ai_agent_id: string
   }) {
-    return await this.#postService('app/page/update_page_setting', {
+    return await this.#postServiceV3('app/page/update_page_setting', {
       ...data,
       is_active_ai_agent: true,
       ai_agent_working_hour_answer: {
@@ -142,17 +157,22 @@ export class ChatbotServiceAPI {
 
   /** cập nhật thiết lập trợ lý ảo */
   public async updateSettingAIAgent(data: { page_id: string }) {
-    return await this.#postService('app/page/update_page_setting', {
+    return await this.#postServiceV3('app/page/update_page_setting', {
       ...data,
       ai_agent_use_external_knowledge: { is_active: true },
       ai_agent_typing_wait: 1,
-      ai_agent_custom_prompt:
-        `Nếu nội dung câu hỏi mang ý nghĩa đặt lịch hẹn, kiểm tra lịch hẹn, chỉ trả lời "@retion-shedule", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xừ lý\nNếu nội dung câu hỏi mang ý nghĩa đặt hàng, mua hàng, chỉ trả lời "@retion-order", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu nội dung câu hỏi mang ý nghĩa hỏi sản phẩm, kiểm tra sản phẩm, kiểm tra món ăn, quần áo, chỉ trả lời "@retion-product", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu khách hàng hỏi hoặc nói bằng tiếng anh thì tư vấn và trả lời lại bằng tiếng anh.`,
+      ai_agent_custom_prompt: `Nếu nội dung câu hỏi mang ý nghĩa đặt lịch hẹn, kiểm tra lịch hẹn, chỉ trả lời "@retion-shedule", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xừ lý\nNếu nội dung câu hỏi mang ý nghĩa đặt hàng, mua hàng, chỉ trả lời "@retion-order", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu nội dung câu hỏi mang ý nghĩa hỏi sản phẩm, kiểm tra sản phẩm, kiểm tra món ăn, quần áo, chỉ trả lời "@retion-product", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu khách hàng hỏi hoặc nói bằng tiếng anh thì tư vấn và trả lời lại bằng tiếng anh.`,
       ai_agent_is_custom_prompt: true,
     })
   }
+
+  /** tự động assign nhân sự */
+  public async autoAssignStaff(_id: string) {
+    return await this.#postService('app/staff/update', {
+      _id,
+      is_auto_assign: true,
+    })
+  }
 }
-
-
 
 export const $chatbot = new ChatbotServiceAPI()
