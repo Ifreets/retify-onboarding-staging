@@ -173,6 +173,13 @@ export class ChatbotServiceAPI {
       is_auto_assign: true,
     })
   }
+
+  /** cập nhật trạng thái setup thành công */
+  public async updateSetupStatus() {
+    return await this.#postServiceV3('app/chatbot_user/update_setup_status', {
+      is_setup_completed: true,
+    })
+  }
 }
 
 export const $chatbot = new ChatbotServiceAPI()

@@ -20,7 +20,9 @@
         </div>
         <div class="flex flex-col items-center">
           <div class="flex gap-1 w-full">
-            <p class="flex-1 font-medium py-2 px-3 bg-slate-100 rounded truncate">
+            <p
+              class="flex-1 font-medium py-2 px-3 bg-slate-100 rounded truncate"
+            >
               {{ `https://retify.ai/c/${appStore.page_id}` }}
             </p>
             <button
@@ -94,6 +96,7 @@ import InstagramIcon from '@/components/icons/InstagramIcon.vue'
 import TiktokIcon from '@/components/icons/TiktokIcon.vue'
 import WebsiteIcon from '@/components/icons/WebsiteIcon.vue'
 import WhatsappIcon from '@/components/icons/WhatsappIcon.vue'
+import { $chatbot } from '@/api/chatbot'
 
 const SOCIALS = [
   {
@@ -178,9 +181,28 @@ function downloadQR() {
 }
 
 /** tiến trước */
-function next() {
-  // $emit('next')
-  router.push('/home')
+async function next() {
+  try {
+    // $emit('next')
+    // router.push('/home')
+
+    // Hàm cập nhật trạng thái setup
+    await $chatbot.updateSetupStatus()
+    
+    // gửi event thành công cho native
+    window.ReactNativeWebView?.postMessage(
+      JSON.stringify({
+        type: 'page.home',
+        message: {
+          final: true,
+          page_id: appStore.page_id,
+          org_id: appStore.org_id,
+        },
+      }),
+    )
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 /** quay lại */
