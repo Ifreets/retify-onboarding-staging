@@ -66,15 +66,9 @@ onMounted(() => {
   window.addEventListener('message', handleMessage)
 
   /** lấy token chatbot */
-  getChatbotToken(MOCK_TOKEN)
+  // getChatbotToken(MOCK_TOKEN)
 
-
-  if(localStorage.getItem('step') === '2') {
-    current_step.value = 2
-  }
-
-
-  localStorage.setItem('step', '2')
+  localStorage.clear()
 })
 
 onUnmounted(() => {
