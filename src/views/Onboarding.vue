@@ -34,17 +34,17 @@
 <script setup lang="ts">
 import { $chatbot } from '@/api/chatbot'
 import { useAppStore } from '@/stores'
+import { useCreateTokenMerchant } from '@/views/OnBoarding/composable/useCreateTokenMerchant'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
-import Tabs from '@/views/OnBoarding/Tabs.vue'
 import Step1 from '@/views/OnBoarding/Step1.vue'
 import Step2 from '@/views/OnBoarding/Step2.vue'
 import Step3 from '@/views/OnBoarding/Step3.vue'
-import { useCreateTokenMerchant } from './OnBoarding/composable/useCreateTokenMerchant'
+import Tabs from '@/views/OnBoarding/Tabs.vue'
 
 /** fake token chat bot để chạy trên pc */
 const MOCK_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiOTEzOTM3MTZiYzE1NDUxNDk3ZTZjOGIwNjQzYmY1MjIiLCJmYl9zdGFmZl9pZCI6IjEyMjEyMTczMDYzNDMzMjQ0MiIsIl9pZCI6IjY2ZjdhYzE2MjE0Mzg4MTFiNjVjZTI5OCIsImlhdCI6MTc1MDk5OTg2MSwiZXhwIjozMTU1MzUwOTk5ODYxfQ.A4jHrb4Mviyr1UQ_P0O62f_QBnW1Qih0h6Z05_8bluQ'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiODk5NzY3MzE1Mzk2MTcxIiwiX2lkIjoiNjg1ZTQ2MDg0ZGM3M2MwYjhkMTQzYTJlIiwiaWF0IjoxNzUxNTk4OTQyLCJleHAiOjMxNTUzNTE1OTg5NDJ9.iUqlmnVACz5uuW-CCgOGshbJr15g8gN5SJSO3Tj7zW8'
 
 // store
 const appStore = useAppStore()
@@ -66,7 +66,15 @@ onMounted(() => {
   window.addEventListener('message', handleMessage)
 
   /** lấy token chatbot */
-  // getChatbotToken(MOCK_TOKEN)
+  getChatbotToken(MOCK_TOKEN)
+
+
+  if(localStorage.getItem('step') === '2') {
+    current_step.value = 2
+  }
+
+
+  localStorage.setItem('step', '2')
 })
 
 onUnmounted(() => {

@@ -225,11 +225,11 @@ async function next() {
       await createPageChatbot()
 
       // delay 2s mới chạy tiếp
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(true)
-        }, 3000)
-      })
+      // await new Promise((resolve) => {
+      //   setTimeout(() => {
+      //     resolve(true)
+      //   }, 3000)
+      // })
     }
 
     // tạo token merchant
