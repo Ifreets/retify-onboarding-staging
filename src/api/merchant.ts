@@ -35,11 +35,8 @@ export class MerchantServiceAPI {
   }
 
   /** tạo token merchant */
-  createToken(data: { access_token: string; client_id: string }) {
-    return this.#post('v1/public/chatbox/get_config', {
-      ...data,
-      secret_key: '6f8b22eebe1d4d93b2f4a618901df020',
-    })
+  createToken(data: { access_token: string; page_id?: string }) {
+    return this.#post('v1/auth/chatbox_login', data)
   }
 
   /** tạo danh sách sản phẩm từ ảnh */

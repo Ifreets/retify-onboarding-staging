@@ -105,15 +105,15 @@
 </template>
 <script setup lang="ts">
 import { $chatbot } from '@/api/chatbot'
+import { $merchant } from '@/api/merchant'
 import { useAppStore, useOnBoardingStore } from '@/stores'
+import { toRenderDomain } from '@/utils'
 import { useCreateTokenMerchant } from '@/views/OnBoarding/composable/useCreateTokenMerchant'
 import { computed, ref } from 'vue'
 
 import CameraIcon from '@/components/icons/CameraIcon.vue'
 import TrashIcon from '@/components/icons/TrashIcon.vue'
-import { toRenderDomain } from '@/utils'
 import { XCircleIcon } from '@heroicons/vue/24/solid'
-import { $merchant } from '@/api/merchant'
 
 const $emit = defineEmits(['next', 'back'])
 
@@ -140,14 +140,17 @@ const valid_to_next = computed(() => {
   return business_info.value.name.trim() && (valid_menu_url.value || valid_web_url.value)
 })
 
+/** kiểm tra xem link menu có hợp lệ không */
 const valid_menu_url = computed(() => {
   return isValidURL(business_info.value.menu_url.trim())
 })
 
+/** kiểm tra xem link website có hợp lệ không */
 const valid_web_url = computed(() => {
   return isValidURL(business_info.value.web_url.trim())
 })
 
+/** kiểm tra xem link có hợp lệ không */
 function isValidURL(url: string) {
   try {
     new URL(url)
@@ -223,17 +226,12 @@ async function next() {
     if(!appStore.page_id) {
       // tạo page mới nếu của có page
       await createPageChatbot()
-
-      // delay 2s mới chạy tiếp
-      // await new Promise((resolve) => {
-      //   setTimeout(() => {
-      //     resolve(true)
-      //   }, 3000)
-      // })
     }
 
     // tạo token merchant
     await createTokenMerchant()
+
+    $emit('next')
 
     // nếu không có token merchant thì thôi
     if(!appStore.merchant_token) {
@@ -243,8 +241,8 @@ async function next() {
 
     // tạo danh sách sản phẩm từ ảnh
     $merchant.createProductFromImage({
-      type: 'image',
-      url: business_info.value.web_url
+      type: 'url',
+      url: business_info.value.web_url || business_info.value.menu_url
     })
 
     // bật tự động assign nhân sự
@@ -252,11 +250,14 @@ async function next() {
 
     // setup trợ lý ảo bên chat bot
     setupAIAgentChatbot()
-  
-    $emit('next')
   } catch (error) {
     
   }
+}
+
+/** bật tự động assign nhân sự */
+function autoAssignStaff() {
+  $chatbot.autoAssignStaff(appStore.user_id)
 }
 
 /** setup trợ lý ảo bên chat bot */

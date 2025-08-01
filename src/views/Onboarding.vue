@@ -66,7 +66,7 @@ onMounted(() => {
   window.addEventListener('message', handleMessage)
 
   /** lấy token chatbot */
-  // getChatbotToken(MOCK_TOKEN)
+  getChatbotToken(MOCK_TOKEN)
 
   localStorage.clear()
 })

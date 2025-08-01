@@ -133,23 +133,19 @@ export function useCreateTokenMerchant() {
   /** hàm tạo token merchant */
   async function createTokenMerchant() {
     try {
-      // lấy partner token và lấy client id
-      await Promise.all([getPartnerToken(), getClientID()])
-
-      // nếu chưa có token partner hoặc client id thì thôi
-      if (!appStore.partner_token || !appStore.client_id) {
-        console.log('chưa có token partner hoặc client id')
+      // nếu chưa có chatbot_token
+      if (!appStore.chatbot_token) {
+        console.log('chưa có chatbot_token')
         return
       }
 
       /** dữ liệu token trả về */
       const RES: any = await $merchant.createToken({
-        access_token: appStore.partner_token,
-        client_id: appStore.client_id,
+        access_token: appStore.chatbot_token,
       })
 
       // trả về token
-      appStore.merchant_token = RES?.access_token
+      appStore.merchant_token = RES?.branch?.token_business
 
       // lưu lại token vào service api
       $merchant.setMerchantToken()
