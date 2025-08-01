@@ -1,7 +1,7 @@
 <template>
   <main class="h-dvh w-dvw max-w-md mx-auto linear-gradient px-3 py-10 text-sm">
     <ul
-      v-if="organizations.length >= 2 && !appStore.org_id"
+      v-if="organizations.length >= 2 && !onBoardingStore.selected_data.org_id"
       class="flex flex-col gap-3"
     >
       <li class="text-2xl font-semibold text-center">Select Organization</li>
@@ -14,7 +14,7 @@
       </li>
     </ul>
     <article
-      v-if="appStore.org_id"
+      v-if="onBoardingStore.selected_data.org_id"
       class="bg-white h-full rounded-xl py-5 px-3 flex flex-col gap-3"
     >
       <Tabs :current_tab="current_step" :total_tabs="3" />
@@ -33,7 +33,7 @@
 </template>
 <script setup lang="ts">
 import { $chatbot } from '@/api/chatbot'
-import { useAppStore } from '@/stores'
+import { useAppStore, useOnBoardingStore } from '@/stores'
 import { useCreateTokenMerchant } from '@/views/OnBoarding/composable/useCreateTokenMerchant'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
@@ -48,6 +48,7 @@ const MOCK_TOKEN =
 
 // store
 const appStore = useAppStore()
+const onBoardingStore = useOnBoardingStore()
 
 // composable
 const { createTokenMerchant } = useCreateTokenMerchant()
@@ -68,7 +69,8 @@ onMounted(() => {
   /** lấy token chatbot */
   getChatbotToken(MOCK_TOKEN)
 
-  localStorage.clear()
+  // khởi tạo các guias 
+  initData()
 })
 
 onUnmounted(() => {
@@ -78,14 +80,56 @@ onUnmounted(() => {
 // lắng nghe chuyển tiếp hay quay lại để thêm hiệu ứng
 watch(current_step, (new_val, old_val) => {
   transition_name.value = new_val > old_val ? 'slide-left' : 'slide-right'
+  localStorage.setItem('current_step', new_val.toString())
 })
+
+watch(
+  () => onBoardingStore.selected_data,
+  () => {
+    localStorage.setItem(
+      'selected_data',
+      JSON.stringify(onBoardingStore.selected_data),
+    )
+  },
+  { deep: true },
+)
+
+watch(
+  () => onBoardingStore.business_info,
+  () => {
+    localStorage.setItem('business_info', JSON.stringify(onBoardingStore.business_info))
+  },
+  { deep: true },
+)
+
+/** khởi tạo các giá trị lấy từ local */
+function initData() {
+  // lấy bước hiện tại từ local
+  if(localStorage.getItem('current_step')){
+    current_step.value = Number(localStorage.getItem('current_step'))
+  }
+
+  /** dữ liệu đã chọn ở local */
+  const LOCAL_SELECTED_DATA = localStorage.getItem('selected_data')
+  // nếu có thì lưu vào store
+  if(LOCAL_SELECTED_DATA){
+    onBoardingStore.selected_data = JSON.parse(LOCAL_SELECTED_DATA)
+  }
+
+  /** dữ liệu của doanh nghiệp lưu ở local */
+  const LOCAL_BUSINESS_INFO = localStorage.getItem('business_info')
+  // nếu có thì lưu vào store
+  if(LOCAL_BUSINESS_INFO){
+    onBoardingStore.business_info = JSON.parse(LOCAL_BUSINESS_INFO)
+  }
+}
 
 /** lấy token chatbot */
 function getChatbotToken(token: string) {
   // lấy token fake
   appStore.chatbot_token = token
   // nếu không có chatbot token thì dừng lại
-    if (!appStore.chatbot_token) return
+  if (!appStore.chatbot_token) return
   /** lưu lại token vào service api */
   $chatbot.setChatbotToken()
   /** lấy danh sách các tổ chức */
@@ -131,7 +175,7 @@ async function getOrganizations() {
 
 /** chọn tổ chức */
 async function selectOrg(org_id: string) {
-  appStore.org_id = org_id
+  onBoardingStore.selected_data.org_id = org_id
   // lấy page retify
   await getPageRetify()
 
@@ -142,13 +186,16 @@ async function selectOrg(org_id: string) {
 /** tạo page chatbot của retify */
 async function getPageRetify() {
   try {
+    // nếu đã có page id thì thôi
+    if (onBoardingStore.selected_data.page_id) return
+
     /** id page retify */
     let page_id: string | undefined = await getExistingPageID()
 
     /** kiểm tra xem đã tạo page nào trước đó chưa */
     if (page_id) {
       /** lưu vào store */
-      appStore.page_id = page_id || ''
+      onBoardingStore.selected_data.page_id = page_id || ''
     }
   } catch (e) {
     console.error(e)
@@ -159,13 +206,15 @@ async function getPageRetify() {
 async function getExistingPageID() {
   try {
     // nếu không có id tổ chức thì thôi
-    if (!appStore.org_id) return
+    if (!onBoardingStore.selected_data.org_id) return
 
     /** danh sách các page */
-    const RES: any = await $chatbot.getPages(appStore.org_id)
+    const RES: any = await $chatbot.getPages(onBoardingStore.selected_data.org_id)
 
     /** lọc ra page retify */
-    const RETIFY_PAGES = RES?.filter((item: any) => item?.page_info?.name.includes('.retify.ai'))
+    const RETIFY_PAGES = RES?.filter((item: any) =>
+      item?.page_info?.name.includes('.retify.ai'),
+    )
 
     // trả về id của page retify
     return RETIFY_PAGES?.[0]?.page_id

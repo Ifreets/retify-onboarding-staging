@@ -122,7 +122,7 @@ const appStore = useAppStore()
 const onBoardingStore = useOnBoardingStore()
 
 // composable
-const { createTokenMerchant } = useCreateTokenMerchant()
+const { createTokenMerchant, getPageInfo } = useCreateTokenMerchant()
 
 /** thông tin công ty */
 const business_info = computed({
@@ -199,11 +199,11 @@ async function createPageChatbot() {
   try {
     /** dữ liệu của page mới được tạo */
     const RES = await $chatbot.createPage({
-      org_id: appStore.org_id,
+      org_id: onBoardingStore.selected_data.org_id,
       name: toRenderDomain(business_info.value.name),
     })
     // lưu lại id page vào store
-    appStore.page_id =  RES?.fb_page_id
+    onBoardingStore.selected_data.page_id =  RES?.fb_page_id
   } catch (e) {
     console.error(e)
   }
@@ -223,7 +223,7 @@ async function next() {
     // nếu dữ liệu của hợp lệ thì dừng lại
     if (!valid_to_next.value) return
   
-    if(!appStore.page_id) {
+    if(!onBoardingStore.selected_data.page_id) {
       // tạo page mới nếu của có page
       await createPageChatbot()
     }
@@ -246,7 +246,7 @@ async function next() {
     })
 
     // bật tự động assign nhân sự
-    $chatbot.autoAssignStaff(appStore.user_id)
+    autoAssignStaff()
 
     // setup trợ lý ảo bên chat bot
     setupAIAgentChatbot()
@@ -256,8 +256,16 @@ async function next() {
 }
 
 /** bật tự động assign nhân sự */
-function autoAssignStaff() {
-  $chatbot.autoAssignStaff(appStore.user_id)
+async function autoAssignStaff() {
+  try {
+    // lấy thông tin chatbot
+    await getPageInfo()
+
+    // call api bật tự động assign nhân sự
+    await $chatbot.autoAssignStaff(onBoardingStore.selected_data.user_id)
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 /** setup trợ lý ảo bên chat bot */
@@ -265,7 +273,7 @@ async function setupAIAgentChatbot(){
   try {
     
     /** ID của trợ lý ảo */
-    let id_ai_agent = await getFirstAIAgent(appStore.org_id)
+    let id_ai_agent = await getFirstAIAgent(onBoardingStore.selected_data.org_id)
 
     // nếu không có trợ lý ảo thì tạo mới
     if(!id_ai_agent) {
@@ -274,20 +282,15 @@ async function setupAIAgentChatbot(){
 
       // nếu tạo thành công thì gọi lại api lấy danh sách để lấy id
       if(RESULT_CREATE) {
-        id_ai_agent = await getFirstAIAgent(appStore.org_id)
+        id_ai_agent = await getFirstAIAgent(onBoardingStore.selected_data.org_id)
       }
     }
 
     // cập nhật cài đặt trang
-    await $chatbot.updateSettingPage({
-      page_id: appStore.page_id,
-      ai_agent_id: id_ai_agent,
-    })
+    updateSettingPage(id_ai_agent)
 
     // cập nhật cài đặt trợ lý ảo
-    await $chatbot.updateSettingAIAgent({
-      page_id: id_ai_agent,
-    })
+    updateSettingAIAgent(id_ai_agent)
 
   } catch (e) {
     console.log(e);
@@ -299,13 +302,13 @@ async function setupAIAgentChatbot(){
 async function createAIAgent() {
   try {
     // nếu không có id tổ chức thì thôi
-    if(!appStore.org_id) {
+    if(!onBoardingStore.selected_data.org_id) {
       console.log('chưa có id tổ chức')
       return
     }
 
     // tạo trợ lý ảo
-    const RES = await $chatbot.createAIAgent(appStore.org_id)
+    const RES = await $chatbot.createAIAgent(onBoardingStore.selected_data.org_id)
 
     /** Nếu code !== 200 thì throw lỗi */
     if (RES?.code !== 200) {
@@ -322,14 +325,41 @@ async function getFirstAIAgent(org_id: string) {
   try {
     // lấy danh sách trợ lý ảo
     const RES = await $chatbot.getAIAgents(org_id)
-
-    console.log(RES);
-    
-
     /** ID của trợ lý ảo */
     return RES?.[0]?.fb_page_id
   } catch (error) {
     console.error(error)
+  }
+}
+
+/** cập nhật cài đặt trang */
+async function updateSettingPage(id_ai_agent: string) {
+  try {
+    // cập nhật cài đặt trang
+    await $chatbot.updateSettingPage({
+      page_id: onBoardingStore.selected_data.page_id,
+      ai_agent_id: id_ai_agent,
+    })
+
+    // bật trạng thái setup
+    onBoardingStore.is_setup.page = true
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+/** cập nhật cài đặt trợ lý ảo */
+async function updateSettingAIAgent(id_ai_agent: string) {
+  try {
+    // cập nhật cài đặt trợ lý ảo
+    await $chatbot.updateSettingAIAgent({
+      page_id: id_ai_agent,
+    })
+
+    // bật trạng thái setup
+    onBoardingStore.is_setup.ai_agent = true
+  } catch (e) {
+    console.error(e)
   }
 }
 

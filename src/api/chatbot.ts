@@ -81,40 +81,11 @@ export class ChatbotServiceAPI {
   }
 
   /** lấy partner token */
-  public async getPartnerToken(data: {
+  public async getPageInfo(data: {
     org_id: string
     list_page_id: string[]
   }) {
     return await this.#postServiceV3('app/page/get_page_info_to_chat', data)
-  }
-
-  /** lấy client id */
-  public async getClientID(data: {
-    org_id: string
-    page_id: string
-    search: string
-  }) {
-    console.log(data);
-    
-    return await this.#postServiceV3('app/conversation/read_conversation', data)
-  }
-
-  /** gửi tin nhắn */
-  public async sendMessage(data: {
-    org_id: string
-    client_id: string
-    page_id: string
-    text: string
-  }) {
-    return await this.#postPublic('embed/message/send_message', {
-      ...data,
-      // from: 'PAGE',
-    })
-  }
-
-  /** tạo 1 hội thoại mới */
-  public async createConversation(data: { page_id: string; name: string }) {
-    return await this.#postPublic('embed/conversation/init_identify', data)
   }
 
   /** lấy danh sách AI agent */

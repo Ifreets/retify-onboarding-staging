@@ -1,5 +1,5 @@
-import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
 export const useOnBoardingStore = defineStore('onboarding', () => {
   /** thông tin công ty */
@@ -10,5 +10,19 @@ export const useOnBoardingStore = defineStore('onboarding', () => {
     menu_url: '',
   })
 
-  return { business_info }
+  /** dữ liệu đã chọn */
+  const selected_data = ref({
+    org_id: '',
+    page_id: '',
+    user_id: '',
+  })
+
+  /** các cờ check đã thực hiện thao tác chưa */
+  const is_setup = ref({
+    ai_agent: false,
+    page: false,
+    product: false,
+  })
+
+  return { business_info, selected_data, is_setup }
 })

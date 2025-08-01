@@ -23,7 +23,7 @@
             <p
               class="flex-1 font-medium py-2 px-3 bg-slate-100 rounded truncate"
             >
-              {{ `https://retify.ai/c/${appStore.page_id}` }}
+              {{ `https://retify.ai/c/${onBoardingStore.selected_data.page_id}` }}
             </p>
             <button
               class="py-1.5 px-6 border border-blue-700 rounded-md font-semibold text-blue-700 bg-blue-100"
@@ -83,20 +83,19 @@
   </section>
 </template>
 <script setup lang="ts">
+import { useAppStore, useOnBoardingStore } from '@/stores'
 import { onMounted, ref } from 'vue'
-import { useAppStore } from '@/stores'
 import { useRouter } from 'vue-router'
 
 import QRCode from 'qrcode'
 
+import { $chatbot } from '@/api/chatbot'
 import GlobalIcon from '@/assets/icons/global.png'
-import QRImage from '@/assets/image/qr.png'
 import FacebookIcon from '@/components/icons/FacebookIcon.vue'
 import InstagramIcon from '@/components/icons/InstagramIcon.vue'
 import TiktokIcon from '@/components/icons/TiktokIcon.vue'
 import WebsiteIcon from '@/components/icons/WebsiteIcon.vue'
 import WhatsappIcon from '@/components/icons/WhatsappIcon.vue'
-import { $chatbot } from '@/api/chatbot'
 
 const SOCIALS = [
   {
@@ -125,6 +124,7 @@ const $emit = defineEmits(['next', 'back'])
 
 // store
 const appStore = useAppStore()
+const onBoardingStore = useOnBoardingStore()
 
 // router
 const router = useRouter()
@@ -138,7 +138,7 @@ onMounted(() => {
 
 /** copy link chat */
 async function copyLink() {
-  await navigator.clipboard.writeText(`https://retify.ai/c/${appStore.page_id}`)
+  await navigator.clipboard.writeText(`https://retify.ai/c/${onBoardingStore.selected_data.page_id}`)
 
   // báo copy thành công
   alert('Copied')
@@ -153,7 +153,7 @@ async function generateQR() {
     // tao qr code
     await QRCode.toCanvas(
       canvas_ref.value,
-      `https://retify.ai/c/${appStore.page_id}`,
+      `https://retify.ai/c/${onBoardingStore.selected_data.page_id}`,
       {
         width: 208,
       },
@@ -195,8 +195,8 @@ async function next() {
         type: 'page.home',
         message: {
           final: true,
-          page_id: appStore.page_id,
-          org_id: appStore.org_id,
+          page_id: onBoardingStore.selected_data.page_id,
+          org_id: onBoardingStore.selected_data.org_id,
         },
       }),
     )
