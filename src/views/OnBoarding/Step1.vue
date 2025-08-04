@@ -25,7 +25,15 @@
       </li>
     </ul>
     <footer class="flex justify-between font-semibold">
-      <div></div>
+      <div>
+        <button 
+          v-if="is_has_back"
+          @click="back"
+          class="py-1.5 px-10 rounded-md bg-slate-200 text-slate-700"
+        >
+          Back
+        </button>
+      </div>
       <button
         @click="next"
         class="py-1.5 px-10 rounded-md bg-blue-700 text-white disabled:bg-blue-200 disabled:text-blue-700"
@@ -83,6 +91,13 @@ const BUSINESS_TYPES = [
 
 const $emit = defineEmits(['next', 'back'])
 
+const $props = defineProps({
+  is_has_back: {
+    type: Boolean,
+    required: true,
+  },
+})
+
 // store
 const onBoardingStore = useOnBoardingStore()
 
@@ -96,5 +111,10 @@ const business_type = computed({
 /** tiến trước */
 function next() {
   $emit('next')
+}
+
+/** lùi lại */
+function back() {
+  $emit('back')
 }
 </script>

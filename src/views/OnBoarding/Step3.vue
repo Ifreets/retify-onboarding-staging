@@ -23,7 +23,9 @@
             <p
               class="flex-1 font-medium py-2 px-3 bg-slate-100 rounded truncate"
             >
-              {{ `https://retify.ai/c/${onBoardingStore.selected_data.page_id}` }}
+              {{
+                `https://retify.ai/c/${onBoardingStore.selected_data.page_id}`
+              }}
             </p>
             <button
               class="py-1.5 px-6 border border-blue-700 rounded-md font-semibold text-blue-700 bg-blue-100"
@@ -76,6 +78,12 @@
       <button
         @click="next"
         class="py-1.5 px-10 rounded-md bg-blue-700 text-white disabled:bg-blue-200 disabled:text-blue-700"
+        :disabled="
+          !onBoardingStore.is_setup.page ||
+          !onBoardingStore.is_setup.auto_assign_staff ||
+          !onBoardingStore.is_setup.product ||
+          !onBoardingStore.is_setup.ai_agent
+        "
       >
         Finish
       </button>
@@ -138,7 +146,9 @@ onMounted(() => {
 
 /** copy link chat */
 async function copyLink() {
-  await navigator.clipboard.writeText(`https://retify.ai/c/${onBoardingStore.selected_data.page_id}`)
+  await navigator.clipboard.writeText(
+    `https://retify.ai/c/${onBoardingStore.selected_data.page_id}`,
+  )
 
   // báo copy thành công
   alert('Copied')
@@ -188,7 +198,7 @@ async function next() {
 
     // Hàm cập nhật trạng thái setup
     await $chatbot.updateSetupStatus()
-    
+
     // gửi event thành công cho native
     window.ReactNativeWebView?.postMessage(
       JSON.stringify({
@@ -201,7 +211,7 @@ async function next() {
       }),
     )
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 }
 
