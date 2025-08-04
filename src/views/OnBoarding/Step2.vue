@@ -87,19 +87,26 @@
     </section>
 
     <footer class="flex justify-between font-semibold">
-      <button @click="back" class="py-1.5 px-10 rounded-md bg-slate-200 text-slate-700">
+      <button 
+        @click="back" 
+        class="py-1.5 w-28 text-center rounded-md bg-slate-200 text-slate-700"
+        :class="{ 'pointer-events-none': is_loading }"
+      >
         Back
       </button>
-      <button
+      <ButtonLoading
         @click="next"
-        class="py-1.5 px-10 rounded-md"
+        class="py-1.5 rounded-md w-28 flex justify-center items-center gap-2"
         :class="{
           'bg-blue-200 text-blue-700': !valid_to_next,
           'bg-blue-700 text-white': valid_to_next,
+          'pointer-events-none': is_loading,
         }"
+        :is_loading="is_loading"
+        :class_icon="'text-white fill-orange-500 size-5'"
       >
         Next
-      </button>
+      </ButtonLoading>
     </footer>
   </section>
 </template>
@@ -111,9 +118,12 @@ import { toRenderDomain } from '@/utils'
 import { useCreateTokenMerchant } from '@/views/OnBoarding/composable/useCreateTokenMerchant'
 import { computed, ref } from 'vue'
 
+import ButtonLoading from '@/components/ui/ButtonLoading.vue'
+
 import CameraIcon from '@/components/icons/CameraIcon.vue'
 import TrashIcon from '@/components/icons/TrashIcon.vue'
 import { XCircleIcon } from '@heroicons/vue/24/solid'
+import { get } from 'lodash'
 
 const $emit = defineEmits(['next', 'back'])
 
@@ -134,6 +144,9 @@ const business_info = computed({
 
 /** cờ check dữ liệu để hiển thị ui */
 const is_check = ref(false)
+
+/** cờ kiểm tra xem có đang loading hay không */
+const is_loading = ref(false)
 
 /** đủ điều kiện để sang bước tiếp */
 const valid_to_next = computed(() => {
@@ -161,37 +174,46 @@ function isValidURL(url: string) {
 }
 
 /** Hàm xử lý khi người dùng chọn ảnh */
-function handleImageUpload(event: Event) {
-  /** input nhập ảnh */
-  const TARGET = event.target as HTMLInputElement
-  /** lấy ra ảnh đầu tiên */
-  const FILE = TARGET.files?.[0]
-  // nếu không có ảnh thì thôi
-  if (!FILE) return
-
-  /** các loại ảnh được tải lên */
-  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-  // nếu không phải là ảnh thì không cho phép
-  if (!ALLOWED_TYPES.includes(FILE.type)) {
-    alert('Chỉ hỗ trợ ảnh JPG, PNG hoặc WEBP.')
-    return
+async function handleImageUpload(event: Event) {
+  try {
+    /** input nhập ảnh */
+    const TARGET = event.target as HTMLInputElement
+    /** lấy ra ảnh đầu tiên */
+    const FILE = TARGET.files?.[0]
+    // nếu không có ảnh thì thôi
+    if (!FILE) return
+  
+    /** các loại ảnh được tải lên */
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+    // nếu không phải là ảnh thì không cho phép
+    if (!ALLOWED_TYPES.includes(FILE.type)) {
+      alert('Chỉ hỗ trợ ảnh JPG, PNG hoặc WEBP.')
+      return
+    }
+  
+    /** Kích thước tối đa (<= 5MB) */
+    const MAX_SIZE = 5 * 1024 * 1024
+    // nếu quá 5MB thì không cho phép
+    if (FILE.size > MAX_SIZE) {
+      alert('Ảnh quá lớn. Dung lượng tối đa là 5MB.')
+      return
+    }
+  
+    /** form data để tải ảnh */
+    let form_data = new FormData()
+    // thêm ảnh vào form data
+    form_data.append('file', FILE)
+    /** dữ liệu của ảnh được tải lên merchant */
+    const RES = await $merchant.uploadFile(form_data)
+    /** Trả về link ảnh */
+		const FILE_PATH = get(RES, 'file_path')
+    // nếu không có link ảnh thì báo lỗi
+    if(!FILE_PATH) throw 'Tải hình thất bại'
+    // lưu lại link ảnh vào store
+    business_info.value.menu_url = FILE_PATH
+  } catch (e) {
+    console.log(e);
   }
-
-  /** Kích thước tối đa (<= 5MB) */
-  const MAX_SIZE = 5 * 1024 * 1024
-  // nếu quá 5MB thì không cho phép
-  if (FILE.size > MAX_SIZE) {
-    alert('Ảnh quá lớn. Dung lượng tối đa là 5MB.')
-    return
-  }
-
-  /** Bộ đọc file thành base64 */
-  const READER = new FileReader()
-  // đọc xog thì lưu lại link ảnh
-  READER.onload = () => {
-    business_info.value.menu_url = READER.result as string
-  }
-  READER.readAsDataURL(FILE)
 }
 
 /** tạo page chatbot */
@@ -217,6 +239,9 @@ function back() {
 /** tiến trước */
 async function next() {
   try {
+    // bật loading
+    is_loading.value = true
+
     // bật check
     is_check.value = true
 
@@ -228,8 +253,11 @@ async function next() {
       await createPageChatbot()
     }
 
-    // tạo token merchant
-    await createTokenMerchant()
+    // nếu đã đẩy dữ liệu thì thôi
+    if(!onBoardingStore.is_setup.product) {
+      // tạo token merchant
+      await createTokenMerchant()
+    }
 
     $emit('next')
 
@@ -239,19 +267,53 @@ async function next() {
       return
     }
 
-    // tạo danh sách sản phẩm từ ảnh
+    // nếu đã đẩy dữ liệu thì thôi
+    if(!onBoardingStore.is_setup.product) {
+      // tạo danh sách sản phẩm từ ảnh
+      createProductFromImage()
+    }
+
+    // nếu đã bật tự động assign nhân sự thì thôi
+    if(!onBoardingStore.is_setup.auto_assign_staff) {
+      // bật tự động assign nhân sự
+      autoAssignStaff()
+    }
+
+    // nếu đã cài đặt page và trợ lý ảo thì thôi
+    if(!onBoardingStore.is_setup.page && !onBoardingStore.is_setup.ai_agent) {
+      // setup trợ lý ảo và cài đặt trang bên chat bot
+      setupAIAgentAndPageChatbot()
+    }
+  } catch (error) {
+    
+  } finally {
+    // tắt loading
+    is_loading.value = false
+  }
+}
+
+/** tạo danh sách sản phẩm từ ảnh */
+async function createProductFromImage() {
+  /** có lỗi xảy ra */
+  let has_error = false;
+
+  try {
     $merchant.createProductFromImage({
       type: 'url',
       url: business_info.value.web_url || business_info.value.menu_url
     })
 
-    // bật tự động assign nhân sự
-    autoAssignStaff()
+    // sau 1s call api và không lỗi được tính là đã update sản phẩm
+    setTimeout(() => {
+      // nếu lỗi thì thôi
+      if(has_error) return
 
-    // setup trợ lý ảo bên chat bot
-    setupAIAgentChatbot()
+      // bật cờ đã setup sản phẩm
+      onBoardingStore.is_setup.product = true
+    }, 1000)
+
   } catch (error) {
-    
+    has_error = true
   }
 }
 
@@ -263,13 +325,16 @@ async function autoAssignStaff() {
 
     // call api bật tự động assign nhân sự
     await $chatbot.autoAssignStaff(onBoardingStore.selected_data.user_id)
+
+    // bật cờ đã setup nhân sự
+    onBoardingStore.is_setup.auto_assign_staff = true
   } catch (e) {
     console.log(e)
   }
 }
 
 /** setup trợ lý ảo bên chat bot */
-async function setupAIAgentChatbot(){
+async function setupAIAgentAndPageChatbot(){
   try {
     
     /** ID của trợ lý ảo */

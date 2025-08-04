@@ -22,6 +22,7 @@ export const useOnBoardingStore = defineStore('onboarding', () => {
     ai_agent: false,
     page: false,
     product: false,
+    auto_assign_staff: false,
   })
 
   return { business_info, selected_data, is_setup }

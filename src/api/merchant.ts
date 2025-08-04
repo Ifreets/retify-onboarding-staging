@@ -24,13 +24,26 @@ export class MerchantServiceAPI {
 
   /** Gửi request post đến server product merchant */
   #postProduct(url: string, data: any, headers?: object) {
-    return this.REQUEST.post(`${this.HOST.merchant_product}/${url}`, data, headers)
+    return this.REQUEST.post(
+      `${this.HOST.merchant_product}/${url}`,
+      data,
+      headers,
+    )
   }
 
   /** set chatbot token vào header */
-  public setMerchantToken() {
+  setMerchantToken() {
     this.REQUEST.setHeaders({
       'token-business': this.APP_STORE.merchant_token,
+    })
+  }
+  
+  /** tải hình ảnh lên merchant */
+  uploadFile(data: FormData) {
+    return this.#post('v1/internals/attachment/upload', data, {
+      'Content-Type': 'multipart/form-data',
+      'token-business':
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJidXNpbmVzc19pZCI6IjY0MjY1NTQ1N2MzMzlmOTE5NDI4OGRhOSIsImJyYW5jaF9pZCI6IjY0MjY1NTQ1N2MzMzlmOTE5NDI4OGRhYyIsImRlcGFydG1lbnRfaWQiOiI2NDI2NWU5YzNkOGU5MjkxMDMwZTc1ZTgiLCJlbXBsb3llZV9pZCI6IjY2MTNhZjk4ZTdjYjc4M2I5YzdiZGM0OCIsInVzZXJfaWQiOiI2NjEzYWVlOWU3Y2I3ODNiOWM3YmRiOWYiLCJwZXJtaXNzaW9uX2lkIjoiNjQyNjk2ZmExZmZhMzBjNjA5OWIxZjJlIiwieG5vZGUiOiJ0ZW5hbnRfMDIzMzc5NzkiLCJpc19vd25lcl9idXNpbmVzcyI6ZmFsc2UsImlhdCI6MTc1Mzg2NTIyOSwiZXhwIjoxNzYxNjQxMjI5fQ.u2LGKft23NR8AHmSs28gCE-BWVK-3BR1dzBY6V_0iSc',
     })
   }
 
@@ -40,10 +53,7 @@ export class MerchantServiceAPI {
   }
 
   /** tạo danh sách sản phẩm từ ảnh */
-  createProductFromImage(data: {
-    type:string,
-    url: string
-  }) {
+  createProductFromImage(data: { type: string; url: string }) {
     return this.#postProduct('product/import_data_url', data)
   }
 }
