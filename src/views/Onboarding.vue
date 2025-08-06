@@ -10,8 +10,10 @@
         @click="selectOrg(organization?.org_id)"
         class="text-base py-2 px-4 rounded-md cursor-pointer border border-transparent hover:border-blue-700"
         :class="{
-          'bg-blue-500 text-white': organization?.org_id === onBoardingStore.selected_data.org_id,
-          'bg-white hover:bg-blue-100': organization?.org_id !== onBoardingStore.selected_data.org_id,
+          'bg-blue-500 text-white':
+            organization?.org_id === onBoardingStore.selected_data.org_id,
+          'bg-white hover:bg-blue-100':
+            organization?.org_id !== onBoardingStore.selected_data.org_id,
         }"
       >
         {{ organization?.org_info?.org_name }}
@@ -72,7 +74,7 @@ onMounted(() => {
   window.addEventListener('message', handleMessage)
 
   /** lấy token chatbot */
-  // getChatbotToken(MOCK_TOKEN)
+  getChatbotToken(MOCK_TOKEN)
 
   // khởi tạo các guias
   initData()
@@ -88,6 +90,7 @@ watch(current_step, (new_val, old_val) => {
   localStorage.setItem('current_step', new_val.toString())
 })
 
+// lắng nghe những dữ liệu đã nhập để lưu vào local
 watch(
   () => onBoardingStore.selected_data,
   () => {
@@ -100,6 +103,7 @@ watch(
   { deep: true },
 )
 
+// lắng nghe những dữ liệu về doanh nghiệp đã nhập để lưu vào local
 watch(
   () => onBoardingStore.business_info,
   () => {
@@ -108,29 +112,44 @@ watch(
       'business_info',
       JSON.stringify(onBoardingStore.business_info),
     )
-
   },
   { deep: true },
 )
 
+// lắng nghe các cờ check xem đã thiết lập đến đâu để lưu vào local
 watch(
   () => onBoardingStore.is_setup,
   () => {
     // lưu dữ liệu xuống local
-    localStorage.setItem(
-      'is_setup',
-      JSON.stringify(onBoardingStore.is_setup),
-    )
+    localStorage.setItem('is_setup', JSON.stringify(onBoardingStore.is_setup))
   },
   { deep: true },
 )
 
+// lắng nghe token để lưu vào local
+watch(
+  () => appStore.merchant_token,
+  () => {
+    localStorage.setItem('merchant_token', appStore.merchant_token)
+  },
+)
+
+watch(
+  () => appStore.chatbot_token,
+  () => {
+    localStorage.setItem('chatbot_token', appStore.chatbot_token)
+  },
+)
+
 // lắng nghe link menu và link ảnh
 watch(
-  () => [onBoardingStore.business_info.menu_url, onBoardingStore.business_info.web_url],
+  () => [
+    onBoardingStore.business_info.menu_url,
+    onBoardingStore.business_info.web_url,
+  ],
   () => {
     onBoardingStore.is_setup.product = false
-  }
+  },
 )
 
 /** khởi tạo các giá trị lấy từ local */
@@ -141,7 +160,6 @@ function initData() {
   if (LOCAL_SELECTED_DATA) {
     onBoardingStore.selected_data = JSON.parse(LOCAL_SELECTED_DATA)
   }
-  
 
   /** dữ liệu của doanh nghiệp lưu ở local */
   const LOCAL_BUSINESS_INFO = localStorage.getItem('business_info')
@@ -200,15 +218,14 @@ async function getOrganizations() {
     }
 
     // nếu chưa có bước lưu ở local
-    if(current_step.value !== -1) return
+    if (current_step.value !== -1) return
 
     // nếu là nhiều tổ chức và chưa chọn tổ chức nào
-    if(IS_MUTI_ORG && !onBoardingStore.selected_data.org_id) {
+    if (IS_MUTI_ORG && !onBoardingStore.selected_data.org_id) {
       current_step.value = 0
     } else {
       current_step.value = 1
     }
-
   } catch (e) {
     console.error(e)
   }
@@ -217,7 +234,7 @@ async function getOrganizations() {
 /** chọn tổ chức */
 async function selectOrg(org_id: string) {
   // nếu khác tổ chức đang chọn thì reset lại toàn bộ data
-  if(org_id !== onBoardingStore.selected_data.org_id) {
+  if (org_id !== onBoardingStore.selected_data.org_id) {
     // reset data đã nhập
     onBoardingStore.selected_data = {
       org_id: '',
@@ -238,7 +255,7 @@ async function selectOrg(org_id: string) {
       page: false,
       product: false,
       ai_agent: false,
-      auto_assign_staff: false
+      auto_assign_staff: false,
     }
 
     // reset merchant token

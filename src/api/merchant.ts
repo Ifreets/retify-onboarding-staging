@@ -58,4 +58,5 @@ export class MerchantServiceAPI {
   }
 }
 
+/** instance api merchant */
 export const $merchant = new MerchantServiceAPI()

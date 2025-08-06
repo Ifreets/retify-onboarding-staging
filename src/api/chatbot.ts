@@ -153,4 +153,5 @@ export class ChatbotServiceAPI {
   }
 }
 
+/** instance api chatbot */
 export const $chatbot = new ChatbotServiceAPI()

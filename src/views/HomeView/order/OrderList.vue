@@ -1,32 +1,85 @@
 <template>
   <section class="overflow-auto">
-    <ul 
-      v-for="item in 5" class="flex flex-col px-2 gap-2 last-of-type:pb-0 pb-5 cursor-pointer"
+    <ul
+      v-for="(item, date) in show_order"
+      class="flex flex-col px-2 gap-2 last-of-type:pb-0 pb-5 cursor-pointer"
       @click="openOrder()"
     >
       <div class="sticky top-0 bg-white">
         <p
           class="flex justify-between text-semibold py-0.5 px-2 rounded bg-slate-100 font-semibold text-slate-700"
         >
-          <span>TODAY 18/04/2025</span>
-          <span>$216.75</span>
+          <span>{{ date }}</span>
+          <span>{{ item.total }}</span>
         </p>
       </div>
-      <OrderItem v-for="item in 2" :index="item" />
+      <OrderItem
+        v-for="order in item.list"
+        :order="order"
+      />
     </ul>
   </section>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { formatDate } from '@/services/format'
+import { computed, type PropType } from 'vue'
+import { useRouter } from 'vue-router'
 
 import OrderItem from '@/views/HomeView/order/OrderItem.vue'
 
+import type { Order } from '@/interfaces'
+
+// props
+const $props = defineProps({
+  orders: {
+    type: Array as PropType<Order[]>,
+    required: true,
+  },
+})
+
+// router
 const router = useRouter()
+
+/** danh sách đơn hàng hiển thị ra màn hình */
+const show_order = computed(() => {
+  let result: {
+    [key: string]: {
+      list: Order[]
+      total: number
+    }
+  } = {}
+
+  // lặp qua danh sách đơn hàng
+  $props.orders?.forEach((order: Order) => {
+    /** ngày hạch toán */
+    const DATE = order.created_date
+    // nếu không có ngày hạch toán thì thôi
+    if (!DATE) return
+    /** định dạng lại ngày hạch toán */
+    const FORMATED_DATE = formatDate(DATE)
+
+    // nếu đã có đơn hàng nào với ngày hiện tại thì thêm và mảng và cộng thêm tổng tiền
+    if (result[FORMATED_DATE]?.list) {
+      result[FORMATED_DATE] = {
+        list: [...result[FORMATED_DATE].list, order],
+        total: result[FORMATED_DATE].total + (order.total_money || 0),
+      }
+    } 
+    // nếu chưa có thì khởi tạo
+    else {
+      result[FORMATED_DATE] = {
+        list: [order],
+        total: order.total_money || 0,
+      }
+    }
+  })
+
+  return result
+})
 
 /** mở chi tiết đơn hàng */
 function openOrder() {
   router.push('/home/order/103429')
 }
-
 </script>

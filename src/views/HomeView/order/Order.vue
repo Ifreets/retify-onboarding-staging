@@ -6,12 +6,16 @@
       <CreateButton />
     </header>
     <section class="w-full h-full py-2 flex flex-col overflow-hidden">
-      <InputSearch placeholder="Search Orders..." />
-      <OrderList />
-      <!-- <EmptyState 
+      <InputSearch v-model="search" placeholder="Search Orders..." />
+      <OrderList
+        v-if="orders.length"
+        :orders="orders"
+      />
+      <EmptyState
+        v-else
         add_content="New Order"
         empty_content="Not Found Order"
-      /> -->
+      />
     </section>
 
     <AskRetionButton />
@@ -19,9 +23,36 @@
 </template>
 
 <script setup lang="ts">
-import AskRetionButton from '@/components/common/AskRetionButton.vue';
-import CreateButton from '@/components/common/CreateButton.vue';
-import EmptyState from '@/components/common/EmptyState.vue';
-import InputSearch from '@/components/common/InputSearch.vue';
-import OrderList from '@/views/HomeView/order/OrderList.vue';
+import { $order } from '@/api/order'
+import { onMounted, ref } from 'vue'
+
+import AskRetionButton from '@/components/common/AskRetionButton.vue'
+import CreateButton from '@/components/common/CreateButton.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
+import InputSearch from '@/components/common/InputSearch.vue'
+import OrderList from '@/views/HomeView/order/OrderList.vue'
+
+import type { Order } from '@/interfaces'
+
+/** danh sách đơn hàng */
+const orders = ref<Order[]>([])
+
+const search = ref('')
+
+onMounted(() => {
+  // call api lấy danh sách đơn hàng
+  getOrder()
+})
+
+/** Lấy danh sách đơn hàng */
+async function getOrder() {
+  try {
+    /** danh sách đơn hàng */
+    const RES = await $order.getOrder({ skip: 0, limit: 10 })
+    // lưu lại
+    orders.value = RES
+  } catch (e) {
+
+  }
+}
 </script>
