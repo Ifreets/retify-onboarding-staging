@@ -3,7 +3,6 @@
     <ul
       v-for="(item, date) in show_order"
       class="flex flex-col px-2 gap-2 last-of-type:pb-0 pb-5 cursor-pointer"
-      @click="openOrder()"
     >
       <div class="sticky top-0 bg-white">
         <p
@@ -38,9 +37,6 @@ const $props = defineProps({
   },
 })
 
-// router
-const router = useRouter()
-
 /** danh sách đơn hàng hiển thị ra màn hình */
 const show_order = computed(() => {
   let result: {
@@ -65,7 +61,7 @@ const show_order = computed(() => {
         list: [...result[FORMATED_DATE].list, order],
         total: result[FORMATED_DATE].total + (order.total_money || 0),
       }
-    } 
+    }
     // nếu chưa có thì khởi tạo
     else {
       result[FORMATED_DATE] = {
@@ -77,9 +73,4 @@ const show_order = computed(() => {
 
   return result
 })
-
-/** mở chi tiết đơn hàng */
-function openOrder() {
-  router.push('/home/order/103429')
-}
 </script>

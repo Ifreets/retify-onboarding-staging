@@ -1,5 +1,5 @@
 <template>
-  <li class="flex gap-3 py-2 border-b">
+  <li class="flex gap-3 py-2 border-b" @click="openOrder(order)">
     <img
       v-if="order.products?.[0]?.images?.[0]"
       :src="order.products?.[0]?.images?.[0]"
@@ -24,18 +24,14 @@
                 <p class="w-fit lg:max-w-20 truncate">
                   {{ action_status_obj?.[status.action || '']?.name || '' }}
                 </p>
-                <LockClosedIcon
+                <!-- <LockClosedIcon
                   v-if="order?.is_locked"
                   class="w-4 h-4"
-                />
+                /> -->
               </div>
             </div>
           </div>
         </div>
-        <!-- <p v-if="$props.index % 2" class="bg-blue-500 text-white rounded-md py-0.5 px-2">
-          New Order
-        </p>
-        <p v-else class="bg-green-500 text-white rounded-md py-0.5 px-2">Paid</p> -->
       </div>
       <p class="text-lg font-semibold">{{ order.contact_info?.first_name }}</p>
       <p class="text-lg font-semibold text-blue-700">{{ order.total_money }}</p>
@@ -44,14 +40,17 @@
 </template>
 
 <script setup lang="ts">
-import type { PropType } from 'vue'
-
-import type { Order } from '@/interfaces'
-import { format } from 'date-fns'
+import { useOrderStore } from '@/stores/order';
 import { ACTION_STATUS } from '@/utils/constant';
+import { format } from 'date-fns';
+import type { PropType } from 'vue';
+import { useRouter } from 'vue-router';
+
+import type { Order } from '@/interfaces';
 
 type ActionStatus = typeof ACTION_STATUS[number]
 
+// props
 const $props = defineProps({
   order: {
     type: Object as PropType<Order>,
@@ -59,8 +58,22 @@ const $props = defineProps({
   },
 })
 
+// store
+const orderStore = useOrderStore()
+
+// router
+const router = useRouter()
+
 // danh sách action dạng object
 const action_status_obj = convert(ACTION_STATUS);
+
+/** mở chi tiết đơn hàng */
+function openOrder(order: Order) {
+  // lưu đơn hàng được chọn vào store
+  orderStore.selected_order = order
+  // chuyển router
+  router.push('/home/order/' + order.order_id)
+}
 
 /** Lấy trạng thái cuối đang được kích hoạt */
 function getLastStatus(order: Order) {

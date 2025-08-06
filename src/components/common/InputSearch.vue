@@ -7,11 +7,15 @@
       class="py-2 px-4 pl-11 w-full bg-transparent outline-none text-black placeholder:text-slate-500"
       type="text"
       :placeholder="placeholder"
+      v-model="search"
+      @input="debounceCallApi()"
     />
   </div>
 </template>
 
 <script setup lang="ts">
+import { debounce } from 'lodash';
+
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 
 const $props = defineProps({
@@ -19,6 +23,20 @@ const $props = defineProps({
     type: String,
     default: 'Search...',
   },
+  callApiSearch: {
+    type: Function,
+    required: true
+  }
 })
+
+/** từ khóa tìm kiếm đơn hàng */
+const search = defineModel('search', {
+  required: true
+})
+
+/** hàm debounce call api */
+const debounceCallApi = debounce(() => {
+  $props.callApiSearch()
+}, 300)
 
 </script>

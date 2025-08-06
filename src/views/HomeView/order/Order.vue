@@ -6,7 +6,11 @@
       <CreateButton />
     </header>
     <section class="w-full h-full py-2 flex flex-col overflow-hidden">
-      <InputSearch v-model="search" placeholder="Search Orders..." />
+      <InputSearch
+        v-model:search="search"
+        placeholder="Search Orders..."
+        :call-api-search="getOrder"
+      />
       <OrderList
         v-if="orders.length"
         :orders="orders"
@@ -48,11 +52,13 @@ onMounted(() => {
 async function getOrder() {
   try {
     /** danh sách đơn hàng */
-    const RES = await $order.getOrder({ skip: 0, limit: 10 })
+    const RES = await $order.getOrder({
+      skip: 0,
+      limit: 10,
+      search: search.value,
+    })
     // lưu lại
     orders.value = RES
-  } catch (e) {
-
-  }
+  } catch (e) {}
 }
 </script>
