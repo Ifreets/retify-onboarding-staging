@@ -1,7 +1,7 @@
-import { format, isToday, isYesterday } from "date-fns"
+import { format, isToday, isYesterday } from 'date-fns'
 
 /** định dạng ngày */
-export function formatDate(date: Date): string{
+export function formatDate(date: Date): string {
   /** giá trị của ngày sau khi được format */
   let date_format = ''
 
@@ -19,4 +19,57 @@ export function formatDate(date: Date): string{
     return format(date, 'EEEE dd/MM/yyyy')
   }
   return `${date_format} ${format(date, 'dd/MM/yyyy')}`
+}
+
+/** hàm làm tròn giá trị */
+export function roundMoney(amount?: number) {
+  /** loại tiền tệ */
+  const CURRENCY = localStorage.getItem('currency') || 'USD'
+  // nếu là việt nam đồng thì làm tròn đến hàng đơn vị
+  if (CURRENCY === 'VND') return Math.round(amount || 0)
+  // nếu là loại tiền tệ khác
+  return amount || 0
+}
+
+
+/**
+ * Định dạng một giá trị số thành chuỗi tiền tệ theo loại tiền tệ đã chỉ định.
+ * 
+ * @param amount - Giá trị số cần định dạng thành chuỗi tiền tệ.
+ * @returns Chuỗi tiền tệ đã định dạng với các thiết lập vùng lãnh thổ thích hợp.
+ * 
+ * Hàm này sử dụng `Intl.NumberFormat` để định dạng giá trị số theo vùng lãnh thổ 
+ * tương ứng với loại tiền tệ đã chỉ định. Nó hỗ trợ các loại tiền tệ 
+ * như Đồng Việt Nam (VND), Yên Nhật (JPY), Đô la Mỹ (USD), Euro (EUR), 
+ * Bảng Anh (GBP), Nhân dân tệ (CNY) và Won Hàn Quốc (KRW).
+ * Nếu loại tiền tệ không được nhận dạng, nó sẽ mặc định là vùng lãnh thổ 'en-US'.
+ * Số lượng chữ số phần thập phân tối thiểu được đặt là 0 cho VND, JPY và KRW, và 2 cho các loại khác.
+ */
+export function formatCurrency(amount?: number): string {
+	// if (!amount) return ''
+
+	/** loại tiền tệ */
+	const CURRENCY = localStorage.getItem('currency') || 'USD'
+
+  // Map giữa currency và locale tương ứng
+  const CURRENCY_LOCALE_MAP: Record<string, string> = {
+    VND: 'vi-VN', // Việt Nam Đồng
+    JPY: 'ja-JP', // Yên Nhật
+    USD: 'en-US', // Đô la Mỹ
+    EUR: 'de-DE', // Euro (Đức)
+    GBP: 'en-GB', // Bảng Anh
+    CNY: 'zh-CN', // Nhân dân tệ (Trung Quốc)
+    KRW: 'ko-KR', // Won Hàn Quốc
+  }
+
+  // Lấy locale phù hợp, nếu không có thì mặc định 'en-US'
+  const locale = CURRENCY_LOCALE_MAP?.[CURRENCY] || 'en-US'
+
+  const RESULT = new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: CURRENCY,
+    minimumFractionDigits: ['VND', 'JPY', 'KRW'].includes(CURRENCY) ? 0 : 2,
+  }).format(amount||0)
+
+	return RESULT
 }

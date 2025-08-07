@@ -538,7 +538,6 @@ export interface ActionStatus {
   name: any
   value: string
   hiddend: boolean
-  description: string
 }
 
 /** quyền cập nhật đơn hàng */

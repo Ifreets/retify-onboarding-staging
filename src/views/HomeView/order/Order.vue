@@ -9,17 +9,22 @@
       <InputSearch
         v-model:search="search"
         placeholder="Search Orders..."
-        :call-api-search="getOrder"
+        :call-api-search="getOrders"
       />
-      <OrderList
-        v-if="orders.length"
-        :orders="orders"
-      />
-      <EmptyState
-        v-else
-        add_content="New Order"
-        empty_content="Not Found Order"
-      />
+      <SkeletonLoading v-if="loading.first" />
+      <template v-else>
+        <OrderList
+          v-if="orders.length"
+          :orders="orders"
+          :get-orders="getMoreOrder"
+        />
+        <EmptyState
+          v-else
+          add_content="New Order"
+          empty_content="Not Found Order"
+        />
+      </template>
+      <Loading :loading="loading.more"/>
     </section>
 
     <AskRetionButton />
@@ -34,31 +39,94 @@ import AskRetionButton from '@/components/common/AskRetionButton.vue'
 import CreateButton from '@/components/common/CreateButton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import InputSearch from '@/components/common/InputSearch.vue'
+import Loading from '@/components/common/Loading.vue'
+import SkeletonLoading from '@/components/common/SkeletonLoading.vue'
 import OrderList from '@/views/HomeView/order/OrderList.vue'
 
 import type { Order } from '@/interfaces'
 
+/** số bản ghi một lần lấy dữ liệu */
+const LIMIT = 10
+
 /** danh sách đơn hàng */
 const orders = ref<Order[]>([])
 
+/** từ khóa tìm kiếm */
 const search = ref('')
+
+/** số bản ghi bắt đầu lấy */
+const skip = ref(0)
+
+/** trạng thái loading của đơn hàng */
+const loading = ref({
+  first: false,
+  more: false,
+})
+
+/** cờ check xem đã load hết dữ liệu chưa */
+const is_load_full = ref(false)
 
 onMounted(() => {
   // call api lấy danh sách đơn hàng
-  getOrder()
+  getOrders()
 })
 
 /** Lấy danh sách đơn hàng */
-async function getOrder() {
+async function getOrders() {
   try {
+    // bật loading
+    loading.value.first = true
+    // clear skip
+    skip.value = 0
     /** danh sách đơn hàng */
-    const RES = await $order.getOrder({
-      skip: 0,
-      limit: 10,
-      search: search.value,
-    })
+    const RES = await getOrder()
     // lưu lại
     orders.value = RES
-  } catch (e) {}
+  } catch (e) {
+    console.log(e)
+  } finally {
+    // tắt loading
+    loading.value.first = false
+    // tắt cờ load hết dữ liệu
+    is_load_full.value = false
+  }
+}
+
+/** lấy thêm danh sách đơn hàng */
+async function getMoreOrder() {
+  try {
+    // ngeries cờ load hết dữ liệu
+    if (is_load_full.value) return
+
+    // bật loading
+    loading.value.more = true
+    // tăng skip
+    skip.value += LIMIT
+
+    /** dữ liệu danh sách đơn hàng */
+    const RES = await getOrder()
+
+    // thêm danh sách vào danh sách đơn hàng hiện tại
+    orders.value = [...orders.value, ...RES]
+
+    /** nếu ít hơn số bản ghi cần lấy => đã lấy hết */
+    if (RES.length < LIMIT) {
+      is_load_full.value = true
+    }
+  } catch (e) {
+    console.log(e)
+  } finally {
+    // tắt loading
+    loading.value.more = false
+  }
+}
+
+// call api lấy danh sách đơn hàng
+async function getOrder() {
+  return await $order.getOrder({
+    skip: skip.value,
+    limit: LIMIT,
+    search: search.value,
+  })
 }
 </script>

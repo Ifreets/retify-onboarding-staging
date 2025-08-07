@@ -31,7 +31,7 @@ export class OrderServiceAPI {
   }
 
   /** api lấy danh sách đơn hàng */
-  getOrder(data: { skip: number; limit: number, search?: string }) {
+  getOrder(data: { skip?: number; limit?: number, search?: string, order_id?: string }) {
     return this.#post('order/get_order', {
       ...data,
       sort: { created_date: 'desc' },

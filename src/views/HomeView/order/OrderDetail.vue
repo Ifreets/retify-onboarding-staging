@@ -10,10 +10,18 @@
     </header>
     <main class="w-full h-full px-2 py-3 gap-5 flex flex-col overflow-auto">
       <section class="border py-3 px-4 rounded-lg flex gap-2">
-        <CheckBadgeIcon class="size-8 text-blue-700" />
+        <CheckBadgeIcon
+          class="size-8"
+          :class="`${last_status.bg_color?.replace('bg-', 'text-')}`"
+        />
         <div class="w-full flex flex-col gap-3">
           <div class="flex justify-between items-center">
-            <p class="text-lg font-semibold text-blue-700">Confirmed</p>
+            <p
+              class="text-lg font-semibold"
+              :class="`${last_status.bg_color?.replace('bg-', 'text-')}`"
+            >
+              {{ ACTION_STATUS_OBJ?.[last_status.action || '']?.name || '' }}
+            </p>
             <p class="text-base">
               Order ID:
               <span class="font-medium text-sm"
@@ -35,12 +43,12 @@
           <div class="flex justify-between items-center">
             <p class="text-base">
               Total Items:
-              <span class="font-medium text-sm">{{
-                orderStore.selected_order?.products?.length
-              }}</span>
+              <span class="font-medium text-sm">
+                {{ orderStore.selected_order?.products?.length }}
+              </span>
             </p>
             <p class="text-xl font-semibold text-blue-700">
-              {{ orderStore.selected_order?.total_money }}
+              {{ formatCurrency(orderStore.selected_order?.total_money) }}
             </p>
           </div>
         </div>
@@ -48,7 +56,7 @@
 
       <section class="border py-3 px-4 rounded-lg flex gap-3">
         <img
-          src="@/assets/image/avatar.png"
+          :src="orderStore.selected_order?.contact_info?.avatar || ''"
           class="w-11 h-11 rounded-full"
         />
         <div class="w-full flex flex-col gap-3">
@@ -113,23 +121,57 @@
         title="Ordered Items"
         :products="orderStore.selected_order?.products || []"
       />
+
+      <section class="border py-3 px-4 rounded-lg flex gap-2">
+        <DollarSignIcon class="size-8 flex-shrink-0" />
+        <div class="flex flex-col gap-3 w-full">
+          <p class="font-semibold">Payment Summary</p>
+          <div class="h-px w-full bg-slate-200"></div>
+          <p class="flex justify-between font-medium">
+            Subtotal
+            <span class="font-semibold text-lg">
+              {{ formatCurrency(orderStore.selected_order?.price) }}
+            </span>
+          </p>
+          <p class="flex justify-between font-medium text-red-500">
+            Discount
+            <span class="font-semibold text-lg">
+              {{ formatCurrency(orderStore.selected_order?.discount) }}
+            </span>
+          </p>
+          <div class="h-px w-full bg-slate-200"></div>
+          <p class="flex justify-between font-semibold text-lg">
+            Total
+            <span class="text-xl text-blue-700">
+              {{ formatCurrency(orderStore.selected_order?.total_money) }}
+            </span>
+          </p>
+        </div>
+      </section>
     </main>
   </article>
 </template>
 
 <script setup lang="ts">
+import { $order } from '@/api/order'
+import { formatCurrency } from '@/services/format'
+import { useOrderStore } from '@/stores/order'
+import { useOrder } from '@/views/HomeView/order/composables/order'
+import { format } from 'date-fns'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import ProductList from '@/components/common/ProductList.vue'
 
+import DollarSignIcon from '@/components/icons/DollarSignIcon.vue'
 import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from '@heroicons/vue/24/outline'
 import {
   ChatBubbleOvalLeftEllipsisIcon,
   CheckBadgeIcon,
   PhoneIcon as SolidPhoneIcon,
 } from '@heroicons/vue/24/solid'
-import { useOrderStore } from '@/stores/order'
-import { format } from 'date-fns'
+
+import type { ActionStep, Order } from '@/interfaces'
 
 // store
 const orderStore = useOrderStore()
@@ -138,8 +180,64 @@ const orderStore = useOrderStore()
 const router = useRouter()
 const route = useRoute()
 
+// composable
+const { ACTION_STATUS_OBJ } = useOrder()
+
+/** trạng thái đang kích hoạt */
+const last_status = computed(() => {
+  return getLastStatus(orderStore.selected_order)
+})
+
+onMounted(() => {
+  // nếu chưa có dữ liệu id thì thôi
+  if (orderStore.selected_order.order_id) return
+  // call api lấy dữ liệu cửa đơn hàng trên url
+  getOrderOnUrl()
+})
+
+onUnmounted(() => {
+  orderStore.selected_order = {}
+})
+
+/** lấy dữ liệu cửa đơn hàng trên url */
+async function getOrderOnUrl() {
+  try {
+    // nếu không có id trên url
+    if (!route.params.id) return
+
+    // call api lấy dữ liệu cửa đơn hàng
+    const RES = await $order.getOrder({
+      order_id: route.params.id as string,
+    })
+
+    // lưu lại dữ liệu cửa đơn hàng
+    orderStore.selected_order = RES
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 /** hàm trở lại màn danh sách đơn hàng */
 function back() {
   router.push('/home/order')
+}
+
+/** Lấy trạng thái cuối đang được kích hoạt */
+function getLastStatus(order: Order) {
+  /** hành trình đơn hàng */
+  const ORDER_JOURNEY = order.order_journey || []
+  /** trạng thái cuối cùng */
+  let last_status: ActionStep = {}
+  /** lặp qua mảng hành trình đơn hàng */
+  ORDER_JOURNEY?.forEach((step, index_step) => {
+    /** lặp qua các trạng thái của từng bước */
+    step?.forEach((status, index_status) => {
+      // nếu không có trạng thái hoạt động thì thôi
+      if (!status.is_active) return
+      // lưu lại trạng thái được kích hoạt
+      last_status = status
+    })
+  })
+  return last_status
 }
 </script>

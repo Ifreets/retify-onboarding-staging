@@ -1,5 +1,8 @@
 <template>
-  <section class="overflow-auto">
+  <section
+    ref="ref_order_list"
+    class="overflow-auto"
+  >
     <ul
       v-for="(item, date) in show_order"
       class="flex flex-col px-2 gap-2 last-of-type:pb-0 pb-5 cursor-pointer"
@@ -9,7 +12,7 @@
           class="flex justify-between text-semibold py-0.5 px-2 rounded bg-slate-100 font-semibold text-slate-700"
         >
           <span>{{ date }}</span>
-          <span>{{ item.total }}</span>
+          <span>{{ formatCurrency(item.total) }}</span>
         </p>
       </div>
       <OrderItem
@@ -21,9 +24,9 @@
 </template>
 
 <script setup lang="ts">
-import { formatDate } from '@/services/format'
-import { computed, type PropType } from 'vue'
-import { useRouter } from 'vue-router'
+import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
+import { formatCurrency, formatDate, roundMoney } from '@/services/format'
+import { computed, ref, type PropType } from 'vue'
 
 import OrderItem from '@/views/HomeView/order/OrderItem.vue'
 
@@ -35,7 +38,14 @@ const $props = defineProps({
     type: Array as PropType<Order[]>,
     required: true,
   },
+  getOrders: {
+    type: Function,
+    required: true,
+  }
 })
+
+/** danh sách đơn hàng */
+const ref_order_list = ref<HTMLElement | null>(null)
 
 /** danh sách đơn hàng hiển thị ra màn hình */
 const show_order = computed(() => {
@@ -57,20 +67,29 @@ const show_order = computed(() => {
 
     // nếu đã có đơn hàng nào với ngày hiện tại thì thêm và mảng và cộng thêm tổng tiền
     if (result[FORMATED_DATE]?.list) {
+      /** tổng tiền của các đơn hàng của ngày hiện tại */
+      const TOTAL_MONEY = result[FORMATED_DATE].total + (order.total_money || 0)
       result[FORMATED_DATE] = {
         list: [...result[FORMATED_DATE].list, order],
-        total: result[FORMATED_DATE].total + (order.total_money || 0),
+        total: roundMoney(TOTAL_MONEY),
       }
     }
     // nếu chưa có thì khởi tạo
     else {
       result[FORMATED_DATE] = {
         list: [order],
-        total: order.total_money || 0,
+        total: roundMoney(order.total_money || 0),
       }
     }
   })
 
   return result
+})
+
+// composable
+useInfiniteScroll({
+  element: ref_order_list,
+  offset: 100,
+  onLoadMore: $props.getOrders,
 })
 </script>

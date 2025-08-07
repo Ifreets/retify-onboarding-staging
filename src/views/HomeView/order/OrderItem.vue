@@ -1,5 +1,8 @@
 <template>
-  <li class="flex gap-3 py-2 border-b" @click="openOrder(order)">
+  <li
+    class="flex gap-3 py-2 border-b"
+    @click="openOrder(order)"
+  >
     <img
       v-if="order.products?.[0]?.images?.[0]"
       :src="order.products?.[0]?.images?.[0]"
@@ -11,44 +14,30 @@
           #{{ order.order_id }} -
           {{ order.created_date && format(order.created_date, 'HH:mm') }}
         </p>
-        <div v-if="order?.order_journey">
-          <div v-for="(step, index) in order.order_journey">
-            <div v-if="getLastStatus(order) === index">
-              <div
-                v-for="(status, status_index) in step"
-                v-show="status.is_active"
-                :class="`${status.bg_color} ${status.text_color} rounded-md py-0.5 px-2`"
-                v-tooltip="action_status_obj?.[status.action || '']?.name || ''"
-                class="flex gap-1"
-              >
-                <p class="w-fit lg:max-w-20 truncate">
-                  {{ action_status_obj?.[status.action || '']?.name || '' }}
-                </p>
-                <!-- <LockClosedIcon
-                  v-if="order?.is_locked"
-                  class="w-4 h-4"
-                /> -->
-              </div>
-            </div>
-          </div>
+        <div
+          :class="`${last_status.bg_color} ${last_status.text_color} rounded-md py-0.5 px-2`"
+          class="flex gap-1"
+        >
+          <p class="w-fit lg:max-w-20 truncate">
+            {{ ACTION_STATUS_OBJ?.[last_status.action || '']?.name || '' }}
+          </p>
         </div>
       </div>
       <p class="text-lg font-semibold">{{ order.contact_info?.first_name }}</p>
-      <p class="text-lg font-semibold text-blue-700">{{ order.total_money }}</p>
+      <p class="text-lg font-semibold text-blue-700">{{ formatCurrency(order.total_money) }}</p>
     </div>
   </li>
 </template>
 
 <script setup lang="ts">
-import { useOrderStore } from '@/stores/order';
-import { ACTION_STATUS } from '@/utils/constant';
-import { format } from 'date-fns';
-import type { PropType } from 'vue';
-import { useRouter } from 'vue-router';
+import { formatCurrency } from '@/services/format'
+import { useOrderStore } from '@/stores/order'
+import { useOrder } from '@/views/HomeView/order/composables/order'
+import { format } from 'date-fns'
+import { computed, type PropType } from 'vue'
+import { useRouter } from 'vue-router'
 
-import type { Order } from '@/interfaces';
-
-type ActionStatus = typeof ACTION_STATUS[number]
+import type { ActionStep, Order } from '@/interfaces'
 
 // props
 const $props = defineProps({
@@ -64,8 +53,13 @@ const orderStore = useOrderStore()
 // router
 const router = useRouter()
 
-// danh sách action dạng object
-const action_status_obj = convert(ACTION_STATUS);
+// composable
+const { ACTION_STATUS_OBJ } = useOrder()
+
+/** trạng thái đang kích hoạt */
+const last_status = computed(() => {
+  return getLastStatus($props.order)
+})
 
 /** mở chi tiết đơn hàng */
 function openOrder(order: Order) {
@@ -77,28 +71,20 @@ function openOrder(order: Order) {
 
 /** Lấy trạng thái cuối đang được kích hoạt */
 function getLastStatus(order: Order) {
-  let order_journey = order.order_journey || []
-  let index = 0
-  order_journey.map((step, index_step) => {
-    step.map((status, index_status) => {
-      if (status.is_active) index = index_step
+  /** hành trình đơn hàng */
+  const ORDER_JOURNEY = order.order_journey || []
+  /** trạng thái cuối cùng */
+  let last_status: ActionStep = {}
+  /** lặp qua mảng hành trình đơn hàng */
+  ORDER_JOURNEY?.forEach((step, index_step) => {
+    /** lặp qua các trạng thái của từng bước */
+    step?.forEach((status, index_status) => {
+      // nếu không có trạng thái hoạt động thì thôi
+      if (!status.is_active) return
+      // lưu lại trạng thái được kích hoạt
+      last_status = status
     })
   })
-  return index
-}
-
-/** hàm chuyển đổi mảng action sang object */ 
-function convert(array: ActionStatus[]) {
-  /** object của action */
-  let obj: { [key: string]: ActionStatus } = {};
-
-  /** duyệt qua mảng action tạo ra 1 object với key là value của action, 
-  * giá trị là action đó */ 
-  array.forEach((item) => {
-    obj[item.value] = item;
-  });
-
-  // trả về dạng object
-  return obj;
+  return last_status
 }
 </script>
