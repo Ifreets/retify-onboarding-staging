@@ -5,5 +5,6 @@ export interface IEnv {
   chatbot_public: string
   merchant: string
   merchant_product: string
+  merchant_contact: string
   llm_no_proxy: string,
 }

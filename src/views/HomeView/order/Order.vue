@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { $order } from '@/api/order'
+import { $order } from '@/api'
 import { onMounted, ref } from 'vue'
 
 import AskRetionButton from '@/components/common/AskRetionButton.vue'

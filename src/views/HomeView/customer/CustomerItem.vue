@@ -1,12 +1,44 @@
 <template>
   <li class="flex gap-3 py-2 border-b">
-    <img src="@/assets/image/avatar.png" class="w-21 h-21" />
-    <div class="flex flex-col">
-      <p class="text-lg font-semibold">A Sophia Chen</p>
-      <p class="text-base font-medium text-slate-700">(123) 893-7122</p>
-      <p class="font-medium bg-blue-500 text-white py-0.5 px-2 w-fit rounded-md">New Lead</p>
+    <Image
+      :url="contact.avatar || ''"
+      class="w-21 h-21 rounded-full object-contain flex-shrink-0"
+    >
+      <div
+        class="w-21 h-21 flex-shrink-0 rounded-full flex items-center justify-center bg-slate-100"
+      >
+        <UserIcon class="w-14 h-14 flex-shrink-0 text-slate-700" />
+      </div>
+    </Image>
+
+    <div class="flex flex-col overflow-hidden">
+      <p class="text-lg font-semibold truncate">
+        {{ contact.first_name }} {{ contact.last_name }}
+      </p>
+      <p class="text-base font-medium text-slate-700">
+        {{ contact.contact_phones?.[0]?.phone_number }}
+      </p>
+      <!-- <p
+        class="font-medium bg-blue-500 text-white py-0.5 px-2 w-fit rounded-md"
+      >
+        New Lead
+      </p> -->
     </div>
   </li>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import type { PropType } from 'vue'
+
+import { UserIcon } from '@heroicons/vue/24/solid'
+
+import type { Contact } from '@/interfaces'
+import Image from '@/components/ui/Image.vue'
+
+const $props = defineProps({
+  contact: {
+    type: Object as PropType<Contact>,
+    required: true,
+  },
+})
+</script>

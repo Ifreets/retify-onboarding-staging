@@ -6,7 +6,7 @@
       <CreateButton />
     </header>
     <section class="w-full h-full py-2 flex flex-col overflow-hidden">
-      <InputSearch placeholder="Search Conversations..." />
+      <InputSearch placeholder="Search Conversations..." :call-api-search="() => {}"/>
       <ConversationList />
       <!-- <EmptyState
         add_content="Connect Channels"

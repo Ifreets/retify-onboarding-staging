@@ -3,11 +3,17 @@
     class="flex gap-3 py-2 border-b"
     @click="openOrder(order)"
   >
-    <img
-      v-if="order.products?.[0]?.images?.[0]"
-      :src="order.products?.[0]?.images?.[0]"
-      class="w-21 h-21 object-contain shadow border border-slate-100 rounded-xl"
-    />
+    <Image
+      :url="order.products?.[0]?.images?.[0] || ''"
+      class="w-21 h-21 object-contain shadow border border-slate-100 rounded-xl flex-shrink-0"
+    >
+      <div
+        class="w-21 h-21 object-contain shadow border border-slate-100 rounded-xl  flex-shrink-0 flex items-center justify-center bg-slate-100"
+      >
+        <CubeIcon class="w-14 h-14 flex-shrink-0 text-slate-700" />
+      </div>
+    </Image>
+
     <div class="flex flex-col w-full">
       <div class="flex justify-between font-medium">
         <p class="text-base text-slate-700">
@@ -38,6 +44,8 @@ import { computed, type PropType } from 'vue'
 import { useRouter } from 'vue-router'
 
 import type { ActionStep, Order } from '@/interfaces'
+import Image from '@/components/ui/Image.vue'
+import { CubeIcon } from '@heroicons/vue/24/solid'
 
 // props
 const $props = defineProps({

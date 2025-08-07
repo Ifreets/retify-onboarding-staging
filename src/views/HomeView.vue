@@ -10,9 +10,9 @@
 </template>
 
 <script setup lang="ts">
-import { $order } from '@/api/order'
-import { useAppStore } from '@/stores'
-import { onMounted } from 'vue'
+import { $contact, $order } from '@/api';
+import { useAppStore } from '@/stores';
+import { onMounted } from 'vue';
 
 // store
 const appStore = useAppStore()
@@ -24,6 +24,7 @@ onMounted(() => {
   if (BUSINESS_TOKEN) {
     appStore.merchant_token = BUSINESS_TOKEN
     $order.setTokenBusiness()
+    $contact.setTokenBusiness()
   }
 })
 </script>

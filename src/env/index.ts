@@ -12,6 +12,7 @@ export const ENV: {
     
     merchant: 'https://api.merchant.vn',
     merchant_product: "https://api-product.merchant.vn",
+    merchant_contact:"https://api-contact.merchant.vn"
   },
   production: {
     chatbot_billing: 'https://chatbox-billing.botbanhang.vn',
@@ -22,5 +23,6 @@ export const ENV: {
 
     merchant: 'https://api.merchant.vn',
     merchant_product: "https://api-product.merchant.vn",
+    merchant_contact:"https://api-contact.merchant.vn"
   },
 }

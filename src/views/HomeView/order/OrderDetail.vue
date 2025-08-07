@@ -153,7 +153,7 @@
 </template>
 
 <script setup lang="ts">
-import { $order } from '@/api/order'
+import { $order } from '@/api'
 import { formatCurrency } from '@/services/format'
 import { useOrderStore } from '@/stores/order'
 import { useOrder } from '@/views/HomeView/order/composables/order'

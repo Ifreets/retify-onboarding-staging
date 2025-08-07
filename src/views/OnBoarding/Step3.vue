@@ -91,13 +91,13 @@
   </section>
 </template>
 <script setup lang="ts">
+import { $chatbot } from '@/api'
 import { useAppStore, useOnBoardingStore } from '@/stores'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import QRCode from 'qrcode'
 
-import { $chatbot } from '@/api/chatbot'
 import GlobalIcon from '@/assets/icons/global.png'
 import FacebookIcon from '@/components/icons/FacebookIcon.vue'
 import InstagramIcon from '@/components/icons/InstagramIcon.vue'

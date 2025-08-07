@@ -111,8 +111,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import { $chatbot } from '@/api/chatbot'
-import { $merchant } from '@/api/merchant'
+import { $chatbot, $merchant } from '@/api'
 import { useAppStore, useOnBoardingStore } from '@/stores'
 import { toRenderDomain } from '@/utils'
 import { useCreateTokenMerchant } from '@/views/OnBoarding/composable/useCreateTokenMerchant'

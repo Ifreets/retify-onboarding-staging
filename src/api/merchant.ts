@@ -1,7 +1,8 @@
 import { Request } from '@/api/axios'
 import { ENV } from '@/env'
-import type { IEnv } from '@/interfaces'
 import { useAppStore } from '@/stores'
+
+import type { IEnv } from '@/interfaces'
 
 /** Đường dẫn host của merchant */
 const $HOST: IEnv = ENV[import.meta.env.VITE_APP_ENV || 'development']

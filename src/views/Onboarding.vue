@@ -39,7 +39,7 @@
   </main>
 </template>
 <script setup lang="ts">
-import { $chatbot } from '@/api/chatbot'
+import { $chatbot } from '@/api'
 import { useAppStore, useOnBoardingStore } from '@/stores'
 import { useCreateTokenMerchant } from '@/views/OnBoarding/composable/useCreateTokenMerchant'
 import { onMounted, onUnmounted, ref, watch } from 'vue'

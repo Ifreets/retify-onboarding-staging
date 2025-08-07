@@ -1,4 +1,4 @@
-import { LocationDetail } from "./location"
+import type { LocationDetail } from "./location"
 
 /** Lưu dữ liệu contact */
 export interface Contact {

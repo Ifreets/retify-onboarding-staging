@@ -1,5 +1,4 @@
-import { $chatbot } from '@/api/chatbot'
-import { $merchant } from '@/api/merchant'
+import { $chatbot, $merchant } from '@/api'
 import { useAppStore, useOnBoardingStore } from '@/stores'
 import { get, keys, values } from 'lodash'
 

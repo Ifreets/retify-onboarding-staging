@@ -163,7 +163,7 @@
         </div>
       </section>
 
-      <ProductList v-show="!is_edit" title="Last Orders" />
+      <ProductList v-show="!is_edit" title="Last Orders" :products="[]"/>
     </main>
   </article>
 </template>
