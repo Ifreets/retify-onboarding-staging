@@ -394,21 +394,21 @@ export interface LabelContact {
 }
 
 /** Thông tin nhãn */
-export interface Label {
-    /** Id bản ghi */
-    id?: string
-    /** Id nhãn */
-    label_id?: string
-    /** Màu nhãn */
-    bg_color?: string
-    /** Id page */
-    fb_page_id?: string
-    /** Màu chữ */
-    text_color?: string
-    /** Tên nhãn */
-    title?: string
-    /** Thời gian update */
-    updatedAt?: string
-    /** Time tạo */
-    createdAt?: string
-}
+// export interface Label {
+//     /** Id bản ghi */
+//     id?: string
+//     /** Id nhãn */
+//     label_id?: string
+//     /** Màu nhãn */
+//     bg_color?: string
+//     /** Id page */
+//     fb_page_id?: string
+//     /** Màu chữ */
+//     text_color?: string
+//     /** Tên nhãn */
+//     title?: string
+//     /** Thời gian update */
+//     updatedAt?: string
+//     /** Time tạo */
+//     createdAt?: string
+// }

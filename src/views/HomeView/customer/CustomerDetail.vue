@@ -21,7 +21,7 @@
       <button
         v-else
         class="w-18 flex items-center gap-1 py-2 justify-center rounded-xl font-medium text-white bg-blue-700"
-        @click="closeEdit"
+        @click="save"
       >
         Save
       </button>
@@ -44,7 +44,7 @@
               {{ contactStore.selected_contact.first_name }}
               {{ contactStore.selected_contact.last_name }}
             </p>
-            <p class="text-slate-700">{{ phone }}</p>
+            <p class="text-slate-700">{{ before_edit.phone }}</p>
           </div>
           <template v-if="!is_edit">
             <div class="w-full h-px bg-slate-200"></div>
@@ -84,7 +84,17 @@
                 :disabled="!is_edit"
                 type="text"
                 v-model="phone"
-                placeholder="No phone"
+                @focus="
+                  () => {
+                    if (before_edit.phone === phone) phone = ''
+                  }
+                "
+                @blur="
+                  () => {
+                    if (!phone) phone = before_edit.phone
+                  }
+                "
+                :placeholder="before_edit.phone || 'No phone'"
               />
             </div>
             <Square2StackIcon
@@ -107,7 +117,17 @@
                 :disabled="!is_edit"
                 type="text"
                 v-model="email"
-                placeholder="No email"
+                :placeholder="before_edit.email || 'No email'"
+                @focus="
+                  () => {
+                    if (before_edit.email === email) email = ''
+                  }
+                "
+                @blur="
+                  () => {
+                    if (!email) email = before_edit.email
+                  }
+                "
               />
             </div>
             <Square2StackIcon
@@ -116,7 +136,7 @@
             />
           </div>
 
-          <div class="flex gap-3 items-center">
+          <!-- <div class="flex gap-3 items-center">
             <MapPinIcon class="text-base size-5 flex-shrink-0 text-slate-500" />
             <div class="w-full flex flex-col">
               <p class="font-semibold">Address</p>
@@ -128,14 +148,20 @@
                 :disabled="!is_edit"
                 type="text"
                 v-model="address"
-                placeholder="No address"
+                :placeholder="before_edit.address || 'No address'"
+                @focus="() => {
+                  if(before_edit.address === address) address = ''
+                }"
+                @blur="() => {
+                  if(!address) address = before_edit.address
+                }"
               />
             </div>
             <Square2StackIcon
               v-if="!is_edit"
               class="size-5 flex-shrink-0 text-blue-700"
             />
-          </div>
+          </div> -->
 
           <!-- <div class="flex gap-3 items-center">
             <FacebookCircleIcon class="text-base size-5 flex-shrink-0 text-slate-500" />
@@ -180,22 +206,50 @@
           <div class="w-full h-px bg-slate-200"></div>
           <ul class="flex gap-3 flex-wrap">
             <li
-              v-for="label in contactStore.selected_contact.label_ids"
+              v-for="(label, index) in contactStore.selected_contact.label_ids"
               class="flex gap-1 items-center font-medium bg-slate-200 py-0.5 px-2 rounded-md"
             >
               {{ contactStore.labels_obj?.[label]?.title }}
               <XCircleIcon
                 v-if="is_edit"
                 class="size-4 flex-shrink-0"
+                @click="removeLabel(index)"
               />
             </li>
           </ul>
           <button
-            v-if="is_edit"
+            v-if="is_edit && !is_show_labels"
             class="py-2 px-5 text-white bg-blue-700 rounded-md w-fit font-medium"
+            @click="is_show_labels = true"
           >
             Add Label
           </button>
+          <div
+            v-if="is_edit && is_show_labels"
+            class="flex flex-col gap-2"
+          >
+            <div class="border-b pb-2 flex justify-between">
+              <p class="font-medium">Chọn nhãn</p>
+              <XMarkIcon
+                class="size-5 flex-shrink-0"
+                @click="is_show_labels = false"
+              />
+            </div>
+            <ul class="flex gap-2 flex-wrap">
+              <li
+                v-for="label in contactStore.labels_obj"
+                class="flex gap-1 items-center font-medium bg-slate-200 py-0.5 px-2 rounded-md"
+                @click="addLabel(label.label_id?.toString() || '')"
+                v-show="
+                  !contactStore.selected_contact.label_ids?.includes(
+                    label.label_id?.toString() || '',
+                  )
+                "
+              >
+                {{ label.title }}
+              </li>
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -236,9 +290,16 @@ import {
   UserCircleIcon,
   UserIcon,
   XCircleIcon,
+  XMarkIcon,
 } from '@heroicons/vue/24/solid'
 
-import type { ContactEmail, ContactPhone, Order } from '@/interfaces'
+import type {
+  Contact,
+  ContactAddress,
+  ContactEmail,
+  ContactPhone,
+  Order,
+} from '@/interfaces'
 
 // router
 const router = useRouter()
@@ -250,34 +311,33 @@ const contactStore = useContactStore()
 /** chế độ edit */
 const is_edit = ref(false)
 
+/** ẩn hiện danh sách nhãn */
+const is_show_labels = ref(false)
+
 /** đơn hàng gần nhất */
 const last_order = ref<Order>({})
 
 /** số điện thoại */
 const phone = computed({
-  get: () =>
-    get(contactStore.selected_contact, 'contact_phones[0].phone_number', '') ||
-    '',
-  set: value => {
-    set(contactStore.selected_contact, 'contact_phones[0].phone_number', value)
-  },
+  get: () => getValue(contactStore.selected_contact, 'phone_number'),
+  set: value => setValue('phone_number', value),
 })
 /** email */
 const email = computed({
-  get: () =>
-    get(contactStore.selected_contact, 'contact_emails[0].email', '') || '',
-  set: value => {
-    set(contactStore.selected_contact, 'contact_emails[0].email', value)
-  },
+  get: () => getValue(contactStore.selected_contact, 'email'),
+  set: value => setValue('email', value),
 })
 /** địa chỉ */
 const address = computed({
-  get: () =>
-    get(contactStore.selected_contact, 'contact_addresses[0].address', '') ||
-    '',
-  set: value => {
-    set(contactStore.selected_contact, 'contact_addresses[0].address', value)
-  },
+  get: () => getValue(contactStore.selected_contact, 'full_address'),
+  set: value => setValue('full_address', value),
+})
+
+/** các giá trị trước khi sửa */
+const before_edit = ref({
+  phone: phone.value,
+  email: email.value,
+  address: address.value,
 })
 
 onMounted(() => {
@@ -290,6 +350,44 @@ onMounted(() => {
   // call api lấy dữ liệu của danh bạ trên url
   getContactOnUrl()
 })
+
+/** Lấy giá trị sdt, email, địa chỉ */
+function getValue(
+  contact: Contact,
+  value_key: 'phone_number' | 'email' | 'full_address',
+) {
+  /** danh sách các giá trị */
+  const MAP = {
+    phone_number: 'contact_phones',
+    email: 'contact_emails',
+    full_address: 'contact_addresses',
+  }
+  /** mảng chứa các giá trị cần lấy */
+  const DATAS = get(contact, MAP[value_key], [])
+  // lấy ra phần tử cuối cùng
+  return get(DATAS, `[${DATAS.length - 1}][${value_key}]`, '') || ''
+}
+
+/** Gán giá trị sdt, email, địa chỉ */
+function setValue(
+  value_key: 'phone_number' | 'email' | 'full_address',
+  value: string,
+) {
+  /** danh sách các giá trị */
+  const MAP = {
+    phone_number: 'contact_phones',
+    email: 'contact_emails',
+    full_address: 'contact_addresses',
+  }
+  /** mảng chứa các giá trị */
+  const DATAS = get(contactStore.selected_contact, MAP[value_key], [])
+  // set giá trị có sản phẩm cuối cùng
+  set(
+    contactStore.selected_contact,
+    `[${MAP[value_key]}][${DATAS.length - 1}][${value_key}]`,
+    value,
+  )
+}
 
 /** Lấy dữ liệu cửa đơn hàng trên url */
 async function getContactOnUrl() {
@@ -330,6 +428,21 @@ async function getLastOrders() {
 /** bật chế độ edit */
 function openEdit() {
   is_edit.value = true
+  before_edit.value = {
+    phone: phone.value,
+    email: email.value,
+    address: address.value,
+  }
+}
+
+/** lưu thông tin */
+async function save() {
+  try {
+    await updateContactInfo()
+    closeEdit()
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 /** tắt chế độ edit */
@@ -340,12 +453,12 @@ function closeEdit() {
 /** cập nhật liên hệ */
 async function updateContactInfo() {
   try {
-    /** Convert lại dữ liệu datetime */
-    if (contactStore.selected_contact.birthday) {
-      contactStore.selected_contact.birthday = new Date(
-        contactStore.selected_contact.birthday,
-      )
-    }
+    // nếu không có id liên hệ là thì dừng lại
+    if (
+      !contactStore.selected_contact.id ||
+      !contactStore.selected_contact.identifier_id
+    )
+      return
 
     // tạo mới hoặc cập nhật các số điện thoại
     await createAndUpdatePhone(
@@ -357,15 +470,13 @@ async function updateContactInfo() {
       contactStore.selected_contact.contact_emails || [],
     )
 
-    // nếu không có id liên hệ là thì dừng lại
-    if (
-      !contactStore.selected_contact.id ||
-      !contactStore.selected_contact.identifier_id
+    // tạo mới hoặc cập nhật các địa chỉ
+    await createAndUpdateAddress(
+      contactStore.selected_contact.contact_address || [],
     )
-      return
 
     /** dữ liệu liên hệ mới được cập nhật */
-    const RES = await $contact.update({
+    await $contact.update({
       id: contactStore.selected_contact.id,
       identifier_id: contactStore.selected_contact.identifier_id,
       label_ids: contactStore.selected_contact.label_ids,
@@ -373,7 +484,13 @@ async function updateContactInfo() {
       last_name: contactStore.selected_contact.last_name,
     })
 
-    return RES
+    // call api lấy dữ liệu cửa đơn hàng
+    const RES = await $contact.getContact({
+      identifier_id: route.params.id as string,
+    })
+
+    // lưu lại dữ liệu cửa đơn hàng
+    contactStore.selected_contact = RES
   } catch (error) {
     throw error
   }
@@ -382,30 +499,72 @@ async function updateContactInfo() {
 /** tạo mới và cập nhật số điện thoại */
 async function createAndUpdatePhone(contact_phones: ContactPhone[]) {
   try {
+    //không thay đổi gì thì dừng lại
+    if (phone.value === before_edit.value.phone) return
+    // kiểm tra xem số điện thoại có hợp lệ hay không
+    if (!isValidPhone(phone.value)) {
+      throw 'Phone number is invalid'
+    }
+
     await createAndUpdateData(
       contact_phones,
       contactStore.selected_contact.identifier_id,
-      $contact.createPhone,
-      $contact.updatePhone,
+      $contact.createPhone.bind($contact),
+      $contact.updatePhone.bind($contact),
       { value_key: 'phone_number' },
     )
   } catch (error) {
-    console.log(error)
+    throw error
   }
+}
+
+/** kiểm tra xem số điện thoại có hợp lệ hay không */
+function isValidPhone(input: string) {
+  return /^\+?[0-9]\d{1,14}$/.test(input)
 }
 
 /** tạo mới và cập nhật email */
 async function createAndUpdateEmail(contact_emails: ContactEmail[]) {
   try {
+    // không thay đổi gì thì dừng lại
+    if (email.value === before_edit.value.email) return
+    // kiểm tra xem số điện thoại có hợp lệ hay không
+    if (!isValidEmail(email.value)) {
+      throw 'Email is invalid'
+    }
+
     await createAndUpdateData(
       contact_emails,
       contactStore.selected_contact.identifier_id,
-      $contact.createEmail,
-      $contact.updateEmail,
+      $contact.createEmail.bind($contact),
+      $contact.updateEmail.bind($contact),
       { value_key: 'email' },
     )
   } catch (error) {
-    console.log(error)
+    throw error
+  }
+}
+
+/** kiểm tra xem email có hợp lệ hay không */
+function isValidEmail(input: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input)
+}
+
+/** tạo mới và cập nhật điểm giao hành */
+async function createAndUpdateAddress(contact_addresses: ContactAddress[]) {
+  try {
+    // không thay đổi gì thì dừng lại
+    if (address.value === before_edit.value.address) return
+
+    await createAndUpdateData(
+      contact_addresses,
+      contactStore.selected_contact.identifier_id,
+      $contact.createAddress.bind($contact),
+      $contact.updateAddress.bind($contact),
+      { value_key: 'full_address' },
+    )
+  } catch (error) {
+    throw error
   }
 }
 
@@ -420,57 +579,55 @@ async function createAndUpdateData<T extends { id?: string }>(
   // nếu không có id contact thì dừng lại
   if (!identifier_id) return
 
-  /** mảng các promise cần gọi API */
-  const OPERATIONS: { promise: Promise<T>; index: number }[] = []
+  /** phần tử đầu tiên */
+  const ITEM = items?.[items.length - 1] as any
 
-  // Lặp qua tất cả dữ liệu
-  items?.forEach((item: any, i) => {
-    /** giá trị cần cập nhật haowjc tạo mới */
-    const VAL = item?.[fields.value_key] as string
+  /** giá trị cần cập nhật hoặc tạo mới */
+  const VAL = ITEM?.[fields.value_key] as string
 
-    // Nếu đã có id và giá trị không chứa '*', gọi update
-    if (item.id && VAL && !VAL.includes('*')) {
-      OPERATIONS.push({
-        index: i,
-        promise: updateFn({
-          identifier_id: identifier_id,
-          object_id: item.id,
-          [fields.value_key]: VAL,
-        }),
-      })
-    }
-    // Nếu chưa có id, gọi create
-    else if (!item.id && VAL) {
-      OPERATIONS.push({
-        index: i,
-        promise: createFn({
-          identifier_id: identifier_id,
-          [fields.value_key]: VAL,
-        }),
-      })
-    }
-  })
-
-  /** danh sách kết quả của các api */
-  const RES = await Promise.allSettled(OPERATIONS.map(op => op.promise))
-
-  // Cập nhật kết quả trả về cho từng item ban đầu hoặc log lỗi
-  RES.forEach((res, idx) => {
-    if (res.status === 'fulfilled') {
-      // Gán lại item gốc bằng dữ liệu trả về mới
-      items[idx] = res.value
-    } else {
-      throw res.reason
-    }
-  })
+  // Nếu đã có id và giá trị không chứa '*', gọi update
+  if (ITEM?.id) {
+    updateFn({
+      identifier_id: identifier_id,
+      object_id: ITEM.id,
+      [fields.value_key]: VAL,
+    })
+  }
+  // Nếu chưa có id, gọi create
+  else {
+    createFn({
+      identifier_id: identifier_id,
+      [fields.value_key]: VAL,
+    })
+  }
 }
 
 /** hàm trở lại danh sách khách hàng */
 function back() {
+  // nếu đang ở màn edit thì lấy lại giá trị trước khi sửa
   if (is_edit.value) {
+    // lấy lại giá trị trước khi sửa
+    phone.value = before_edit.value.phone
+    email.value = before_edit.value.email
+    address.value = before_edit.value.address
+
+    // thoát màn edit
     closeEdit()
     return
   }
   router.push('/home/customer')
+}
+
+/** hàm xóa nhãn */
+function removeLabel(index: number) {
+  contactStore.selected_contact.label_ids?.splice(index, 1)
+}
+
+/** thêm mới nhãn */
+function addLabel(label_id: string) {
+  contactStore.selected_contact.label_ids = [
+    ...(contactStore.selected_contact.label_ids || []),
+    label_id,
+  ]
 }
 </script>

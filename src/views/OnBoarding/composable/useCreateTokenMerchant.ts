@@ -50,6 +50,7 @@ export function useCreateTokenMerchant() {
       /** dữ liệu token trả về */
       const RES: any = await $merchant.createToken({
         access_token: appStore.chatbot_token,
+        page_id: onBoardingStore.selected_data.page_id,
       })
 
       // trả về token

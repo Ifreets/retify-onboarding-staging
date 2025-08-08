@@ -108,6 +108,24 @@ export class ContactServiceAPI {
     })
   }
 
+  /** thêm mới địa chỉ */
+  createAddress(data: QueryHiddenData) {
+    return this.#postV2('contact/update_contact', {
+      ...data,
+      address: '',
+      location: {},
+      action: 'ADD_ADDRESS',
+    })
+  }
+
+  /** cập nhật địa chỉ */
+  updateAddress(data: QueryHiddenData) {
+    return this.#postV2('contact/update_contact', {
+      ...data,
+      action: 'UPDATE_ADDRESS',
+    })
+  }
+
   /** lấy danh sách nhãn */
   getLabel() {
     return this.#post('label/get_label', {})
