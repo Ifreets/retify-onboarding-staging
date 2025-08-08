@@ -31,6 +31,7 @@ const router = createRouter({
         },
         {
           path: 'customer',
+          component: () => import('@/views/HomeView/customer/Container.vue'),
           children: [
             {
               path: '',

@@ -37,6 +37,15 @@ export class OrderServiceAPI {
       sort: { created_date: 'desc' },
     })
   }
+
+  /** api lấy danh sách đơn hàng bằng id contact */
+  getOrderByContact(data: { contact_id?: string }) {
+    return this.#post('order/get_order_by_contact_id', {
+      ...data,
+      limit: 1,
+      sort: { created_date: 'desc' },
+    })
+  }
 }
 
 /** instance api order */

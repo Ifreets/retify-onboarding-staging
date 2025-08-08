@@ -1,5 +1,8 @@
 <template>
-  <li class="flex gap-3 py-2 border-b">
+  <li 
+    class="flex gap-3 py-2 border-b"
+    @click="openContact(contact)"
+  >
     <Image
       :url="contact.avatar || ''"
       class="w-21 h-21 rounded-full object-contain flex-shrink-0"
@@ -29,16 +32,34 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue'
+import { useRouter } from 'vue-router';
+import { useContactStore } from '@/stores/contact';
+
+import Image from '@/components/ui/Image.vue'
 
 import { UserIcon } from '@heroicons/vue/24/solid'
 
 import type { Contact } from '@/interfaces'
-import Image from '@/components/ui/Image.vue'
 
+// props
 const $props = defineProps({
   contact: {
     type: Object as PropType<Contact>,
     required: true,
   },
 })
+
+// router
+const router = useRouter()
+
+// store
+const contactStore = useContactStore()
+
+/** mở chi tiết đơn hàng */
+function openContact(contact: Contact) {
+  // lưu đơn hàng được chọn vào store
+  contactStore.selected_contact = contact
+  // chuyển router
+  router.push('/home/customer/' + contact.identifier_id)
+}
 </script>
