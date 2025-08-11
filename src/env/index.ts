@@ -9,6 +9,7 @@ export const ENV: {
     chatbot_service_v3: 'https://chatbox-service-v3.botbanhang.vn',
     chatbot_public: 'https://chatbox-public-v2.botbanhang.vn',
     llm_no_proxy: "https://chatbox-llm.botbanhang.vn",
+    iframe_url:'https://chatbox-embed-ui.botbanhang.vn',
     
     merchant: 'https://api.merchant.vn',
     merchant_product: "https://api-product.merchant.vn",
@@ -20,6 +21,7 @@ export const ENV: {
     chatbot_service_v3: 'https://chatbox-service-v3.botbanhang.vn',
     chatbot_public: 'https://chatbox-public-v2.botbanhang.vn',
     llm_no_proxy: "https://chatbox-llm.botbanhang.vn",
+    iframe_url:'https://chatbox-embed-ui.botbanhang.vn',
 
     merchant: 'https://api.merchant.vn',
     merchant_product: "https://api-product.merchant.vn",

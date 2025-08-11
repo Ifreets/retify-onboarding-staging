@@ -72,6 +72,10 @@ const router = createRouter({
         },
       ],
     },
+    {
+      path: '/c/:id',
+      component: () => import('@/views/chat/Chat.vue'),
+    },
   ],
 })
 

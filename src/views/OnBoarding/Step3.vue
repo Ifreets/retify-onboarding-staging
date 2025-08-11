@@ -24,7 +24,7 @@
               class="flex-1 font-medium py-2 px-3 bg-slate-100 rounded truncate"
             >
               {{
-                `https://retify.ai/c/${onBoardingStore.selected_data.page_id}`
+                `${URL}/c/${onBoardingStore.selected_data.page_id}`
               }}
             </p>
             <button
@@ -128,6 +128,8 @@ const SOCIALS = [
   },
 ]
 
+const URL = 'https://retify-onboarding.vercel.app'
+
 const $emit = defineEmits(['next', 'back'])
 
 // store
@@ -147,7 +149,7 @@ onMounted(() => {
 /** copy link chat */
 async function copyLink() {
   await navigator.clipboard.writeText(
-    `https://retify.ai/c/${onBoardingStore.selected_data.page_id}`,
+    `${URL}/c/${onBoardingStore.selected_data.page_id}`,
   )
 
   // báo copy thành công
@@ -163,7 +165,7 @@ async function generateQR() {
     // tao qr code
     await QRCode.toCanvas(
       canvas_ref.value,
-      `https://retify.ai/c/${onBoardingStore.selected_data.page_id}`,
+      `${URL}/c/${onBoardingStore.selected_data.page_id}`,
       {
         width: 208,
       },

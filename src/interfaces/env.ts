@@ -7,4 +7,5 @@ export interface IEnv {
   merchant_product: string
   merchant_contact: string
   llm_no_proxy: string,
+  iframe_url: string
 }
