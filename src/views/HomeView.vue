@@ -9,14 +9,20 @@
       <RouterView />
     </div>
 
-    <div v-if="show" class="w-90dvw h-fit m-auto absolute top-0 bottom-0 right-0 left-0 overflow-hidden bg-white border shadow p-3">
+    <div
+      v-if="show"
+      class="w-90dvw h-fit m-auto absolute top-0 bottom-0 right-0 left-0 overflow-hidden bg-white border shadow p-3"
+    >
       <p class="break-all">Merchant_token: {{ appStore.merchant_token }}</p>
       <p>Page_id: {{ onBoardingStore.selected_data.page_id }}</p>
       <p>Chatbot_token: {{ appStore.chatbot_token }}</p>
       <p>Chatbot_token url: {{ show_data.chatbot_token }}</p>
     </div>
 
-    <div @click="show = !show" class="h-10 w-10 m-auto absolute bottom-0 left-0"></div>
+    <div
+      @click="show = !show"
+      class="h-10 w-10 m-auto absolute bottom-0 left-0"
+    ></div>
     <!-- <Navigation /> -->
   </main>
 </template>
@@ -34,7 +40,7 @@ const onBoardingStore = useOnBoardingStore()
 const show = ref(false)
 
 const show_data = ref({
-  chatbot_token: ''
+  chatbot_token: '',
 })
 
 onMounted(async () => {
@@ -56,6 +62,7 @@ onMounted(async () => {
   if (
     (!BUSINESS_TOKEN || PAGE_ID !== localStorage.getItem('page_id')) &&
     CHATBOX_TOKEN &&
+    CHATBOX_TOKEN !== 'null' &&
     PAGE_ID
   ) {
     try {
