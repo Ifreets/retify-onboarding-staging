@@ -13,6 +13,7 @@
       <p class="break-all">Merchant_token: {{ appStore.merchant_token }}</p>
       <p>Page_id: {{ onBoardingStore.selected_data.page_id }}</p>
       <p>Chatbot_token: {{ appStore.chatbot_token }}</p>
+      <p>Chatbot_token url: {{ show_data.chatbot_token }}</p>
     </div>
 
     <div @click="show = !show" class="h-10 w-10 m-auto absolute bottom-0 left-0"></div>
@@ -32,7 +33,9 @@ const onBoardingStore = useOnBoardingStore()
 
 const show = ref(false)
 
-const show_data = ref({})
+const show_data = ref({
+  chatbot_token: ''
+})
 
 onMounted(async () => {
   /** id của trang */
@@ -41,6 +44,8 @@ onMounted(async () => {
   const LOCALE = queryString('locale')
   /** token chatbox */
   const CHATBOX_TOKEN = queryString('access_token')
+
+  show_data.value.chatbot_token = CHATBOX_TOKEN || 'không có'
 
   /** token business lưu ở local */
   const BUSINESS_TOKEN = localStorage.getItem('merchant_token')
