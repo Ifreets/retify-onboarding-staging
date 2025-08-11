@@ -1,6 +1,6 @@
 <template>
   <main
-    class="h-dvh w-dvw flex bg-white flex-col max-w-md mx-auto text-sm pt-2"
+    class="h-dvh w-dvw flex bg-white flex-col max-w-md mx-auto text-sm pt-2 relative"
   >
     <div
       class="h-full overflow-hidden"
@@ -8,6 +8,14 @@
     >
       <RouterView />
     </div>
+
+    <div v-if="show" class="w-90dvw h-fit m-auto absolute top-0 bottom-0 right-0 left-0 overflow-hidden bg-white border shadow p-3">
+      <p class="break-all">Merchant_token: {{ appStore.merchant_token }}</p>
+      <p>Page_id: {{ onBoardingStore.selected_data.page_id }}</p>
+      <p>Chatbot_token: {{ appStore.chatbot_token }}</p>
+    </div>
+
+    <div @click="show = !show" class="h-10 w-10 m-auto absolute bottom-0 left-0"></div>
     <!-- <Navigation /> -->
   </main>
 </template>
@@ -16,11 +24,15 @@
 import { $contact, $merchant, $order } from '@/api'
 import { queryString } from '@/services/queryString'
 import { useAppStore, useOnBoardingStore } from '@/stores'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 
 // store
 const appStore = useAppStore()
 const onBoardingStore = useOnBoardingStore()
+
+const show = ref(false)
+
+const show_data = ref({})
 
 onMounted(async () => {
   /** id của trang */
