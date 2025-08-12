@@ -33,6 +33,7 @@
 
 <script setup lang="ts">
 import { $contact } from '@/api'
+import { useMessagePost } from '@/composables/useMessagePost'
 import { onMounted, ref } from 'vue'
 
 import AskRetionButton from '@/components/common/AskRetionButton.vue'
@@ -66,10 +67,20 @@ const loading = ref({
 /** cờ check xem đã load hết dữ liệu chưa */
 const is_load_full = ref(false)
 
+// composable
+useMessagePost(handlePostMessage)
+
 onMounted(() => {
   // Lấy danh sách danh bạ
   getContacts()
 })
+
+/** hàm  xử lý khi có sự kiện postmessage */
+function handlePostMessage(data: any) {
+  if (data?.type === 'page.customer') {
+    getContacts()
+  }
+}
 
 /** Lấy danh sách danh bạ */
 async function getContacts() {

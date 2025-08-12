@@ -33,6 +33,7 @@
 
 <script setup lang="ts">
 import { $order } from '@/api'
+import { useMessagePost } from '@/composables/useMessagePost'
 import { onMounted, ref } from 'vue'
 
 import AskRetionButton from '@/components/common/AskRetionButton.vue'
@@ -66,10 +67,20 @@ const loading = ref({
 /** cờ check xem đã load hết dữ liệu chưa */
 const is_load_full = ref(false)
 
+// composable
+useMessagePost(handlePostMessage)
+
 onMounted(() => {
   // call api lấy danh sách đơn hàng
   getOrders()
 })
+
+/** hàm  xử lý khi có sự kiện postmessage */
+function handlePostMessage(data: any) {
+  if (data?.type === 'page.order') {
+    getOrders()
+  }
+}
 
 /** Lấy danh sách đơn hàng */
 async function getOrders() {
