@@ -13,10 +13,13 @@
       v-if="show"
       class="w-90dvw h-fit m-auto absolute top-0 bottom-0 right-0 left-0 overflow-hidden bg-white border shadow p-3"
     >
-      <p class="break-all">Merchant_token: {{ appStore.merchant_token }}</p>
+      <p>Merchant_token: {{ appStore.merchant_token }}</p>
       <p>Page_id: {{ onBoardingStore.selected_data.page_id }}</p>
-      <p>Chatbot_token: {{ appStore.chatbot_token }}</p>
       <p>Chatbot_token url: {{ show_data.chatbot_token }}</p>
+      <div>
+        Message_data:
+        <pre>{{ show_data.message_data }}</pre>
+      </div>
     </div>
 
     <div
@@ -31,19 +34,21 @@
 import { $contact, $merchant, $order } from '@/api'
 import { queryString } from '@/services/queryString'
 import { useAppStore, useOnBoardingStore } from '@/stores'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 // store
 const appStore = useAppStore()
 const onBoardingStore = useOnBoardingStore()
 
+/** ẩn hiện dữ liệu */
 const show = ref(false)
-
+/** dữ liệu hiển thị */
 const show_data = ref({
   chatbot_token: '',
+  message_data: {},
 })
 
-onMounted(async () => {
+onMounted(() => {
   /** id của trang */
   const PAGE_ID = queryString('page_id')
   /** ngôn ngữ */
@@ -51,7 +56,30 @@ onMounted(async () => {
   /** token chatbox */
   const CHATBOX_TOKEN = queryString('access_token')
 
-  show_data.value.chatbot_token = CHATBOX_TOKEN || 'không có'
+  // xử lý tạo token merchant
+  handleCreateTokenMerchant(PAGE_ID, CHATBOX_TOKEN)
+
+  // lưu các giá trị xuống local
+  if (PAGE_ID) onBoardingStore.selected_data.page_id = PAGE_ID
+  if (CHATBOX_TOKEN) appStore.chatbot_token = CHATBOX_TOKEN
+
+  // lắng nghe post message
+  window.addEventListener('message', handlePostMessage)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('message', handlePostMessage)
+})
+
+/** hàm xử lý tạo mới token merchat với dữ liệu từ url */
+function handleCreateTokenMerchant(page_id?: string, chatbox_token?: string) {
+  /** page id bị thay đổi */
+  const IS_CHANGE_PAGE_ID = page_id !== localStorage.getItem('page_id')
+  /** không có token chatbox */
+  const NO_CHATBOX_TOKEN = !!(chatbox_token && chatbox_token !== 'null')
+
+  // lưu lại token để hiển thị
+  show_data.value.chatbot_token = chatbox_token || 'không có'
 
   /** token business lưu ở local */
   const BUSINESS_TOKEN = localStorage.getItem('merchant_token')
@@ -59,34 +87,34 @@ onMounted(async () => {
   if (BUSINESS_TOKEN) setTokenBusiness(BUSINESS_TOKEN)
 
   // nếu không có token hoặc page id không giống ở local thì tạo lại token merchant
-  if (
-    (!BUSINESS_TOKEN || PAGE_ID !== localStorage.getItem('page_id')) &&
-    CHATBOX_TOKEN &&
-    CHATBOX_TOKEN !== 'null' &&
-    PAGE_ID
-  ) {
-    try {
-      const RES: any = await $merchant.createToken({
-        access_token: CHATBOX_TOKEN,
-        page_id: PAGE_ID,
-      })
-
-      // trả về token
-      setTokenBusiness(RES?.branch?.token_business)
-    } catch (e) {
-      console.log(e)
-    }
+  if ((!BUSINESS_TOKEN || IS_CHANGE_PAGE_ID) && NO_CHATBOX_TOKEN && page_id) {
+    createToken(chatbox_token, page_id)
   }
+}
 
-  // lưu các giá trị xuống local
-  if (PAGE_ID) onBoardingStore.selected_data.page_id = PAGE_ID
-  if (CHATBOX_TOKEN) appStore.chatbot_token = CHATBOX_TOKEN
-})
+/** hàm tạo token */
+async function createToken(chatbot_token: string, page_id: string) {
+  try {
+    const RES: any = await $merchant.createToken({
+      access_token: chatbot_token,
+      page_id: page_id,
+    })
+    // trả về token
+    setTokenBusiness(RES?.branch?.token_business)
+  } catch (e) {
+    console.log(e)
+  }
+}
 
 /** hàm set token business */
 function setTokenBusiness(business_token: string) {
   appStore.merchant_token = business_token
   $order.setTokenBusiness()
   $contact.setTokenBusiness()
+}
+
+/** hàm xử lý khi có postmessage từ webview */
+function handlePostMessage(event: MessageEvent) {
+  show_data.value.message_data = event
 }
 </script>
