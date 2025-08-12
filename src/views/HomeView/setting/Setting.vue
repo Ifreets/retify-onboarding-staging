@@ -41,7 +41,9 @@
       </section>
 
       <section class="px-3 flex flex-col gap-2">
-        <p class="text-lg font-semibold sticky top-0 bg-white">Merchant Information</p>
+        <p class="text-lg font-semibold sticky top-0 bg-white">
+          Merchant Information
+        </p>
         <ul class="flex flex-col gap-4">
           <li>
             <div class="flex gap-3 items-center">
@@ -51,7 +53,9 @@
               <div class="flex-grow flex gap-6 items-center">
                 <div class="text-base flex-grow">
                   <p class="font-semibold">Business Profile</p>
-                  <p>Operating hours, contact info, legal details, Parking info</p>
+                  <p>
+                    Operating hours, contact info, legal details, Parking info
+                  </p>
                 </div>
                 <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
               </div>
@@ -66,7 +70,9 @@
               <div class="flex-grow flex gap-6 items-center">
                 <div class="text-base flex-grow">
                   <p class="font-semibold">Product Information</p>
-                  <p>Product listing information for customers and AI training</p>
+                  <p>
+                    Product listing information for customers and AI training
+                  </p>
                 </div>
                 <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
               </div>
@@ -113,7 +119,9 @@
       </section>
 
       <section class="px-3 flex flex-col gap-2">
-        <p class="text-lg font-semibold sticky top-0 bg-white">Legal & Support</p>
+        <p class="text-lg font-semibold sticky top-0 bg-white">
+          Legal & Support
+        </p>
         <ul class="flex flex-col gap-4">
           <li>
             <div class="flex gap-3 items-center">
@@ -162,12 +170,24 @@
           </li>
         </ul>
       </section>
+
+      <!-- <section class="px-3 flex flex-col gap-2">
+        <button
+          class="text-base bg-red-100 rounded-md px-3 py-2 text-red-500 font-semibold"
+          @click="handleResetOnboarding()"
+        >
+          Reset Onboarding
+        </button>
+      </section> -->
     </main>
     <p class="py-3 text-slate-500">Version 1.0.0 (Build 20240726)</p>
   </article>
 </template>
 
 <script setup lang="ts">
+import { useAppStore } from '@/stores';
+import axios from 'axios';
+
 import QrCodeIcon from '@/components/icons/QrCodeIcon.vue';
 import {
   BriefcaseIcon,
@@ -180,4 +200,33 @@ import {
   ShoppingBagIcon,
   SparklesIcon,
 } from '@heroicons/vue/24/solid';
+
+// store
+const appStore = useAppStore()
+
+async function handleResetOnboarding() {
+  try {
+    handleDisableOnboarding()
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+/** tắt cờ onboarding */
+async function handleDisableOnboarding() {
+  try {
+    await axios.post(
+      'https://chatbox-service-v3.botbanhang.vn/app/chatbot_user/update_setup_status',
+      { is_setup_completed: false },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: appStore.chatbot_token,
+        },
+      }
+    )
+  } catch (e) {
+    throw e
+  }
+}
 </script>

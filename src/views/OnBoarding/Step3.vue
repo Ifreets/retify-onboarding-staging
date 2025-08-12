@@ -212,6 +212,9 @@ async function next() {
         },
       }),
     )
+
+    // xóa hết local storage
+    localStorage.clear()
   } catch (e) {
     console.log(e)
   }

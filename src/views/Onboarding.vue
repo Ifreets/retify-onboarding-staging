@@ -23,9 +23,15 @@
       v-if="current_step > 0"
       class="bg-white h-full rounded-xl py-5 px-3 flex flex-col gap-3"
     >
-      <Tabs :current_tab="current_step" :total_tabs="3" />
+      <Tabs
+        :current_tab="current_step"
+        :total_tabs="3"
+      />
       <div class="relative h-full overflow-hidden">
-        <Transition :name="transition_name" mode="out-in">
+        <Transition
+          :name="transition_name"
+          mode="out-in"
+        >
           <component
             :is="STEPS[current_step - 1]"
             :key="current_step"
@@ -154,18 +160,36 @@ watch(
 
 /** khởi tạo các giá trị lấy từ local */
 function initData() {
-  /** dữ liệu đã chọn ở local */
-  const LOCAL_SELECTED_DATA = localStorage.getItem('selected_data')
-  // nếu có thì lưu vào store
-  if (LOCAL_SELECTED_DATA) {
-    onBoardingStore.selected_data = JSON.parse(LOCAL_SELECTED_DATA)
-  }
+  try {
+    /** dữ liệu đã chọn ở local */
+    const LOCAL_SELECTED_DATA = localStorage.getItem('selected_data')
+    // nếu có thì lưu vào store
+    if (LOCAL_SELECTED_DATA) {
+      onBoardingStore.selected_data = JSON.parse(LOCAL_SELECTED_DATA)
+    }
 
-  /** dữ liệu của doanh nghiệp lưu ở local */
-  const LOCAL_BUSINESS_INFO = localStorage.getItem('business_info')
-  // nếu có thì lưu vào store
-  if (LOCAL_BUSINESS_INFO) {
-    onBoardingStore.business_info = JSON.parse(LOCAL_BUSINESS_INFO)
+    /** dữ liệu của doanh nghiệp lưu ở local */
+    const LOCAL_BUSINESS_INFO = localStorage.getItem('business_info')
+    // nếu có thì lưu vào store
+    if (LOCAL_BUSINESS_INFO) {
+      onBoardingStore.business_info = JSON.parse(LOCAL_BUSINESS_INFO)
+    }
+
+    /** dữ liệu các cờ check ở local */
+    const LOCAL_IS_SETUP = localStorage.getItem('is_setup')
+    // nếu có thì lưu vào store
+    if (LOCAL_IS_SETUP) {
+      onBoardingStore.is_setup = JSON.parse(LOCAL_IS_SETUP)
+    }
+    
+    // nếu đã có token merchant => onboarding xog rồi onboarding lại
+    if (localStorage.getItem('merchant_token')) {
+      localStorage.clear()
+      current_step.value = -1
+      selectOrg('')
+    }
+  } catch (e) {
+    console.error(e)
   }
 }
 

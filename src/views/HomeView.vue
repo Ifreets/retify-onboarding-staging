@@ -60,8 +60,18 @@ onMounted(() => {
   handleCreateTokenMerchant(PAGE_ID, CHATBOX_TOKEN)
 
   // lưu các giá trị xuống local
-  if (PAGE_ID) onBoardingStore.selected_data.page_id = PAGE_ID
-  if (CHATBOX_TOKEN) appStore.chatbot_token = CHATBOX_TOKEN
+  if (PAGE_ID) {
+    onBoardingStore.selected_data.page_id = PAGE_ID
+    // lưu dữ liệu xuống local
+    localStorage.setItem(
+      'selected_data',
+      JSON.stringify(onBoardingStore.selected_data),
+    )
+  }
+  if (CHATBOX_TOKEN) {
+    appStore.chatbot_token = CHATBOX_TOKEN
+    localStorage.setItem('chatbot_token', appStore.chatbot_token)
+  }
 
   // lắng nghe post message
   window.addEventListener('message', handlePostMessage)
@@ -73,8 +83,17 @@ onUnmounted(() => {
 
 /** hàm xử lý tạo mới token merchat với dữ liệu từ url */
 function handleCreateTokenMerchant(page_id?: string, chatbox_token?: string) {
+  try {
+    const SELECTED_DATA = localStorage.getItem('selected_data')
+    onBoardingStore.selected_data = SELECTED_DATA
+      ? JSON.parse(SELECTED_DATA)
+      : {}
+  } catch (e) {
+    console.error(e)
+  }
+
   /** page id bị thay đổi */
-  const IS_CHANGE_PAGE_ID = page_id !== localStorage.getItem('page_id')
+  const IS_CHANGE_PAGE_ID = page_id !== onBoardingStore.selected_data.page_id
   /** không có token chatbox */
   const NO_CHATBOX_TOKEN = !!(chatbox_token && chatbox_token !== 'null')
 
@@ -111,6 +130,7 @@ function setTokenBusiness(business_token: string) {
   appStore.merchant_token = business_token
   $order.setTokenBusiness()
   $contact.setTokenBusiness()
+  localStorage.setItem('merchant_token', appStore.merchant_token)
 }
 
 /** hàm xử lý khi có postmessage từ webview */
