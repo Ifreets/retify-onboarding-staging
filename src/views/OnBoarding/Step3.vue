@@ -128,7 +128,7 @@ const SOCIALS = [
   },
 ]
 
-const URL = 'https://c.retify.ai/onboarding'
+const URL = 'https://c.retify.ai'
 
 const $emit = defineEmits(['next', 'back'])
 
