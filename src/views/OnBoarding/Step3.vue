@@ -128,7 +128,7 @@ const SOCIALS = [
   },
 ]
 
-const URL = 'https://retify-onboarding.vercel.app'
+const URL = 'https://c.retify.ai/onboarding'
 
 const $emit = defineEmits(['next', 'back'])
 
