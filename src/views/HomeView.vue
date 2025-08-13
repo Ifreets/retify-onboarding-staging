@@ -81,15 +81,13 @@ onMounted(() => {
   window.addEventListener('message', handlePostMessage)
 
   // lắng nghe sự kiện
-  // document.addEventListener('visibilitychange', () => {
-  //   console.log(document.visibilityState);
-    
-  //   if (document.visibilityState === 'visible') {
-  //     notify('WebView đang hiển thị');
-  //   } else {
-  //     notify('WebView đang background hoặc bị ẩn');
-  //   }
-  // });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      notify('WebView đang hiển thị');
+    } else {
+      notify('WebView đang background hoặc bị ẩn');
+    }
+  });
 
 })
 
