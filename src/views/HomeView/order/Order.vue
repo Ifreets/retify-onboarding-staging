@@ -67,12 +67,19 @@ const loading = ref({
 /** cờ check xem đã load hết dữ liệu chưa */
 const is_load_full = ref(false)
 
-useResumeAndPause({ onResume: getOrders })
+// composable
+useResumeAndPause({ onResume: getOrdersWithoutSearch })
 
 onMounted(() => {
   // call api lấy danh sách đơn hàng
   getOrders()
 })
+
+/** reset search và lấy danh sách khách hàng */
+function getOrdersWithoutSearch() {
+  search.value = ''
+  getOrders()
+}
 
 /** Lấy danh sách đơn hàng */
 async function getOrders() {
@@ -132,4 +139,6 @@ async function getOrder() {
     search: search.value,
   })
 }
+
+
 </script>

@@ -181,12 +181,12 @@ function initData() {
     if (LOCAL_IS_SETUP) {
       onBoardingStore.is_setup = JSON.parse(LOCAL_IS_SETUP)
     }
-    
+
     // nếu đã có token merchant => onboarding xog rồi onboarding lại
     if (localStorage.getItem('merchant_token')) {
       localStorage.clear()
+      reset()
       current_step.value = -1
-      selectOrg('')
     }
   } catch (e) {
     console.error(e)
@@ -233,6 +233,9 @@ async function getOrganizations() {
     /** lưu lại danh sách */
     organizations.value = RES as any[]
 
+    // nếu chưa có bước lưu ở local
+    if (current_step.value !== -1) return
+
     /** cờ check có nhiều tổ chức hay không */
     const IS_MUTI_ORG = organizations.value?.length > 1
 
@@ -240,9 +243,6 @@ async function getOrganizations() {
     if (!IS_MUTI_ORG) {
       selectOrg(organizations.value[0].org_id)
     }
-
-    // nếu chưa có bước lưu ở local
-    if (current_step.value !== -1) return
 
     // nếu là nhiều tổ chức và chưa chọn tổ chức nào
     if (IS_MUTI_ORG && !onBoardingStore.selected_data.org_id) {
@@ -258,8 +258,24 @@ async function getOrganizations() {
 /** chọn tổ chức */
 async function selectOrg(org_id: string) {
   // nếu khác tổ chức đang chọn thì reset lại toàn bộ data
-  if (org_id !== onBoardingStore.selected_data.org_id) {
-    // reset data đã nhập
+  if (org_id !== onBoardingStore.selected_data.org_id) reset()
+
+  // chuyển sang step 1
+  current_step.value = 1
+
+  // lưu lại id mới vào store
+  onBoardingStore.selected_data.org_id = org_id
+
+  // lấy page retify
+  await getPageRetify()
+
+  // tạo token merchant
+  createTokenMerchant()
+}
+
+/** reset data */
+function reset() {
+  // reset data đã nhập
     onBoardingStore.selected_data = {
       org_id: '',
       page_id: '',
@@ -284,19 +300,6 @@ async function selectOrg(org_id: string) {
 
     // reset merchant token
     appStore.merchant_token = ''
-  }
-
-  // chuyển sang step 1
-  current_step.value = 1
-
-  // lưu lại id mới vào store
-  onBoardingStore.selected_data.org_id = org_id
-
-  // lấy page retify
-  await getPageRetify()
-
-  // tạo token merchant
-  createTokenMerchant()
 }
 
 /** tạo page chatbot của retify */

@@ -82,10 +82,7 @@ export class ChatbotServiceAPI {
   }
 
   /** lấy partner token */
-  public async getPageInfo(data: {
-    org_id: string
-    list_page_id: string[]
-  }) {
+  public async getPageInfo(data: { org_id: string; list_page_id: string[] }) {
     return await this.#postServiceV3('app/page/get_page_info_to_chat', data)
   }
 
@@ -122,8 +119,41 @@ export class ChatbotServiceAPI {
           time: 0,
         },
       },
+      ai_agent_no_result: {
+        type: 'FIXED_MESSAGE',
+        source: {
+          vi: 'Câu hỏi này không nằm trong sự hiểu biết của mình. Bạn vui lòng chờ mình chuyển đến bộ phận liên quan nhé.',
+          en: 'This question is not within my understanding. Please wait for me to transfer it to the relevant department.',
+        },
+      },
       page_language: 'en',
       default_language: 'en',
+      form_before_chat: {
+        is_active: true,
+        data: [
+          {
+            field: 'NAME',
+            title: 'Your name',
+            placeholder: 'Enter your name',
+            is_require: true,
+            is_active: true,
+          },
+          {
+            field: 'PHONE',
+            title: 'Your phone number',
+            placeholder: 'Enter your phone number',
+            is_require: true,
+            is_active: true,
+          },
+          {
+            field: 'EMAIL',
+            title: 'Your email',
+            placeholder: 'Enter your email',
+            is_require: false,
+            is_active: true,
+          },
+        ],
+      },
     })
   }
 
@@ -133,7 +163,7 @@ export class ChatbotServiceAPI {
       ...data,
       ai_agent_use_external_knowledge: { is_active: true },
       ai_agent_typing_wait: 1,
-      ai_agent_custom_prompt: `Nếu nội dung câu hỏi mang ý nghĩa đặt lịch hẹn, kiểm tra lịch hẹn, chỉ trả lời "@retion-shedule", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xừ lý\nNếu nội dung câu hỏi mang ý nghĩa đặt hàng, mua hàng, chỉ trả lời "@retion-order", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu nội dung câu hỏi mang ý nghĩa hỏi sản phẩm, kiểm tra sản phẩm, kiểm tra món ăn, quần áo, chỉ trả lời "@retion-product", không thêm bất cứ nội dung gì khác, để hệ thống của tôi tự xử lý\nNếu khách hàng hỏi hoặc nói bằng tiếng anh thì tư vấn và trả lời lại bằng tiếng anh.`,
+      ai_agent_custom_prompt: `If the question’s content implies making an appointment or checking an appointment, reply with \"@retion-shedule\" only, without adding anything else, so my system can process it automatically.\nIf the question’s content implies placing an order or purchasing, reply with \"@retion-order\" only, without adding anything else, so my system can process it automatically.\nIf the question’s content implies asking about a product, checking a product, checking food, or clothing, reply with \"@retion-product\" only, without adding anything else, so my system can process it automatically.`,
       ai_agent_is_custom_prompt: true,
     })
   }

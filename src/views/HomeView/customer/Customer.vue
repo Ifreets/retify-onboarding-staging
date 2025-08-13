@@ -68,12 +68,18 @@ const loading = ref({
 const is_load_full = ref(false)
 
 // composable
-useResumeAndPause({ onResume: getContacts })
+useResumeAndPause({ onResume: getContactsWithoutSearch })
 
 onMounted(() => {
   // Lấy danh sách danh bạ
   getContacts()
 })
+
+/** reset search và lấy danh sách khách hàng */
+function getContactsWithoutSearch() {
+  search.value = ''
+  getContacts()
+}
 
 /** Lấy danh sách danh bạ */
 async function getContacts() {
@@ -125,7 +131,7 @@ async function getMoreContact() {
   }
 }
 
-// call api lấy danh sách đơn hàng
+/** call api lấy danh sách đơn hàng */
 async function getContact() {
   return await $contact.getContact({
     skip: skip.value,
@@ -133,5 +139,4 @@ async function getContact() {
     search: search.value,
   })
 }
-
 </script>
