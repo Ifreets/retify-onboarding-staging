@@ -240,6 +240,6 @@ async function handleDisableOnboarding() {
 
 /** hàm đăng xuất */
 function logout() {
-  window.ReactNativeWebView?.postMessage("{ type: 'page.logout', payload: {} }")
+  window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'page.logout', payload: {} }))
 }
 </script>
