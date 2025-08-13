@@ -46,6 +46,11 @@ export class OrderServiceAPI {
       sort: { created_date: 'desc' },
     })
   }
+
+  /** danh sách sản phẩm */
+  getProducts(data: { skip?: number; limit?: number }){
+    return this.#post('product/get_product', data)
+  }
 }
 
 /** instance api order */

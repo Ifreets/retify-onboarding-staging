@@ -8,8 +8,14 @@ export const useAppStore = defineStore('app', () => {
   /** token merchant */
   const merchant_token = ref('')
 
+  /** dữ liệu merchant */
+  const merchant_data = ref({
+    employee_id: '',
+    branch_id: '',
+  })
   return {
     chatbot_token,
     merchant_token,
+    merchant_data,
   }
 })

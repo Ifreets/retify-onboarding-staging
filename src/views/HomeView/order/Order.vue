@@ -24,7 +24,7 @@
           empty_content="Not Found Order"
         />
       </template>
-      <Loading :loading="loading.more"/>
+      <Loading :loading="loading.more" />
     </section>
 
     <AskRetionButton />
@@ -34,7 +34,9 @@
 <script setup lang="ts">
 import { $order } from '@/api'
 import { useResumeAndPause } from '@/composables/useResumeAndPause'
-import { onMounted, ref } from 'vue'
+import { useSocket } from '@/composables/useSocket'
+import { useAppStore } from '@/stores'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 import AskRetionButton from '@/components/common/AskRetionButton.vue'
 import CreateButton from '@/components/common/CreateButton.vue'
@@ -45,6 +47,9 @@ import SkeletonLoading from '@/components/common/SkeletonLoading.vue'
 import OrderList from '@/views/HomeView/order/OrderList.vue'
 
 import type { Order } from '@/interfaces'
+
+// store
+const appStore = useAppStore()
 
 /** số bản ghi một lần lấy dữ liệu */
 const LIMIT = 10
@@ -68,17 +73,36 @@ const loading = ref({
 const is_load_full = ref(false)
 
 // composable
-useResumeAndPause({ onResume: getOrdersWithoutSearch })
+const { initSocket, closeSocket } = useSocket()
+useResumeAndPause({ onResume: getOrdersWithoutSearch, onPaused: closeSocket })
+
 
 onMounted(() => {
   // call api lấy danh sách đơn hàng
   getOrders()
+
+  initSocket(
+    appStore.merchant_data.employee_id,
+    appStore.merchant_data.branch_id,
+    handleSocket,
+  )
+})
+
+onUnmounted(() => {
+  closeSocket()
 })
 
 /** reset search và lấy danh sách khách hàng */
 function getOrdersWithoutSearch() {
   search.value = ''
+
   getOrders()
+
+  initSocket(
+    appStore.merchant_data.employee_id,
+    appStore.merchant_data.branch_id,
+    handleSocket,
+  )
 }
 
 /** Lấy danh sách đơn hàng */
@@ -131,7 +155,7 @@ async function getMoreOrder() {
   }
 }
 
-// call api lấy danh sách đơn hàng
+/** call api lấy danh sách đơn hàng */
 async function getOrder() {
   return await $order.getOrder({
     skip: skip.value,
@@ -140,5 +164,10 @@ async function getOrder() {
   })
 }
 
-
+/** hàm xử lý socket */
+function handleSocket(data: any) {
+  if(data.event === 'new_order') {
+    orders.value = [data.data, ...orders.value]
+  }
+}
 </script>

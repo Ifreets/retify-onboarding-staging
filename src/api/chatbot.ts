@@ -119,13 +119,6 @@ export class ChatbotServiceAPI {
           time: 0,
         },
       },
-      ai_agent_no_result: {
-        type: 'FIXED_MESSAGE',
-        source: {
-          vi: 'Câu hỏi này không nằm trong sự hiểu biết của mình. Bạn vui lòng chờ mình chuyển đến bộ phận liên quan nhé.',
-          en: 'This question is not within my understanding. Please wait for me to transfer it to the relevant department.',
-        },
-      },
       page_language: 'en',
       default_language: 'en',
       form_before_chat: {
@@ -165,6 +158,13 @@ export class ChatbotServiceAPI {
       ai_agent_typing_wait: 1,
       ai_agent_custom_prompt: `If the question’s content implies making an appointment or checking an appointment, reply with \"@retion-shedule\" only, without adding anything else, so my system can process it automatically.\nIf the question’s content implies placing an order or purchasing, reply with \"@retion-order\" only, without adding anything else, so my system can process it automatically.\nIf the question’s content implies asking about a product, checking a product, checking food, or clothing, reply with \"@retion-product\" only, without adding anything else, so my system can process it automatically.`,
       ai_agent_is_custom_prompt: true,
+      ai_agent_no_result: {
+        type: 'FIXED_MESSAGE',
+        source: {
+          vi: 'Câu hỏi này không nằm trong sự hiểu biết của mình. Bạn vui lòng chờ mình chuyển đến bộ phận liên quan nhé.',
+          en: 'This question is not within my understanding. Please wait for me to transfer it to the relevant department.',
+        },
+      },
     })
   }
 

@@ -9,6 +9,10 @@
       <RouterView />
     </div>
 
+    <section v-if="is_ai_working" class="absolute bottom-0 left-0 mx-2 mb-3">
+      <AIWorking />
+    </section>
+
     <div
       v-if="show"
       class="w-90dvw h-fit m-auto absolute top-0 bottom-0 right-0 left-0 overflow-hidden bg-white border shadow p-3"
@@ -36,6 +40,8 @@ import { queryString } from '@/services/queryString'
 import { useAppStore, useOnBoardingStore } from '@/stores'
 import { onMounted, onUnmounted, ref } from 'vue'
 
+import AIWorking from '@/components/common/AIWorking.vue'
+
 // store
 const appStore = useAppStore()
 const onBoardingStore = useOnBoardingStore()
@@ -47,6 +53,11 @@ const show_data = ref({
   chatbot_token: '',
   message_data: {},
 })
+/** ai đang detect sản phẩm */
+const is_ai_working = ref(false)
+
+// interval
+let interval:any
 
 onMounted(() => {
   /** id của trang */
@@ -79,6 +90,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('message', handlePostMessage)
+  clearInterval(interval)
 })
 
 /** hàm xử lý tạo mới token merchat với dữ liệu từ url */
@@ -101,12 +113,12 @@ function handleCreateTokenMerchant(page_id?: string, chatbox_token?: string) {
   show_data.value.chatbot_token = chatbox_token || 'không có'
 
   /** token business lưu ở local */
-  const BUSINESS_TOKEN = localStorage.getItem('merchant_token')
+  // const BUSINESS_TOKEN = localStorage.getItem('merchant_token')
   // nếu có thì lưu vào store và set token vào service api order
-  if (BUSINESS_TOKEN) setTokenBusiness(BUSINESS_TOKEN)
+  // if (BUSINESS_TOKEN) setTokenBusiness(BUSINESS_TOKEN)
 
   // nếu không có token hoặc page id không giống ở local thì tạo lại token merchant
-  if ((!BUSINESS_TOKEN || IS_CHANGE_PAGE_ID) && NO_CHATBOX_TOKEN && page_id) {
+  if (NO_CHATBOX_TOKEN && page_id) {
     createToken(chatbox_token, page_id)
   }
 }
@@ -118,8 +130,20 @@ async function createToken(chatbot_token: string, page_id: string) {
       access_token: chatbot_token,
       page_id: page_id,
     })
+
+    // lưu lại dữ liệu data
+    appStore.merchant_data = {
+      branch_id: RES?.branch?.branch_id,
+      employee_id: RES?.branch?.employee_id,
+    }
     // trả về token
     setTokenBusiness(RES?.branch?.token_business)
+
+    checkAIWorking()
+    // 10s check xem AI đã chạy xong chưa
+    interval = setInterval(() => {
+      checkAIWorking()
+    }, 3000)
   } catch (e) {
     console.log(e)
   }
@@ -136,5 +160,21 @@ function setTokenBusiness(business_token: string) {
 /** hàm xử lý khi có postmessage từ webview */
 function handlePostMessage(event: MessageEvent) {
   show_data.value.message_data = event
+}
+
+/** hàm kiểm tra xem ai có đã xử lý xong chưa */
+async function checkAIWorking() {
+  try {
+    /** danh sách sản phẩm */
+    const RES = await $order.getProducts({ skip: 0, limit: 1 })
+    // nếu có sản phẩm thì tắt cờ check
+    if (RES?.length) {
+      is_ai_working.value = false
+      clearInterval(interval)
+    }
+    else is_ai_working.value = true
+  } catch (e) {
+    console.log(e)
+  }
 }
 </script>

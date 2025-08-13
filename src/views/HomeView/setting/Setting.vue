@@ -179,16 +179,24 @@
           Reset Onboarding
         </button>
       </section> -->
+      <section class="px-3 flex flex-col gap-2">
+        <button
+          class="text-base bg-red-100 rounded-md px-3 py-2 text-red-500 font-semibold"
+          @click="logout()"
+        >
+          Logout
+        </button>
+      </section>
+      <p class="w-full text-center py-3 text-slate-500">Version 1.0.0 (Build 20240726)</p>
     </main>
-    <p class="py-3 text-slate-500">Version 1.0.0 (Build 20240726)</p>
   </article>
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '@/stores';
-import axios from 'axios';
+import { useAppStore } from '@/stores'
+import axios from 'axios'
 
-import QrCodeIcon from '@/components/icons/QrCodeIcon.vue';
+import QrCodeIcon from '@/components/icons/QrCodeIcon.vue'
 import {
   BriefcaseIcon,
   ChatBubbleLeftRightIcon,
@@ -199,7 +207,7 @@ import {
   LockClosedIcon,
   ShoppingBagIcon,
   SparklesIcon,
-} from '@heroicons/vue/24/solid';
+} from '@heroicons/vue/24/solid'
 
 // store
 const appStore = useAppStore()
@@ -223,10 +231,15 @@ async function handleDisableOnboarding() {
           'Content-Type': 'application/json',
           Authorization: appStore.chatbot_token,
         },
-      }
+      },
     )
   } catch (e) {
     throw e
   }
+}
+
+/** hàm đăng xuất */
+function logout() {
+  window.ReactNativeWebView?.postMessage("{ type: 'page.logout', payload: {} }")
 }
 </script>
