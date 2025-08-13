@@ -32,6 +32,7 @@
 
 <script setup lang="ts">
 import { $contact, $merchant, $order } from '@/api'
+import { useToast } from '@/composables/useToast';
 import { queryString } from '@/services/queryString'
 import { useAppStore, useOnBoardingStore } from '@/stores'
 import { onMounted, onUnmounted, ref } from 'vue'
@@ -47,6 +48,9 @@ const show_data = ref({
   chatbot_token: '',
   message_data: {},
 })
+
+// composable
+const { notify } = useToast()
 
 onMounted(() => {
   /** id của trang */
@@ -75,6 +79,18 @@ onMounted(() => {
 
   // lắng nghe post message
   window.addEventListener('message', handlePostMessage)
+
+  // lắng nghe sự kiện
+  document.addEventListener('visibilitychange', () => {
+    console.log(document.visibilityState);
+    
+    if (document.visibilityState === 'visible') {
+      notify('WebView đang hiển thị');
+    } else {
+      notify('WebView đang background hoặc bị ẩn');
+    }
+  });
+
 })
 
 onUnmounted(() => {
