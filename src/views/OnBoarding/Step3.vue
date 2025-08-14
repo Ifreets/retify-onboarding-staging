@@ -13,36 +13,9 @@
       </p>
     </header>
     <main class="flex flex-col gap-3 flex-grow">
-      <section class="flex flex-col gap-3 p-3 border rounded-lg">
-        <div class="flex gap-2 items-center">
-          <img :src="GlobalIcon" class="size-7" />
-          <p class="text-base font-semibold">Link connect your Audience</p>
-        </div>
-        <div class="flex flex-col items-center">
-          <div class="flex gap-1 w-full">
-            <p
-              class="flex-1 font-medium py-2 px-3 bg-slate-100 rounded truncate"
-            >
-              {{
-                `${URL}/c/${onBoardingStore.selected_data.page_id}`
-              }}
-            </p>
-            <button
-              class="py-1.5 px-6 border border-blue-700 rounded-md font-semibold text-blue-700 bg-blue-100"
-              @click="copyLink()"
-            >
-              Copy
-            </button>
-          </div>
-          <canvas class="w-52 h-52" ref="canvas_ref"></canvas>
-          <button
-            class="py-1.5 px-12 border border-blue-700 rounded-md font-semibold text-blue-700 bg-blue-100"
-            @click="downloadQR"
-          >
-            Save QR Code
-          </button>
-        </div>
-      </section>
+      <LinkAndQRCode 
+        :page_id="onBoardingStore.selected_data.page_id"
+      />
     </main>
 
     <!-- <section class="flex gap-2 items-center">
@@ -92,13 +65,10 @@
 </template>
 <script setup lang="ts">
 import { $chatbot } from '@/api'
-import { useAppStore, useOnBoardingStore } from '@/stores'
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useOnBoardingStore } from '@/stores'
 
-import QRCode from 'qrcode'
+import LinkAndQRCode from '@/components/common/LinkAndQRCode.vue'
 
-import GlobalIcon from '@/assets/icons/global.png'
 import FacebookIcon from '@/components/icons/FacebookIcon.vue'
 import InstagramIcon from '@/components/icons/InstagramIcon.vue'
 import TiktokIcon from '@/components/icons/TiktokIcon.vue'
@@ -133,71 +103,11 @@ const URL = 'https://c.retify.ai'
 const $emit = defineEmits(['next', 'back'])
 
 // store
-const appStore = useAppStore()
 const onBoardingStore = useOnBoardingStore()
-
-// router
-const router = useRouter()
-
-/** ref tới phần tử hiển thị qr code */
-const canvas_ref = ref<HTMLCanvasElement | null>(null)
-
-onMounted(() => {
-  generateQR()
-})
-
-/** copy link chat */
-async function copyLink() {
-  await navigator.clipboard.writeText(
-    `${URL}/c/${onBoardingStore.selected_data.page_id}`,
-  )
-
-  // báo copy thành công
-  alert('Copied')
-}
-
-/** tạo qr code */
-async function generateQR() {
-  try {
-    // nếu không có phần tử canvas thì thôi
-    if (!canvas_ref.value) return
-
-    // tao qr code
-    await QRCode.toCanvas(
-      canvas_ref.value,
-      `${URL}/c/${onBoardingStore.selected_data.page_id}`,
-      {
-        width: 208,
-      },
-    )
-  } catch (e) {
-    console.error(e)
-  }
-}
-
-/** tải xuong qr code */
-function downloadQR() {
-  // nếu không có phần tử canvas thì thôi
-  if (!canvas_ref.value) return
-
-  /** link download */
-  const DATA_URL = canvas_ref.value.toDataURL('image/png')
-
-  /** tạo 1 thẻ a */
-  const LINK = document.createElement('a')
-  // gán cá thuộc tính cho thẻ đó
-  LINK.href = DATA_URL
-  LINK.download = 'qr-code.png'
-  // click để tải xuống
-  LINK.click()
-}
 
 /** tiến trước */
 async function next() {
   try {
-    // $emit('next')
-    // router.push('/home')
-
     // Hàm cập nhật trạng thái setup
     await $chatbot.updateSetupStatus()
 

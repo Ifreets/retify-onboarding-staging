@@ -1,245 +1,138 @@
 <template>
   <article class="h-full flex flex-col items-center justify-center relative">
-    <header class="flex justify-center w-full px-2 border-b">
-      <h3 class="text-2xl font-semibold pb-2">Settings</h3>
+    <header class="flex justify-between items-center w-full px-2 border-b pb-2">
+      <div class="min-w-14">
+        <button
+          v-if="view !== 'home'"
+          @click="view = 'home'"
+          class="flex gap-2 items-center font-medium"
+        >
+          <ArrowLeftIcon class="size-5" />
+          Back
+        </button>
+      </div>
+      <h3 class="text-2xl font-semibold">{{ VIEWS[view]?.title || 'Settings' }}</h3>
+      <div class="w-14"></div>
     </header>
-    <main class="w-full h-full my-3 gap-4 flex flex-col overflow-auto">
-      <section class="px-3 flex flex-col gap-2">
-        <p class="text-lg font-semibold sticky top-0 bg-white">Integrations</p>
-        <ul class="flex flex-col gap-4">
-          <li>
-            <div class="flex gap-3 items-center">
-              <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
-                <ShoppingBagIcon class="size-5 text-blue-700" />
-              </div>
-              <div class="flex-grow flex gap-6 items-center">
-                <div class="text-base flex-grow">
-                  <p class="font-semibold">POS System</p>
-                  <p>Connect with Clover, Square, and more</p>
-                </div>
-                <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
-              </div>
-            </div>
-            <div class="ml-12 border-b h-4 border-slate-200"></div>
-          </li>
-          <li>
-            <div class="flex gap-3 items-center">
-              <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
-                <ChatBubbleLeftRightIcon class="size-5 text-blue-700" />
-              </div>
-              <div class="flex-grow flex gap-6 items-center">
-                <div class="text-base flex-grow">
-                  <p class="font-semibold">Messaging Platforms</p>
-                  <p>Connect with Clover, Square, and more</p>
-                </div>
-                <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
-              </div>
-            </div>
-            <div class="ml-12 border-b h-4 border-slate-200"></div>
-          </li>
-        </ul>
-      </section>
-
-      <section class="px-3 flex flex-col gap-2">
-        <p class="text-lg font-semibold sticky top-0 bg-white">
-          Merchant Information
-        </p>
-        <ul class="flex flex-col gap-4">
-          <li>
-            <div class="flex gap-3 items-center">
-              <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
-                <BriefcaseIcon class="size-5 text-blue-700" />
-              </div>
-              <div class="flex-grow flex gap-6 items-center">
-                <div class="text-base flex-grow">
-                  <p class="font-semibold">Business Profile</p>
-                  <p>
-                    Operating hours, contact info, legal details, Parking info
-                  </p>
-                </div>
-                <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
-              </div>
-            </div>
-            <div class="ml-12 border-b h-4 border-slate-200"></div>
-          </li>
-          <li>
-            <div class="flex gap-3 items-center">
-              <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
-                <CubeIcon class="size-5 text-blue-700" />
-              </div>
-              <div class="flex-grow flex gap-6 items-center">
-                <div class="text-base flex-grow">
-                  <p class="font-semibold">Product Information</p>
-                  <p>
-                    Product listing information for customers and AI training
-                  </p>
-                </div>
-                <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
-              </div>
-            </div>
-            <div class="ml-12 border-b h-4 border-slate-200"></div>
-          </li>
-        </ul>
-      </section>
-
-      <section class="px-3 flex flex-col gap-2">
-        <p class="text-lg font-semibold sticky top-0 bg-white">AI & QR Code</p>
-        <ul class="flex flex-col gap-4">
-          <li>
-            <div class="flex gap-3 items-center">
-              <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
-                <SparklesIcon class="size-5 text-blue-700" />
-              </div>
-              <div class="flex-grow flex gap-6 items-center">
-                <div class="text-base flex-grow">
-                  <p class="font-semibold">AI Agent</p>
-                  <p>Setting AI Agento</p>
-                </div>
-                <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
-              </div>
-            </div>
-            <div class="ml-12 border-b h-4 border-slate-200"></div>
-          </li>
-          <li>
-            <div class="flex gap-3 items-center">
-              <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
-                <QrCodeIcon class="size-5 text-blue-700" />
-              </div>
-              <div class="flex-grow flex gap-6 items-center">
-                <div class="text-base flex-grow">
-                  <p class="font-semibold">QR Code</p>
-                  <p>Download QR for AI customer chat</p>
-                </div>
-                <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
-              </div>
-            </div>
-            <div class="ml-12 border-b h-4 border-slate-200"></div>
-          </li>
-        </ul>
-      </section>
-
-      <section class="px-3 flex flex-col gap-2">
-        <p class="text-lg font-semibold sticky top-0 bg-white">
-          Legal & Support
-        </p>
-        <ul class="flex flex-col gap-4">
-          <li>
-            <div class="flex gap-3 items-center">
-              <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
-                <LockClosedIcon class="size-5 text-blue-700" />
-              </div>
-              <div class="flex-grow flex gap-6 items-center">
-                <div class="text-base flex-grow">
-                  <p class="font-semibold">Privacy Policy</p>
-                  <p>View the application's privacy policy</p>
-                </div>
-                <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
-              </div>
-            </div>
-            <div class="ml-12 border-b h-4 border-slate-200"></div>
-          </li>
-          <li>
-            <div class="flex gap-3 items-center">
-              <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
-                <DocumentTextIcon class="size-5 text-blue-700" />
-              </div>
-              <div class="flex-grow flex gap-6 items-center">
-                <div class="text-base flex-grow">
-                  <p class="font-semibold">Terms of Service</p>
-                  <p>Read the terms and conditions of service</p>
-                </div>
-                <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
-              </div>
-            </div>
-            <div class="ml-12 border-b h-4 border-slate-200"></div>
-          </li>
-          <li>
-            <div class="flex gap-3 items-center">
-              <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
-                <LifebuoyIcon class="size-5 text-blue-700" />
-              </div>
-              <div class="flex-grow flex gap-6 items-center">
-                <div class="text-base flex-grow">
-                  <p class="font-semibold">Get Support</p>
-                  <p>Get Support</p>
-                </div>
-                <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
-              </div>
-            </div>
-            <div class="ml-12 border-b h-4 border-slate-200"></div>
-          </li>
-        </ul>
-      </section>
-
-      <!-- <section class="px-3 flex flex-col gap-2">
-        <button
-          class="text-base bg-red-100 rounded-md px-3 py-2 text-red-500 font-semibold"
-          @click="handleResetOnboarding()"
-        >
-          Reset Onboarding
-        </button>
-      </section> -->
-      <section class="px-3 flex flex-col gap-2">
-        <button
-          class="text-base bg-red-100 rounded-md px-3 py-2 text-red-500 font-semibold"
-          @click="logout()"
-        >
-          Logout
-        </button>
-      </section>
-      <p class="w-full text-center py-3 text-slate-500">Version 1.0.0 (Build 20240726)</p>
+    <main class="h-full w-full relative overflow-hidden py-3">
+      <Transition
+        :name="transition_name"
+        mode="out-in"
+      >
+        <SettingsHome
+          v-if="view === 'home'"
+          @open-view="openView"
+        />
+        <component v-else :is="VIEWS[view]?.template" />
+      </Transition>
     </main>
   </article>
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '@/stores'
-import axios from 'axios'
+import { computed, ref, type Component } from 'vue';
 
-import QrCodeIcon from '@/components/icons/QrCodeIcon.vue'
-import {
-  BriefcaseIcon,
-  ChatBubbleLeftRightIcon,
-  ChevronRightIcon,
-  CubeIcon,
-  DocumentTextIcon,
-  LifebuoyIcon,
-  LockClosedIcon,
-  ShoppingBagIcon,
-  SparklesIcon,
-} from '@heroicons/vue/24/solid'
+import ProductList from '@/views/HomeView/setting/ProductList.vue';
+import QrLink from '@/views/HomeView/setting/QrLink.vue';
+import SettingsHome from '@/views/HomeView/setting/SettingsHome.vue';
 
-// store
-const appStore = useAppStore()
+import { ArrowLeftIcon } from '@heroicons/vue/24/solid';
 
-async function handleResetOnboarding() {
-  try {
-    handleDisableOnboarding()
-  } catch (e) {
-    console.log(e)
+const VIEWS: Record<string, { title: string; template: Component }> = {
+  qr_link: {
+    title: 'QR code & Link',
+    template: QrLink,
+  },
+  product: {
+    title: 'Products',
+    template: ProductList,
   }
 }
 
-/** tắt cờ onboarding */
-async function handleDisableOnboarding() {
-  try {
-    await axios.post(
-      'https://chatbox-service-v3.botbanhang.vn/app/chatbot_user/update_setup_status',
-      { is_setup_completed: false },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: appStore.chatbot_token,
-        },
-      },
-    )
-  } catch (e) {
-    throw e
-  }
-}
+/** màn hình hiện tại */
+const view = ref('home')
 
-/** hàm đăng xuất */
-function logout() {
-  window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'page.logout', payload: {} }))
+/** loại animation */
+const transition_name = computed(() => {
+  return view.value === 'home' ? 'slide-right' : 'slide-left'
+})
+
+/** tiêu đề ở header */
+const title = computed(() => {
+  switch (view.value) {
+    case 'home':
+      return 'Settings'
+    case 'qr_link':
+
+      return 'QR code & Link'
+  }
+})
+
+/** hàm mở view */
+function openView(data: string) {
+  view.value = data
 }
 </script>
+
+<style scoped>
+.slide-left-enter-from {
+  transform: translateX(100%);
+}
+.slide-left-leave-to {
+  transform: translateX(-100%);
+}
+
+.slide-right-enter-from {
+  transform: translateX(-100%);
+}
+.slide-right-leave-to {
+  transform: translateX(100%);
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.3s ease-in-out;
+  position: absolute;
+  width: 100%;
+  top: 12px;
+  left: 12px;
+}
+
+/* Slide left */
+.slide-left-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.slide-left-enter-to {
+  transform: translateX(0%);
+  opacity: 1;
+}
+.slide-left-leave-from {
+  transform: translateX(0%);
+  opacity: 1;
+}
+.slide-left-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+/* Slide right */
+.slide-right-enter-from {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+.slide-right-enter-to {
+  transform: translateX(0%);
+  opacity: 1;
+}
+.slide-right-leave-from {
+  transform: translateX(0%);
+  opacity: 1;
+}
+.slide-right-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+</style>
