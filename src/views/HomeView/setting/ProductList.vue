@@ -47,6 +47,11 @@
         </div>
       </div>
     </div>
+    <div class="fixed top-0 left-0">
+      <ProductDetail 
+        v-model:product="products[0]"
+      />
+    </div>
   </div>
 </template>
 
@@ -62,6 +67,7 @@ import {
   ScaleIcon,
 } from '@heroicons/vue/24/solid'
 import { formatCurrency } from '@/services/format'
+import ProductDetail from './ProductDetail.vue'
 
 const products = ref<any[]>([])
 
