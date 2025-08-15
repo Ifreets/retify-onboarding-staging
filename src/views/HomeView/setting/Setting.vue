@@ -1,5 +1,5 @@
 <template>
-  <article class="h-full flex flex-col items-center justify-center relative">
+  <article class="h-full flex flex-col items-center justify-center">
     <header class="flex justify-between items-center w-full px-2 border-b pb-2">
       <div class="min-w-14">
         <button
@@ -75,29 +75,16 @@ function openView(data: string) {
 </script>
 
 <style scoped>
-.slide-left-enter-from {
-  transform: translateX(100%);
-}
-.slide-left-leave-to {
-  transform: translateX(-100%);
-}
-
-.slide-right-enter-from {
-  transform: translateX(-100%);
-}
-.slide-right-leave-to {
-  transform: translateX(100%);
-}
-
 .slide-left-enter-active,
 .slide-left-leave-active,
 .slide-right-enter-active,
 .slide-right-leave-active {
-  transition: all 0.3s ease-in-out;
+  transition: all 0.4s ease-in-out;
   position: absolute;
   width: 100%;
   top: 12px;
   left: 12px;
+  height: calc(100% - 24px);  
 }
 
 /* Slide left */

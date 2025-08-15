@@ -1,5 +1,6 @@
+div
 <template>
-  <div class="w-full h-dvh flex flex-col bg-white overflow-hidden">
+  <div class="w-full h-full flex flex-col bg-white overflow-hidden">
     <div
       class="w-full flex justify-between items-center px-3 py-2 border-b bg-white"
     >
@@ -53,7 +54,7 @@
               />
               <PlusCircleIcon
                 v-if="!product.barcode"
-                @click="createBarcode(product.id as string, product_index)"
+                @click="createBarcode(product.id || '')"
                 class="absolute bottom-1.5 right-3 w-5 h-5 cursor-pointer"
               />
             </div>
@@ -84,65 +85,52 @@
                 :min="0"
                 v-model="product.price"
               /> -->
-              <input type="text" v-model="product.price" class="border px-3 py-1.5 w-full rounded-md focus:outline-none">
+              <input
+                type="text"
+                v-model="product.price"
+                class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
+              />
             </div>
           </div>
           <div class="grid grid-cols-2 gap-2">
             <template v-if="!product.variant_options">
               <div>
                 <p class="mb-1">Minimum inventory</p>
-                <Input
+                <input
                   :min="0"
-                  v-if="!checkProductService()"
                   v-model="product.min_inventory_quantity"
                   placeholder="0"
                   class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
                 />
-                <input
-                  v-if="checkProductService()"
-                  disabled
-                  type="number"
-                  value="0"
-                  class="border px-3 py-1.5 w-full rounded-md focus:outline-none cursor-not-allowed bg-slate-100 text-gray-500"
-                />
               </div>
               <div>
                 <p class="mb-1">Maximum inventory</p>
-                <Input
+                <input
                   :min="0"
-                  v-if="!checkProductService()"
                   v-model="product.max_inventory_quantity"
                   placeholder="0"
                   class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
-                />
-                <input
-                  v-if="checkProductService()"
-                  disabled
-                  type="number"
-                  placeholder="0"
-                  class="border px-3 py-1.5 w-full rounded-md focus:outline-none cursor-not-allowed bg-slate-100 text-gray-500"
                 />
               </div>
             </template>
           </div>
           <div>
             <p class="mb-1">Description</p>
-            <TiptapEditor
+            <textarea
               v-model="product.description"
-              :type_content="'markdown'"
-              placeholder="'Enter description'"
-              :upload-image="uploadImages"
-            />
+              placeholder="Enter description"
+              class="border px-3 py-1.5 w-full h-14 rounded-md focus:outline-none"
+            ></textarea>
           </div>
           <div>
             <p class="mb-1">Internal note</p>
             <textarea
               v-model="product.internal_note"
               placeholder="Enter notes"
-              class="border px-3 py-1.5 w-full h-14 rounded-md focus:outline-none resize-none"
+              class="border px-3 py-1.5 w-full h-14 rounded-md focus:outline-none"
             ></textarea>
           </div>
-          <div v-if="!checkProductService()">
+          <div>
             <label class="inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
@@ -170,25 +158,26 @@
               v-if="product.images"
               class="mb-2 flex gap-2 flex-wrap"
             >
-              <draggable
-                class="flex gap-2"
-                ghost-class="ghost"
-                v-model="product.images"
+              <div
+                v-for="(img, index) in product.images"
+                class="relative w-fit group border-2 border-white rounded-lg"
+                :key="index"
               >
-                <transition-group>
-                  <div
-                    v-for="(img, index) in product.images"
-                    class="relative w-fit group border-2 border-white rounded-lg"
-                    :key="index"
-                  >
-                    <img
-                      @click=";(img_selected = img), (show_img = true)"
-                      :src="img"
-                      class="rounded-md w-16 h-16 object-cover"
-                    />
-                  </div>
-                </transition-group>
-              </draggable>
+                <img
+                  @click="
+                    () => {
+                      img_selected = img
+                      show_img = true
+                    }
+                  "
+                  :src="img"
+                  class="rounded-md w-16 h-16 object-cover"
+                />
+                <XCircleIcon
+                  @click="removeImage(index)"
+                  class="w-5 absolute -top-1 -right-1 cursor-pointer text-red-500"
+                />
+              </div>
             </div>
             <button
               @click="selectFile"
@@ -204,27 +193,18 @@
     </div>
     <!-- footer -->
     <div
-      class="flex items-center gap-2 w-full border-t p-3 text-sm text-gray-700 bg-white justify-between flex-wrap"
+      class="flex items-center gap-2 w-full border-t p-3 text-sm text-gray-700 bg-white justify-between font-medium"
     >
-      <div class="w-full flex gap-2 font-medium">
-        <button
-          @click="productReplication()"
-          class="w-1/2 sm:w-fit bg-gray-200 text-gray-700 py-1.5 px-4 rounded-md text-sm flex justify-center gap-2 items-center"
-        >
-          <Square2StackIcon class="w-5 h-5 text-slate-700" />
-          Copy product
-        </button>
-        <button
-          class="flex items-center bg-red-100 py-1.5 px-4 w-1/2 rounded-md justify-center gap-2 text-red-500"
-          @click="deleteAnProduct()"
-        >
-          <TrashIcon class="size-5" />
-          Delete product
-        </button>
-      </div>
+      <button
+        class="flex items-center bg-red-100 py-1.5 px-4 w-1/2 rounded-md justify-center gap-2 text-red-500"
+        @click="deleteAnProduct()"
+      >
+        <TrashIcon class="size-5" />
+        Delete
+      </button>
       <button
         @click="updateAnProduct()"
-        class="bg-black text-white py-1.5 px-4 whitespace-nowrap sm:w-max rounded-md text-sm sm:ml-3 w-full font-medium"
+        class="bg-black text-white py-1.5 px-4 whitespace-nowrap rounded-md w-1/2"
       >
         Save
       </button>
@@ -239,32 +219,179 @@
 </template>
 
 <script setup lang="ts">
+import { $merchant, $order } from '@/api'
+import { useToast } from '@/composables/useToast'
+import { get, isArray } from 'lodash'
 import { ref } from 'vue'
 
 import ImageUpload from '@/assets/icons/image-upload.svg'
+import { PlusCircleIcon } from '@heroicons/vue/24/outline'
 import {
   ChevronDownIcon,
-  PlusCircleIcon,
   TrashIcon,
+  XCircleIcon,
 } from '@heroicons/vue/24/solid'
-import { Square2StackIcon } from '@heroicons/vue/24/outline'
 
-const product = defineModel<any>('product', {
+import type { Product } from '@/interfaces'
+
+const $props = defineProps({
+  update: {
+    type: Function,
+    default: () => {},
+  },
+})
+
+/** dữ liệu sản phẩm đã chọn */
+const product = defineModel<Product>('product', {
   default: {},
 })
-const product_index = ref(0)
+/** index của sản phẩm được chọn trong danh sách */
+const product_index = defineModel<number>('product_index', {
+  default: -1,
+})
 const img_selected = ref('')
 const show_img = ref(false)
 
-function closeForm() {}
-function uploadImages() {}
-function createBarcode(product_id: string, product_index: number) {}
-function checkProductService() {
-  return true
+// composable
+const { notify } = useToast()
+
+/** đóng form */
+function closeForm() {
+  product.value = {}
+  product_index.value = -1
 }
-function selectFile() {}
-function productReplication() {}
+
+/** Tạo barcode cho sản phẩm */
+async function createBarcode(id: string) {
+  /** dữ liệu sản phẩm sau khi tạo barcode  */
+  const NEW_PRODUCT = await $order.updateBarcode(id)
+  // lưu lại barcode mới
+  product.value.barcode = NEW_PRODUCT.barcode
+  //cập nhật dữ liệu trong mảng
+  $props.update()
+}
+
+/** Chọn file để upload */
+function selectFile() {
+  /**input upload file */
+  const INPUT = document.createElement('input')
+
+  // * Thêm các thuộc tính cần thiết
+  INPUT.type = 'file'
+  INPUT.accept = 'image/*'
+  INPUT.style.display = 'none'
+  INPUT.multiple = true
+
+  // * Hàm xử lý sau khi upload thành công
+  INPUT.onchange = () => {
+    // * Nếu không có file nào được chọn thì thoát
+    if (!INPUT.files) return
+
+    // * Upload file
+    uploadFile(INPUT.files)
+
+    // * xoá input sau khi xong việc
+    if (INPUT && INPUT.parentNode) INPUT.parentNode.removeChild(INPUT)
+  }
+
+  // * Thêm input vào html
+  document.body.appendChild(INPUT)
+
+  // * Click vào input
+  INPUT.click()
+}
+
+/** Upload file */
+async function uploadFile(files: FileList) {
+  try {
+    for (let i = 0; i < files.length; i++) {
+      // * Lấy file
+      let file = files[i]
+
+      // * Kiểm tra kích thước file (5MB = 5 * 1024 * 1024 bytes)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error(`File ${file.name} đã lớn hơn 5MB.`)
+      }
+
+      // * Tạo form data
+      let form_data = new FormData()
+
+      // * Thêm file vào form data
+      form_data.append('file', file)
+
+      /** Upload ảnh lên merchant */
+      let res = await $merchant.uploadFile(form_data)
+
+      /** Lấy về dữ liệu ảnh upload lên merchants */
+      let image = get(res, 'file_path')
+
+      // * Thêm ảnh vào sản phẩm
+      if (image && product.value.images && isArray(product.value.images)) {
+        product.value.images = [...product.value.images, image]
+      } else {
+        product.value.images = [image]
+      }
+    }
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+/** Xử lý xóa ảnh */
+function removeImage(index: number) {
+  /** danh sách ảnh */
+  const IMGS = product.value.images
+  // nếu không có ảnh nào trong danh sách thì thôi
+  if (!IMGS?.length) return
+  // xóa ảnh tại index
+  product.value.images = IMGS.filter((item, i) => {
+    return i !== index
+  })
+}
+
+/** xóa sản phẩm */
 function deleteAnProduct() {}
 
-function updateAnProduct() {}
+/** Cập nhật sản phẩm */
+async function updateAnProduct() {
+  try {
+    /** validate các field */
+    validateProduct()
+
+    // * Cập nhật sản phẩm
+    await $order.updateProduct({
+      ...product.value,
+      ...{
+        cost: Number(product.value.cost),
+        price: Number(product.value.price),
+        wholesale_price: Number(product.value.wholesale_price),
+        service_fee: Number(product.value.service_fee),
+      },
+    })
+
+    // * Thông báo
+    notify('Update successfully!')
+
+    // cập nhật trong mảng sản phẩm
+    $props.update()
+
+    // * Đóng form
+    closeForm()
+  } catch (e) {
+    notify(e as string, {
+      type: 'error',
+      duration: 1000,
+      position: 'top-center',
+    })
+  }
+}
+
+/** hàm validate sản phẩm */
+function validateProduct() {
+  /** nếu tên sản phẩm không hợp lệ */
+  if (!product.value.name?.trim()) throw 'Name is required'
+
+  /** loại sản phẩm không hợp lệ */
+  // if (!product.value.type) throw 'Product type is required'
+}
 </script>

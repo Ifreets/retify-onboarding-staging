@@ -1,8 +1,9 @@
 <template>
-  <div class="flex flex-col overflow-auto h-full">
+  <div class="flex flex-col overflow-y-auto h-full w-full overflow-x-hidden">
     <div
       v-for="(item, index) of products"
       class="hover:bg-slate-100 cursor-pointer flex gap-x-2 group w-full px-3"
+      @click="chooseProduct(item, index)"
     >
       <div class="cursor-pointer py-2 flex-shrink-0 min-w-max">
         <img
@@ -30,7 +31,7 @@
       <div class="py-2 text-right px-2 flex-shrink-0">
         <div>
           <p class="text-base font-medium">
-            {{ formatCurrency(item?.cost) || 0 }}
+            {{ formatCurrency(item?.price) || 0 }}
           </p>
           <div class="flex gap-3 justify-end text-xs">
             <p v-if="item?.type === 'product'">
@@ -47,9 +48,17 @@
         </div>
       </div>
     </div>
-    <div class="fixed top-0 left-0">
+    <div 
+      class="absolute top-0 left-0 w-full h-full transition-all duration-500"
+      :class="{
+        'translate-x-0 opacity-100': !isEmpty(product),
+        'translate-x-full opacity-0': isEmpty(product),
+      }"
+    >
       <ProductDetail 
-        v-model:product="products[0]"
+        v-model:product="product"
+        v-model:product_index="product_index"
+        @update="updateProduct"
       />
     </div>
   </div>
@@ -57,31 +66,47 @@
 
 <script setup lang="ts">
 import { $order } from '@/api'
-import { get } from 'lodash'
+import { formatCurrency } from '@/services/format'
+import { get, isEmpty } from 'lodash'
 import { onMounted, ref } from 'vue'
 
-import {
-  CubeIcon,
-  DocumentTextIcon,
-  ReceiptPercentIcon,
-  ScaleIcon,
-} from '@heroicons/vue/24/solid'
-import { formatCurrency } from '@/services/format'
-import ProductDetail from './ProductDetail.vue'
+import ProductDetail from '@/views/HomeView/setting/ProductDetail.vue'
 
-const products = ref<any[]>([])
+import { CubeIcon } from '@heroicons/vue/24/solid'
+
+import type { Product } from '@/interfaces'
+
+/** danh sách sản phẩm */
+const products = ref<Product[]>([])
+/** dữ liệu của sản phẩm */
+const product = ref<Product>({})
+/** index của sản phẩm */
+const product_index = ref(-1)
 
 onMounted(() => {
-  getproduct()
+  getProduct()
 })
 
-async function getproduct() {
+/** Lấy danh sách sản phẩm */
+async function getProduct() {
   try {
-    const res = await $order.getProducts({ skip: 0, limit: 20 })
-    products.value = res
-    console.log(res)
+    /** danh sách sản phẩm */
+    const RES = await $order.getProducts({ skip: 0, limit: 20 })
+    // lưu lại danh sách
+    products.value = RES
   } catch (e) {
     console.log(e)
   }
+}
+
+/** hàm chọn sản phẩm */
+function chooseProduct(item: Product, index: number) {
+  product.value = item
+  product_index.value = index
+}
+
+/** cập nhật sản phẩm trong danh sách */
+function updateProduct() {
+  products.value[product_index.value] = product.value
 }
 </script>

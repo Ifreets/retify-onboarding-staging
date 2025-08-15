@@ -2,7 +2,7 @@ import { Request } from '@/api/axios'
 import { ENV } from '@/env'
 import { useAppStore } from '@/stores'
 
-import type { IEnv } from '@/interfaces'
+import type { IEnv, Product } from '@/interfaces'
 
 /** Đường dẫn host của merchant */
 const $HOST: IEnv = ENV[import.meta.env.VITE_APP_ENV || 'development']
@@ -31,7 +31,12 @@ export class OrderServiceAPI {
   }
 
   /** api lấy danh sách đơn hàng */
-  getOrder(data: { skip?: number; limit?: number, search?: string, order_id?: string }) {
+  getOrder(data: {
+    skip?: number
+    limit?: number
+    search?: string
+    order_id?: string
+  }) {
     return this.#post('order/get_order', {
       ...data,
       sort: { created_date: 'desc' },
@@ -48,8 +53,18 @@ export class OrderServiceAPI {
   }
 
   /** danh sách sản phẩm */
-  getProducts(data: { skip?: number; limit?: number }){
+  getProducts(data: { skip?: number; limit?: number }) {
     return this.#post('product/get_product', data)
+  }
+
+  /** cập nhật sản phẩm */
+  updateProduct(data: Product) {
+    return this.#post('product/update_product', data)
+  }
+
+  /** Cập nhật barcode */
+  updateBarcode(id: string) {
+    return this.#post('product/update_barcode', {id})
   }
 }
 
