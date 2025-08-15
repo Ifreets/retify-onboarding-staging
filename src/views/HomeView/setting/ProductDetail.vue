@@ -1,6 +1,7 @@
 div
 <template>
   <div class="w-full h-full flex flex-col bg-white overflow-hidden">
+    <!-- header -->
     <div
       class="w-full flex justify-between items-center px-3 py-2 border-b bg-white"
     >
@@ -15,6 +16,7 @@ div
       <div class="w-14"></div>
     </div>
 
+    <!-- body -->
     <div
       class="bg-slate-100 text-sm flex flex-col gap-4 p-2 h-full overflow-auto"
     >
@@ -65,30 +67,20 @@ div
           >
             <div>
               <p class="mb-1">Import price</p>
-              <!-- <InputMoney
+              <InputMoney
                 class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
                 placeholder="Import price"
                 :min="0"
                 v-model="product.cost"
-              /> -->
-              <input
-                type="number"
-                v-model="product.cost"
-                class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
               />
             </div>
             <div v-if="product.type !== 'gmv'">
               <p class="mb-1">Selling price</p>
-              <!-- <InputMoney
+              <InputMoney
                 class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
                 placeholder="Selling price"
                 :min="0"
                 v-model="product.price"
-              /> -->
-              <input
-                type="text"
-                v-model="product.price"
-                class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
               />
             </div>
           </div>
@@ -98,6 +90,7 @@ div
                 <p class="mb-1">Minimum inventory</p>
                 <input
                   :min="0"
+                  type="number"
                   v-model="product.min_inventory_quantity"
                   placeholder="0"
                   class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
@@ -107,6 +100,7 @@ div
                 <p class="mb-1">Maximum inventory</p>
                 <input
                   :min="0"
+                  type="number"
                   v-model="product.max_inventory_quantity"
                   placeholder="0"
                   class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
@@ -164,12 +158,6 @@ div
                 :key="index"
               >
                 <img
-                  @click="
-                    () => {
-                      img_selected = img
-                      show_img = true
-                    }
-                  "
                   :src="img"
                   class="rounded-md w-16 h-16 object-cover"
                 />
@@ -191,13 +179,14 @@ div
         </div>
       </div>
     </div>
+
     <!-- footer -->
     <div
       class="flex items-center gap-2 w-full border-t p-3 text-sm text-gray-700 bg-white justify-between font-medium"
     >
       <button
         class="flex items-center bg-red-100 py-1.5 px-4 w-1/2 rounded-md justify-center gap-2 text-red-500"
-        @click="deleteAnProduct()"
+        @click="is_open = true"
       >
         <TrashIcon class="size-5" />
         Delete
@@ -209,12 +198,27 @@ div
         Save
       </button>
     </div>
-    <!-- ZoomImg -->
-    <!-- <ZoomImg
-      v-if="show_img"
-      :image="img_selected"
-      :close="() => (show_img = false)"
-    /> -->
+
+    <Modal
+      v-model:is_open="is_open"
+    >
+      <div class="flex flex-col gap-3 items-center font-medium">
+        <QuestionMarkCircleIcon class="size-20" />
+        <p class="text-2xl text-center">Are you sure you want to confirm delete this product?</p>
+        <div class="flex justify-between gap-2 w-full pt-4">
+          <button class="px-7 py-2 bg-red-100 text-red-500 rounded-md"
+            @click="is_open = false"
+          >
+            Cancel
+          </button>
+          <button class="px-7 py-2 bg-blue-100 text-blue-700 rounded-md"
+          @click="deleteAnProduct()"
+            >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -224,8 +228,10 @@ import { useToast } from '@/composables/useToast'
 import { get, isArray } from 'lodash'
 import { ref } from 'vue'
 
+import Modal from '@/components/ui/Modal.vue'
+
 import ImageUpload from '@/assets/icons/image-upload.svg'
-import { PlusCircleIcon } from '@heroicons/vue/24/outline'
+import { PlusCircleIcon, QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
 import {
   ChevronDownIcon,
   TrashIcon,
@@ -233,6 +239,7 @@ import {
 } from '@heroicons/vue/24/solid'
 
 import type { Product } from '@/interfaces'
+import InputMoney from '@/components/ui/InputMoney.vue'
 
 const $props = defineProps({
   update: {
@@ -249,8 +256,9 @@ const product = defineModel<Product>('product', {
 const product_index = defineModel<number>('product_index', {
   default: -1,
 })
-const img_selected = ref('')
-const show_img = ref(false)
+
+/** đóng mở modal */
+const is_open = ref(false)
 
 // composable
 const { notify } = useToast()
@@ -349,8 +357,19 @@ function removeImage(index: number) {
   })
 }
 
-/** xóa sản phẩm */
-function deleteAnProduct() {}
+/** hàm xóa sản phẩm */
+async function deleteAnProduct() {
+  try {
+    // nếu không có id sản phẩm thì thôi
+    if (!product.value.id) return
+    // * Xóa san pham
+    await $order.deleteProduct(product.value.id)
+    // * Đóng form
+    closeForm()
+  } catch (e) {
+    console.log(e)
+  }
+}
 
 /** Cập nhật sản phẩm */
 async function updateAnProduct() {

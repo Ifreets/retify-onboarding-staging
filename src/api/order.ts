@@ -64,7 +64,12 @@ export class OrderServiceAPI {
 
   /** Cập nhật barcode */
   updateBarcode(id: string) {
-    return this.#post('product/update_barcode', {id})
+    return this.#post('product/update_barcode', { id })
+  }
+
+  /** xóa sản phẩm */
+  deleteProduct(id: string) {
+    return this.#post('product/delete_product', { id })
   }
 }
 

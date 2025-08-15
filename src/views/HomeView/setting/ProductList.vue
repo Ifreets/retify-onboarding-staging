@@ -48,11 +48,12 @@
         </div>
       </div>
     </div>
+    
     <div 
       class="absolute top-0 left-0 w-full h-full transition-all duration-500"
       :class="{
-        'translate-x-0 opacity-100': !isEmpty(product),
-        'translate-x-full opacity-0': isEmpty(product),
+        'translate-x-0 opacity-100': product.product_id,
+        'translate-x-full opacity-0': !product.product_id,
       }"
     >
       <ProductDetail 
