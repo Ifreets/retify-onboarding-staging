@@ -52,16 +52,14 @@ onUnmounted(() => {
 /** hàm xử lý sự kiện message */
 function handleMessageEvent(event: MessageEvent) {
   /** dữ liệu nhận được */
-  const DATA = event?.data
+  const PAYLOAD = event?.data
   /** nguồn dữ liệu */
-  const FROM = DATA?.from
-  /** nội dung dữ liệu */
-  const PAYLOAD = DATA?.payload
+  const FROM = PAYLOAD?.from
 
   /** nếu không phải từ iframe gửi tới thì thôi */
   if (FROM !== 'BBH-EMBED-IFRAME') return
   /** Cập nhật lại embed data */
-  if (PAYLOAD.type === 'CLIENT_ID' && PAYLOAD.data_embed_chat) {
+  if (PAYLOAD?.type === 'CLIENT_ID' && PAYLOAD?.data_embed_chat) {
     localStorage.setItem(
       `data_embed_chat`,
       JSON.stringify(PAYLOAD.data_embed_chat),
