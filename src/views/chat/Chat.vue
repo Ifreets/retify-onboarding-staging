@@ -55,7 +55,7 @@ function handleMessageEvent(event: MessageEvent) {
     typeof event.data === 'string' ? JSON.parse(event.data) : event.data
 
   if (PAYLOAD?.status === 'READY') {
-    const SAVED = localStorage.getItem('data_embed_chat')
+    const SAVED = localStorage.getItem(`${PAYLOAD.key}`)
     if (SAVED && iframe_ref.value?.contentWindow) {
       iframe_ref.value.contentWindow.postMessage(
         {
@@ -70,7 +70,7 @@ function handleMessageEvent(event: MessageEvent) {
 
   if (PAYLOAD?.from === 'BBH-EMBED-IFRAME' && PAYLOAD.type === 'CLIENT_ID') {
     localStorage.setItem(
-      'data_embed_chat',
+      `${PAYLOAD.key}`,
       JSON.stringify(PAYLOAD.data_embed_chat),
     )
     console.log('[SDK] Saved:', PAYLOAD.data_embed_chat)
