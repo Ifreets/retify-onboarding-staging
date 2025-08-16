@@ -52,20 +52,29 @@ onUnmounted(() => {
 
 /** hàm xử lý sự kiện message */
 function handleMessageEvent(event: MessageEvent) {
-  /** dữ liệu nhận được */
-  const PAYLOAD = event?.data
-  /** nguồn dữ liệu */
-  const FROM = PAYLOAD?.from
+  const PAYLOAD =
+    typeof event.data === 'string' ? JSON.parse(event.data) : event.data
 
-  /** nếu không phải từ iframe gửi tới thì thôi */
-  if (FROM !== 'BBH-EMBED-IFRAME') return
-  /** Cập nhật lại embed data */
-  if (PAYLOAD?.type === 'CLIENT_ID' && PAYLOAD?.data_embed_chat) {
+  if (PAYLOAD?.status === 'READY') {
+    const SAVED = localStorage.getItem('data_embed_chat')
+    if (SAVED && iframe_ref.value?.contentWindow) {
+      iframe_ref.value.contentWindow.postMessage(
+        {
+          from: 'RETION_EMBED',
+          type: 'CLIENT_ID',
+          data_embed_chat: SAVED,
+        },
+        '*', // 👉 không check domain
+      )
+    }
+  }
+
+  if (PAYLOAD?.from === 'BBH-EMBED-IFRAME' && PAYLOAD.type === 'CLIENT_ID') {
     localStorage.setItem(
-      `data_embed_chat`,
+      'data_embed_chat',
       JSON.stringify(PAYLOAD.data_embed_chat),
     )
-    console.log('[SDK] Saved data_embed_chat:', PAYLOAD.data_embed_chat)
+    console.log('[SDK] Saved:', PAYLOAD.data_embed_chat)
   }
 }
 
