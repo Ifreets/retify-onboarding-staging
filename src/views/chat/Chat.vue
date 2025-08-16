@@ -1,5 +1,6 @@
 <template>
   <iframe
+    ref="iframe_ref"
     v-if="url"
     :src="url"
     className="w-dvw h-dvh"
