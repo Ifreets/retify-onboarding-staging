@@ -6,7 +6,6 @@
     className="w-dvw h-dvh"
     title="Embedded Content"
     sandbox="allow-scripts allow-same-origin"
-    @load="onIframeLoad"
   />
 </template>
 
@@ -75,27 +74,6 @@ function handleMessageEvent(event: MessageEvent) {
       JSON.stringify(PAYLOAD.data_embed_chat),
     )
     console.log('[SDK] Saved:', PAYLOAD.data_embed_chat)
-  }
-}
-
-/** hàm xử lý sự kiện iframe load */
-function onIframeLoad() {
-  /** Khi iframe load, gửi lại client_id đã lưu (nếu có) */
-  const SAVED_DATA_EMBED_CHAT = localStorage.getItem('data_embed_chat')
-  /** Nếu trang parent có client id */
-  if (SAVED_DATA_EMBED_CHAT) {
-    /**
-     *  Gửi thông điệp cho iframe cập nhật value
-     */
-    iframe_ref.value?.contentWindow?.postMessage(
-      {
-        from: 'RETION_EMBED',
-        type: 'CLIENT_ID',
-        data_embed_chat: SAVED_DATA_EMBED_CHAT,
-      },
-      '*', // Có thể thay bằng origin chính xác của embed
-    )
-    console.log('[SDK] Sent client_id to embed:', SAVED_DATA_EMBED_CHAT)
   }
 }
 </script>
