@@ -5,7 +5,7 @@
     :src="url"
     className="w-dvw h-dvh"
     title="Embedded Content"
-    sandbox="allow-scripts allow-same-origin"
+    sandbox="allow-scripts allow-same-origin allow-popups"
   />
 </template>
 

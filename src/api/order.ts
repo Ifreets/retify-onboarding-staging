@@ -77,6 +77,11 @@ export class OrderServiceAPI {
     return this.#post('integration/get_integration', {})
   }
 
+  /** xóa tích hợp */
+  deleteIntegration(id: string) {
+    return this.#post('integration/delete_integration', { id })
+  }
+
   /** tạo link oauth */
   createOauthLink() {
     return this.#post('integration/authorization', {
