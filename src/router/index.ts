@@ -76,6 +76,10 @@ const router = createRouter({
       path: '/c/:id',
       component: () => import('@/views/chat/Chat.vue'),
     },
+    {
+      path: '/web-view',
+      component: () => import('@/views/FakeWebView.vue'),
+    },
   ],
 })
 

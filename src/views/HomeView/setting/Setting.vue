@@ -26,15 +26,22 @@
         <component v-else :is="VIEWS[view]?.template" />
       </Transition>
     </main>
+    <LoadingFullScreen
+      :loading="appStore.loading"
+    />
   </article>
 </template>
 
 <script setup lang="ts">
+import { useAppStore } from '@/stores';
+import { useRouter } from 'vue-router';
 import { computed, ref, type Component } from 'vue';
 
+import PosSystem from '@/views/HomeView/setting/PosSystem.vue';
 import ProductList from '@/views/HomeView/setting/ProductList.vue';
 import QrLink from '@/views/HomeView/setting/QrLink.vue';
 import SettingsHome from '@/views/HomeView/setting/SettingsHome.vue';
+import LoadingFullScreen from '@/components/ui/LoadingFullScreen.vue';
 
 import { ArrowLeftIcon } from '@heroicons/vue/24/solid';
 
@@ -46,11 +53,27 @@ const VIEWS: Record<string, { title: string; template: Component }> = {
   product: {
     title: 'Products',
     template: ProductList,
+  },
+  pos_system: {
+    title: 'POS System',
+    template: PosSystem,
   }
 }
 
+// store
+const appStore = useAppStore()
+
+// router
+const route = useRouter()
+
 /** màn hình hiện tại */
-const view = ref('home')
+const view = ref(getView())
+
+function getView(){
+  const VIEW_URL = route.currentRoute.value.query.view as string
+  if(VIEW_URL) return VIEW_URL
+  return 'home'
+}
 
 /** loại animation */
 const transition_name = computed(() => {

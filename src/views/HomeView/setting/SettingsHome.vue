@@ -1,9 +1,9 @@
 <template>
-  <div class="w-full h-full gap-4 flex flex-col overflow-auto">
-    <!-- <section class="px-3 flex flex-col gap-2">
+  <div class="w-full h-full gap-4 flex flex-col overflow-auto relative">
+    <section class="px-3 flex flex-col gap-2">
       <p class="text-lg font-semibold sticky top-0 bg-white">Integrations</p>
       <ul class="flex flex-col gap-4">
-        <li>
+        <li @click="$emit('open-view', 'pos_system')">
           <div class="flex gap-3 items-center">
             <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
               <ShoppingBagIcon class="size-5 text-blue-700" />
@@ -18,7 +18,7 @@
           </div>
           <div class="ml-12 border-b h-4 border-slate-200"></div>
         </li>
-        <li>
+        <!-- <li>
           <div class="flex gap-3 items-center">
             <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
               <ChatBubbleLeftRightIcon class="size-5 text-blue-700" />
@@ -32,9 +32,9 @@
             </div>
           </div>
           <div class="ml-12 border-b h-4 border-slate-200"></div>
-        </li>
+        </li> -->
       </ul>
-    </section> -->
+    </section>
 
     <section class="px-3 flex flex-col gap-2">
       <p class="text-lg font-semibold sticky top-0 bg-white">
@@ -171,7 +171,7 @@
           Reset Onboarding
         </button>
       </section> -->
-    
+
     <div class="flex-1"></div>
 
     <section class="px-3 flex flex-col gap-2">
@@ -182,7 +182,7 @@
         Logout
       </button>
     </section>
-    
+
     <p class="w-full text-center py-3 text-slate-500">
       Version 1.0.0 (Build 20240726)
     </p>

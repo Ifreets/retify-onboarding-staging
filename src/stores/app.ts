@@ -13,9 +13,13 @@ export const useAppStore = defineStore('app', () => {
     employee_id: '',
     branch_id: '',
   })
+
+  /** loading */
+  const loading = ref(false)
   return {
     chatbot_token,
     merchant_token,
     merchant_data,
+    loading,
   }
 })

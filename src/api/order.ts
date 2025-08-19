@@ -71,6 +71,18 @@ export class OrderServiceAPI {
   deleteProduct(id: string) {
     return this.#post('product/delete_product', { id })
   }
+
+  /** lấy danh sách tích hợp */
+  getIntegration() {
+    return this.#post('integration/get_integration', {})
+  }
+
+  /** tạo link oauth */
+  createOauthLink() {
+    return this.#post('integration/authorization', {
+      platform: 'SQUARE'
+    })
+  }
 }
 
 /** instance api order */
