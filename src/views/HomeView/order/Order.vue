@@ -3,7 +3,8 @@
     <header class="flex justify-between w-full px-2">
       <div class="w-20"></div>
       <h3 class="text-2xl font-semibold">Orders</h3>
-      <CreateButton />
+      <div class="w-20"></div>
+      <!-- <CreateButton /> -->
     </header>
     <section class="w-full h-full py-2 flex flex-col overflow-hidden">
       <InputSearch
@@ -27,7 +28,7 @@
       <Loading :loading="loading.more" />
     </section>
 
-    <AskRetionButton />
+    <!-- <AskRetionButton /> -->
   </article>
 </template>
 

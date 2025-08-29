@@ -288,3 +288,74 @@ export type TTabProduct =
   | 'ASYNC_THIRD_PARTY'
   | 'TAG'
   | 'ADDON'
+
+
+/** Dữ liệu danh mục */
+export interface Category {
+
+    /** Id bản ghi hệ thống */
+    id?: string;
+
+    /** Mã danh mục tạo random */
+    category_id?: string;
+
+    /** Tên danh mục */
+    name?: string;
+
+    /** Tên tìm kiếm */
+    search_name?: string;
+
+    /** Mô tả danh mục */
+    description?: string;
+
+    /** ID danh mục cha */
+    parent_id?: string | null;
+
+    /** Trạng thái có phải danh mục cha hay không */
+    is_parent?: boolean;
+
+    /** Trạng thái danh mục */
+    status?: string;
+
+    /** Icon */
+    icon?: string | null;
+
+    /** ảnh bìa */
+    cover_photo?: string | null;
+    
+    /** đường dẫn */
+    path?:string
+
+    /** Dạng danh mục */
+    type?: string;
+
+    /** Sắp xếp */
+    sort_index?: number;
+
+    /** ID doanh nghiệp */
+    business_id?: string;
+
+    /** ID chi nhánh */
+    branch_id?: string;
+
+    /** ID Phòng ban */
+    department_id?: string;
+
+    /** ID đội nhóm (dữ liệu này lúc có lúc không) */
+    team_id?: string;
+
+    /** ID nhân viên */
+    employee_id?: string;
+
+    /** ID user */
+    user_id?: string;
+
+    /** Thời gian tạo record */
+    createdAt?: Date;
+
+    /** Thời gian cập nhật record */
+    updatedAt?: Date;
+
+    /** Tổng số sản phẩm */
+    total_products?: number;
+}

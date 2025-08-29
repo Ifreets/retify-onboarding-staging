@@ -88,6 +88,11 @@ export class OrderServiceAPI {
       platform: 'SQUARE'
     })
   }
+
+  /** danh sách danh mục */
+  getCategories(data: { skip?: number; limit?: number }) {
+    return this.#post('category/get_category', data)
+  }
 }
 
 /** instance api order */

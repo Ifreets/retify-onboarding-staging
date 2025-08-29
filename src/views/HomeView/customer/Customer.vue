@@ -27,7 +27,7 @@
       <Loading :loading="loading.more"/>
     </section>
 
-    <AskRetionButton />
+    <!-- <AskRetionButton /> -->
   </article>
 </template>
 

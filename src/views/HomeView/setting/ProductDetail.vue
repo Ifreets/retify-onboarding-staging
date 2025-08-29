@@ -24,7 +24,7 @@ div
         <!-- Left -->
         <div class="col-span-2 rounded-lg bg-white p-3 flex flex-col gap-2">
           <div>
-            <p class="mb-1">
+            <p class="mb-1 font-medium">
               Product name
               <span class="text-red-500">*</span>
             </p>
@@ -37,17 +37,17 @@ div
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <p class="mb-1">Product ID</p>
+              <p class="mb-1 font-medium">Product ID</p>
               <input
                 v-model="product.product_id"
                 type="text"
                 placeholder="Product ID"
-                class="border px-3 py-1.5 w-full rounded-md focus:outline-none cursor-not-allowed"
+                class="border px-3 py-1.5 w-full rounded-md focus:outline-none cursor-not-allowed read-only:bg-slate-100"
                 readonly
               />
             </div>
             <div class="relative">
-              <p class="mb-1">BarCode</p>
+              <p class="mb-1 font-medium">BarCode</p>
               <input
                 v-model="product.barcode"
                 type="text"
@@ -66,7 +66,7 @@ div
             class="grid grid-cols-2 gap-2"
           >
             <div>
-              <p class="mb-1">Import price</p>
+              <p class="mb-1 font-medium">Cost</p>
               <InputMoney
                 class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
                 placeholder="Import price"
@@ -75,7 +75,7 @@ div
               />
             </div>
             <div v-if="product.type !== 'gmv'">
-              <p class="mb-1">Selling price</p>
+              <p class="mb-1 font-medium">Price</p>
               <InputMoney
                 class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
                 placeholder="Selling price"
@@ -84,40 +84,43 @@ div
               />
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-2">
-            <template v-if="!product.variant_options">
-              <div>
-                <p class="mb-1">Minimum inventory</p>
-                <input
-                  :min="0"
-                  type="number"
-                  v-model="product.min_inventory_quantity"
-                  placeholder="0"
-                  class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
-                />
-              </div>
-              <div>
-                <p class="mb-1">Maximum inventory</p>
-                <input
-                  :min="0"
-                  type="number"
-                  v-model="product.max_inventory_quantity"
-                  placeholder="0"
-                  class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
-                />
-              </div>
-            </template>
-          </div>
+          <!-- Trạng thái -->
           <div>
-            <p class="mb-1">Description</p>
+            <p class="mb-1 font-medium">Status</p>
+            <Select 
+              v-model="product.status"
+              :options="STATUS"
+              :label_field="'name'"
+              :value_field="'value'"
+              placeholder="Choose status"
+            />
+          </div>
+
+          <!-- Danh mục -->
+          <div>
+            <p class="mb-1 font-medium">Category</p>
+            <Select 
+              v-model="product.category_id"
+              :options="categories"
+              :label_field="'name'"
+              :value_field="'category_id'"
+              placeholder="Seach name category"
+              :is_search="true"
+            />
+          </div>
+
+          <!-- Mô tả -->
+          <div>
+            <p class="mb-1 font-medium">Description</p>
             <textarea
               v-model="product.description"
               placeholder="Enter description"
               class="border px-3 py-1.5 w-full h-14 rounded-md focus:outline-none"
             ></textarea>
           </div>
+          <!-- Ghi chú nội bộ -->
           <div>
-            <p class="mb-1">Internal note</p>
+            <p class="mb-1 font-medium">Internal note</p>
             <textarea
               v-model="product.internal_note"
               placeholder="Enter notes"
@@ -147,7 +150,7 @@ div
         <div class="col-span-2 flex flex-col gap-3">
           <!-- Ảnh -->
           <div class="rounded-lg bg-white p-3">
-            <p class="mb-2">Image</p>
+            <p class="mb-2 font-medium">Image</p>
             <div
               v-if="product.images"
               class="mb-2 flex gap-2 flex-wrap"
@@ -182,10 +185,10 @@ div
 
     <!-- footer -->
     <div
-      class="flex items-center gap-2 w-full border-t p-3 text-sm text-gray-700 bg-white justify-between font-medium"
+      class="text-base flex items-center gap-2 w-full border-t p-3 text-gray-700 bg-white justify-between font-medium"
     >
       <button
-        class="flex items-center bg-red-100 py-1.5 px-4 w-1/2 rounded-md justify-center gap-2 text-red-500"
+        class="flex items-center bg-red-100 py-2 px-4 w-1/2 rounded-md justify-center gap-2 text-red-500"
         @click="is_open = true"
       >
         <TrashIcon class="size-5" />
@@ -193,7 +196,7 @@ div
       </button>
       <button
         @click="updateAnProduct()"
-        class="bg-black text-white py-1.5 px-4 whitespace-nowrap rounded-md w-1/2"
+        class="bg-black text-white py-2 px-4 whitespace-nowrap rounded-md w-1/2"
       >
         Save
       </button>
@@ -226,9 +229,11 @@ div
 import { $merchant, $order } from '@/api'
 import { useToast } from '@/composables/useToast'
 import { get, isArray } from 'lodash'
-import { ref } from 'vue'
+import { ref, type PropType } from 'vue'
 
+import InputMoney from '@/components/ui/InputMoney.vue'
 import Modal from '@/components/ui/Modal.vue'
+import Select from '@/components/ui/Select.vue'
 
 import ImageUpload from '@/assets/icons/image-upload.svg'
 import { PlusCircleIcon, QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
@@ -238,13 +243,51 @@ import {
   XCircleIcon,
 } from '@heroicons/vue/24/solid'
 
-import type { Product } from '@/interfaces'
-import InputMoney from '@/components/ui/InputMoney.vue'
+import type { Category, Product } from '@/interfaces'
+
+/** danh sách sản phẩm */
+const STATUS = [
+  {
+    value: 'IN_STOCK',
+    name: 'In stock',
+    description: 'The product appears in search results with a warning.',
+  },
+  {
+    value: 'OUT_OF_STOCK',
+    name: 'Out stock',
+    description: 'The product appears in search results with a warning.',
+  },
+  {
+    value: 'On Sale',
+    name: 'ON_SALE',
+    description: 'The product does not appear in search results.',
+  },
+  {
+    value: 'NEW_ARRIVALS',
+    name: 'New arrivals',
+    description: 'The product does not appear in search results.',
+  },
+  {
+    value: 'ACTIVE',
+    name: 'Active',
+    description: '',
+  },
+  {
+    value: 'UNACTIVE',
+    name: 'Unactive',
+    description: "The product does not appear in search results.",
+  },
+  
+]
 
 const $props = defineProps({
   update: {
     type: Function,
     default: () => {},
+  },
+  categories: {
+    type: Array as PropType<Category[]>,
+    required: true,
   },
 })
 

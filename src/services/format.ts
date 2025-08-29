@@ -31,25 +31,24 @@ export function roundMoney(amount?: number) {
   return amount || 0
 }
 
-
 /**
  * Định dạng một giá trị số thành chuỗi tiền tệ theo loại tiền tệ đã chỉ định.
- * 
+ *
  * @param amount - Giá trị số cần định dạng thành chuỗi tiền tệ.
  * @returns Chuỗi tiền tệ đã định dạng với các thiết lập vùng lãnh thổ thích hợp.
- * 
- * Hàm này sử dụng `Intl.NumberFormat` để định dạng giá trị số theo vùng lãnh thổ 
- * tương ứng với loại tiền tệ đã chỉ định. Nó hỗ trợ các loại tiền tệ 
- * như Đồng Việt Nam (VND), Yên Nhật (JPY), Đô la Mỹ (USD), Euro (EUR), 
+ *
+ * Hàm này sử dụng `Intl.NumberFormat` để định dạng giá trị số theo vùng lãnh thổ
+ * tương ứng với loại tiền tệ đã chỉ định. Nó hỗ trợ các loại tiền tệ
+ * như Đồng Việt Nam (VND), Yên Nhật (JPY), Đô la Mỹ (USD), Euro (EUR),
  * Bảng Anh (GBP), Nhân dân tệ (CNY) và Won Hàn Quốc (KRW).
  * Nếu loại tiền tệ không được nhận dạng, nó sẽ mặc định là vùng lãnh thổ 'en-US'.
  * Số lượng chữ số phần thập phân tối thiểu được đặt là 0 cho VND, JPY và KRW, và 2 cho các loại khác.
  */
 export function formatCurrency(amount?: number): string {
-	// if (!amount) return ''
+  // if (!amount) return ''
 
-	/** loại tiền tệ */
-	const CURRENCY = localStorage.getItem('currency') || 'USD'
+  /** loại tiền tệ */
+  const CURRENCY = localStorage.getItem('currency') || 'USD'
 
   // Map giữa currency và locale tương ứng
   const CURRENCY_LOCALE_MAP: Record<string, string> = {
@@ -69,7 +68,29 @@ export function formatCurrency(amount?: number): string {
     style: 'currency',
     currency: CURRENCY,
     minimumFractionDigits: ['VND', 'JPY', 'KRW'].includes(CURRENCY) ? 0 : 2,
-  }).format(amount||0)
+  }).format(amount || 0)
 
-	return RESULT
+  return RESULT
+}
+
+/**
+ * format tiếng việt thành tiếng việt không dấu
+ * đổi toàn bộ chữ hoa thành chữ thường
+ *
+ * vd: Xin chào các bạn  -> xin chao cac ban
+ */
+export const nonAccentVn = (input: string): string => {
+  input = input.toLowerCase()
+
+  input = input.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
+  input = input.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
+  input = input.replace(/ì|í|ị|ỉ|ĩ/g, 'i')
+  input = input.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o')
+  input = input.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u')
+  input = input.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y')
+  input = input.replace(/đ/g, 'd')
+  input = input.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, '')
+  input = input.replace(/\u02C6|\u0306|\u031B/g, '')
+
+  return input
 }

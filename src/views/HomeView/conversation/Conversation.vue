@@ -14,7 +14,7 @@
       /> -->
     </section>
 
-    <AskRetionButton />
+    <!-- <AskRetionButton /> -->
   </article>
 </template>
   
