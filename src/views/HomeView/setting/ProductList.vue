@@ -1,7 +1,34 @@
 <template>
-  <section>
-    <header>
-      
+  <section class="flex flex-col h-full overflow-hidden">
+    <header class="px-3 pb-3 flex flex-col gap-2">
+      <input
+        type="text"
+        placeholder="Search products..."
+        class="w-full border rounded-md px-3 py-2 outline-none placeholder:text-slate-400"
+        v-model="search"
+        @input="searchProduct"
+      />
+      <ul class="flex gap-2 overflow-auto w-full">
+        <li
+          class="min-w-max px-3 py-1 border border-slate-200 rounded-full cursor-pointer"
+          :class="{
+            'bg-blue-700 text-white': !category_selected,
+          }"
+          @click="selectCategory()"
+        >
+          All
+        </li>
+        <li
+          v-for="item of categories"
+          class="min-w-max px-3 py-1 border border-slate-200 rounded-full cursor-pointer"
+          :class="{
+            'bg-blue-700 text-white': category_selected === item.category_id,
+          }"
+          @click="selectCategory(item)"
+        >
+          {{ item?.name }}
+        </li>
+      </ul>
     </header>
     <div class="flex flex-col overflow-y-auto h-full w-full overflow-x-hidden">
       <div
@@ -68,18 +95,44 @@
         />
       </div>
     </div>
+
+    <div class="flex items-center justify-end gap-2 flex-shrink-0 pt-3 px-4">
+      <button
+        class="bg-white border size-7 flex justify-center items-center rounded hover:bg-slate-100"
+        :class="{
+          '!bg-slate-200 pointer-events-none': page <= 0,
+        }"
+        @click="changePage(page - 1)"
+      >
+        <ChevronDownIcon class="w-5 h-5 text-slate-500 rotate-90" />
+      </button>
+      <button
+        class="bg-blue-700 py-0.5 px-2.5 rounded-md text-white w-max text-base"
+      >
+        {{ page + 1 }}
+      </button>
+      <button
+        class="bg-white border size-7 flex justify-center items-center rounded hover:bg-slate-100"
+        :class="{
+          '!bg-slate-200 pointer-events-none': !(products.length === PAGE_SIZE),
+        }"
+        @click="changePage(page + 1)"
+      >
+        <ChevronDownIcon class="w-5 h-5 text-slate-500 -rotate-90" />
+      </button>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import { $order } from '@/api'
 import { formatCurrency } from '@/services/format'
-import { get } from 'lodash'
+import { debounce, get } from 'lodash'
 import { onMounted, ref } from 'vue'
 
 import ProductDetail from '@/views/HomeView/setting/ProductDetail.vue'
 
-import { CubeIcon } from '@heroicons/vue/24/solid'
+import { ChevronDownIcon, CubeIcon } from '@heroicons/vue/24/solid'
 
 import { type Category, type Product } from '@/interfaces'
 
@@ -89,7 +142,14 @@ const products = ref<Product[]>([])
 const product = ref<Product>({})
 /** index của sản phẩm */
 const product_index = ref(-1)
-
+/** số trang hiện tại */
+const page = ref(0)
+/** số bản ghi một lần lấy */
+const PAGE_SIZE = 25
+/** Từ khóa tìm kiếm */
+const search = ref<string>('')
+/** Danh mục được chọn */
+const category_selected = ref<string>('')
 /** danh sách danh mục */
 const categories = ref<Category[]>([])
 
@@ -98,11 +158,24 @@ onMounted(() => {
   getCategories()
 })
 
+/** debounce search sản phẩm */
+const searchProduct = debounce(() => {
+  page.value = 0
+  getProduct()
+}, 300)
+
 /** Lấy danh sách sản phẩm */
 async function getProduct() {
   try {
     /** danh sách sản phẩm */
-    const RES = await $order.getProducts({ skip: 0, limit: 20 })
+    const RES = await $order.getProducts({
+      ...(search.value ? { search: search.value } : {}),
+      ...(category_selected.value
+        ? { category_id: category_selected.value }
+        : {}),
+      skip: page.value * PAGE_SIZE,
+      limit: PAGE_SIZE,
+    })
     // lưu lại danh sách
     products.value = RES
   } catch (e) {
@@ -114,7 +187,10 @@ async function getProduct() {
 async function getCategories(skip: number = 0) {
   try {
     /** danh sách danh mục api trả về */
-    const RES = await $order.getCategories({ skip, limit: 20 })
+    const RES = await $order.getCategories({
+      skip,
+      limit: 20,
+    })
 
     // nếu là trang đầu tiên thì ghi đè
     if (skip === 0) categories.value = RES
@@ -139,5 +215,18 @@ function chooseProduct(item: Product, index: number) {
 /** cập nhật sản phẩm trong danh sách */
 function updateProduct() {
   products.value[product_index.value] = product.value
+}
+
+/** chuyển trang */
+function changePage(value: number) {
+  page.value = value
+  getProduct()
+}
+
+/** chuyển danh mục */
+function selectCategory(item?: Category) {
+  category_selected.value = item?.category_id || ''
+  page.value = 0
+  getProduct()
 }
 </script>
