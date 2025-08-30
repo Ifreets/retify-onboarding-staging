@@ -1,5 +1,6 @@
 <template>
   <section class="flex flex-col h-full overflow-hidden">
+    <!-- header -->
     <header class="px-3 pb-3 flex flex-col gap-2">
       <input
         type="text"
@@ -30,6 +31,7 @@
         </li>
       </ul>
     </header>
+    <!-- Danh sách sản phẩm -->
     <div class="flex flex-col overflow-y-auto h-full w-full overflow-x-hidden">
       <div
         v-for="(item, index) of products"
@@ -64,62 +66,46 @@
             <p class="text-base font-medium">
               {{ formatCurrency(item?.price) || 0 }}
             </p>
-            <div class="flex gap-3 justify-end text-xs">
-              <p v-if="item?.type === 'product'">
-                Stock
-                <span
-                  :class="{
-                    'text-red-500':
-                      item?.stock_quantity && item.stock_quantity < 0,
-                  }"
-                  >{{ item?.stock_quantity }}
-                </span>
-              </p>
-            </div>
           </div>
         </div>
       </div>
-
-      <div
-        class="absolute top-0 left-0 w-full h-full transition-all duration-500"
-        :class="{
-          'translate-x-0 opacity-100': product.product_id,
-          'translate-x-full opacity-0': !product.product_id,
-        }"
-      >
-        <ProductDetail
-          v-model:product="product"
-          v-model:product_index="product_index"
-          @update="updateProduct"
-          :categories="categories"
-        />
-      </div>
     </div>
-
-    <div class="flex items-center justify-end gap-2 flex-shrink-0 pt-3 px-4">
+    <!-- Phân trang -->
+    <Pagination
+      class="pt-2"
+      v-model:page="page"
+      :total="total_product"
+      :sibling-count="1"
+      :items-per-page="PAGE_SIZE"
+      :change-page="getProduct"
+    />
+    <!-- Nút tạo mới -->
+    <div class="absolute bottom-14 right-5">
       <button
-        class="bg-white border size-7 flex justify-center items-center rounded hover:bg-slate-100"
-        :class="{
-          '!bg-slate-200 pointer-events-none': page <= 0,
-        }"
-        @click="changePage(page - 1)"
+        class="rounded-full flex justify-center items-center bg-blue-700 text-white px-4 py-2 font-medium gap-2"
+        @click="addProduct()"
       >
-        <ChevronDownIcon class="w-5 h-5 text-slate-500 rotate-90" />
+        <PlusIcon class="size-5" />
+        Add New
       </button>
-      <button
-        class="bg-blue-700 py-0.5 px-2.5 rounded-md text-white w-max text-base"
-      >
-        {{ page + 1 }}
-      </button>
-      <button
-        class="bg-white border size-7 flex justify-center items-center rounded hover:bg-slate-100"
-        :class="{
-          '!bg-slate-200 pointer-events-none': !(products.length === PAGE_SIZE),
-        }"
-        @click="changePage(page + 1)"
-      >
-        <ChevronDownIcon class="w-5 h-5 text-slate-500 -rotate-90" />
-      </button>
+    </div>
+    <!-- Chi tiết sản phẩm -->
+    <div
+      class="absolute top-0 left-0 w-full h-full transition-all duration-500"
+      :class="{
+        'translate-x-0 opacity-100': view !== 'list',
+        'translate-x-full opacity-0': view == 'list',
+      }"
+    >
+      <ProductDetail
+        v-model:view="view"
+        v-model:product="product"
+        v-model:product_index="product_index"
+        :create="createProduct"
+        :update="updateProduct"
+        :delete="deleteProduct"
+        :categories="categories"
+      />
     </div>
   </section>
 </template>
@@ -130,12 +116,18 @@ import { formatCurrency } from '@/services/format'
 import { debounce, get } from 'lodash'
 import { onMounted, ref } from 'vue'
 
-import ProductDetail from '@/views/HomeView/setting/ProductDetail.vue'
+import Pagination from '@/components/ui/Pagination.vue'
+import ProductDetail from '@/views/HomeView/setting/product/ProductDetail.vue'
 
-import { ChevronDownIcon, CubeIcon } from '@heroicons/vue/24/solid'
+import { ChevronDownIcon, CubeIcon, PlusIcon } from '@heroicons/vue/24/solid'
 
 import { type Category, type Product } from '@/interfaces'
 
+/** màn hình hiển thị */
+const view = ref<'form' | 'list'>('list')
+
+/** tổng số sản phẩm */
+const total_product = ref(0)
 /** danh sách sản phẩm */
 const products = ref<Product[]>([])
 /** dữ liệu của sản phẩm */
@@ -143,7 +135,7 @@ const product = ref<Product>({})
 /** index của sản phẩm */
 const product_index = ref(-1)
 /** số trang hiện tại */
-const page = ref(0)
+const page = ref(1)
 /** số bản ghi một lần lấy */
 const PAGE_SIZE = 25
 /** Từ khóa tìm kiếm */
@@ -154,15 +146,21 @@ const category_selected = ref<string>('')
 const categories = ref<Category[]>([])
 
 onMounted(() => {
-  getProduct()
+  getDataFilter()
   getCategories()
 })
 
 /** debounce search sản phẩm */
 const searchProduct = debounce(() => {
-  page.value = 0
-  getProduct()
+  getDataFilter()
 }, 300)
+
+/** hàm lấy dữ liệu khi có lọc */
+function getDataFilter() {
+  page.value = 1
+  getProduct()
+  getTotalProduct()
+}
 
 /** Lấy danh sách sản phẩm */
 async function getProduct() {
@@ -173,11 +171,29 @@ async function getProduct() {
       ...(category_selected.value
         ? { category_id: category_selected.value }
         : {}),
-      skip: page.value * PAGE_SIZE,
+      skip: (page.value - 1) * PAGE_SIZE,
       limit: PAGE_SIZE,
     })
     // lưu lại danh sách
     products.value = RES
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+/** lấy tổng số sản phẩm */
+async function getTotalProduct() {
+  try {
+    /** dữ liệu số lượng sản phẩm trả về */
+    const RES = await $order.countProducts({
+      ...(search.value ? { search: search.value } : {}),
+      ...(category_selected.value
+        ? { category_id: category_selected.value }
+        : {}),
+    })
+    
+    // lưu lại tổng số sản phẩm
+    total_product.value = RES?.count || 0
   } catch (e) {
     console.log(e)
   }
@@ -210,6 +226,12 @@ async function getCategories(skip: number = 0) {
 function chooseProduct(item: Product, index: number) {
   product.value = item
   product_index.value = index
+  view.value = 'form'
+}
+
+/** thêm mới sản phẩm vào danh sách */
+function createProduct(product: Product) {
+  products.value = [product, ...products.value]
 }
 
 /** cập nhật sản phẩm trong danh sách */
@@ -217,16 +239,20 @@ function updateProduct() {
   products.value[product_index.value] = product.value
 }
 
-/** chuyển trang */
-function changePage(value: number) {
-  page.value = value
-  getProduct()
+/** xóa sản phẩm trong danh sách */
+function deleteProduct(index: number) {
+  products.value = products.value.filter((item, i) => i !== index)
 }
 
 /** chuyển danh mục */
 function selectCategory(item?: Category) {
   category_selected.value = item?.category_id || ''
-  page.value = 0
-  getProduct()
+  getDataFilter()
+}
+
+/** Chuyển sang màn thêm mới sản phẩm */
+function addProduct() {
+  product.value = {}
+  view.value = 'form'
 }
 </script>

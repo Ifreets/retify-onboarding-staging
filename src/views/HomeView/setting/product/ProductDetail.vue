@@ -12,7 +12,18 @@ div
         <ChevronDownIcon class="text-sky-600 w-4 rotate-90" />
         <span class="text-blue-500">Back</span>
       </button>
-      <p class="font-medium">#{{ product.product_id }}</p>
+      <p
+        class="font-medium"
+        v-if="product.product_id"
+      >
+        #{{ product.product_id }}
+      </p>
+      <p
+        class="font-medium"
+        v-else
+      >
+        New Product
+      </p>
       <div class="w-14"></div>
     </div>
 
@@ -66,7 +77,9 @@ div
             class="grid grid-cols-2 gap-2"
           >
             <div>
-              <p class="mb-1 font-medium">Cost</p>
+              <p class="mb-1 font-medium">
+                Cost <span class="text-red-500">*</span>
+              </p>
               <InputMoney
                 class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
                 placeholder="Import price"
@@ -87,7 +100,7 @@ div
           <!-- Trạng thái -->
           <div>
             <p class="mb-1 font-medium">Status</p>
-            <Select 
+            <Select
               v-model="product.status"
               :options="STATUS"
               :label_field="'name'"
@@ -99,7 +112,7 @@ div
           <!-- Danh mục -->
           <div>
             <p class="mb-1 font-medium">Category</p>
-            <Select 
+            <Select
               v-model="product.category_id"
               :options="categories"
               :label_field="'name'"
@@ -127,7 +140,7 @@ div
               class="border px-3 py-1.5 w-full h-14 rounded-md focus:outline-none"
             ></textarea>
           </div>
-          <div>
+          <!-- <div>
             <label class="inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
@@ -143,7 +156,7 @@ div
                 Allow sale when quantity runs out
               </span>
             </label>
-          </div>
+          </div> -->
         </div>
 
         <!-- Right -->
@@ -202,21 +215,23 @@ div
       </button>
     </div>
 
-    <Modal
-      v-model:is_open="is_open"
-    >
-      <div class="flex flex-col gap-3 items-center font-medium">
-        <QuestionMarkCircleIcon class="size-20" />
-        <p class="text-2xl text-center">Are you sure you want to confirm delete this product?</p>
-        <div class="flex justify-between gap-2 w-full pt-4">
-          <button class="px-7 py-2 bg-red-100 text-red-500 rounded-md"
+    <Modal v-model:is_open="is_open" :container_class="'w-[360px]'">
+      <div class="flex flex-col items-center font-medium">
+        <QuestionMarkCircleIcon class="size-20 text-orange-400" />
+        <p class="text-xl text-center">
+          Are you sure you want to confirm delete this product?
+        </p>
+        <div class="flex justify-between gap-2 w-full pt-4 px-7">
+          <button
+            class="px-7 py-2 bg-red-100 text-red-500 rounded-md"
             @click="is_open = false"
           >
             Cancel
           </button>
-          <button class="px-7 py-2 bg-blue-100 text-blue-700 rounded-md"
-          @click="deleteAnProduct()"
-            >
+          <button
+            class="px-7 py-2 bg-blue-100 text-blue-700 rounded-md"
+            @click="deleteAnProduct()"
+          >
             Confirm
           </button>
         </div>
@@ -236,7 +251,10 @@ import Modal from '@/components/ui/Modal.vue'
 import Select from '@/components/ui/Select.vue'
 
 import ImageUpload from '@/assets/icons/image-upload.svg'
-import { PlusCircleIcon, QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
+import {
+  PlusCircleIcon,
+  QuestionMarkCircleIcon,
+} from '@heroicons/vue/24/outline'
 import {
   ChevronDownIcon,
   TrashIcon,
@@ -275,13 +293,20 @@ const STATUS = [
   {
     value: 'UNACTIVE',
     name: 'Unactive',
-    description: "The product does not appear in search results.",
+    description: 'The product does not appear in search results.',
   },
-  
 ]
 
 const $props = defineProps({
+  create: {
+    type: Function,
+    default: () => {},
+  },
   update: {
+    type: Function,
+    default: () => {},
+  },
+  delete: {
     type: Function,
     default: () => {},
   },
@@ -289,6 +314,11 @@ const $props = defineProps({
     type: Array as PropType<Category[]>,
     required: true,
   },
+})
+
+/** màn hình hiển thị */
+const view = defineModel<'form' | 'list'>('view', {
+  default: 'form',
 })
 
 /** dữ liệu sản phẩm đã chọn */
@@ -310,6 +340,7 @@ const { notify } = useToast()
 function closeForm() {
   product.value = {}
   product_index.value = -1
+  view.value = 'list'
 }
 
 /** Tạo barcode cho sản phẩm */
@@ -407,6 +438,15 @@ async function deleteAnProduct() {
     if (!product.value.id) return
     // * Xóa san pham
     await $order.deleteProduct(product.value.id)
+
+    // xóa trong mảng
+    $props.delete(product_index.value)
+
+    // Thông báo
+    notify('Delete successfully!')
+
+    // đóng modal
+    is_open.value = false
     // * Đóng form
     closeForm()
   } catch (e) {
@@ -420,22 +460,45 @@ async function updateAnProduct() {
     /** validate các field */
     validateProduct()
 
-    // * Cập nhật sản phẩm
-    await $order.updateProduct({
-      ...product.value,
-      ...{
-        cost: Number(product.value.cost),
-        price: Number(product.value.price),
-        wholesale_price: Number(product.value.wholesale_price),
-        service_fee: Number(product.value.service_fee),
-      },
-    })
+    // nếu có id thì là cập nhật
+    if(product.value.id) {
+      // * Cập nhật sản phẩm
+      await $order.updateProduct({
+        ...product.value,
+        ...{
+          cost: Number(product.value.cost),
+          price: Number(product.value.price),
+          wholesale_price: Number(product.value.wholesale_price),
+          service_fee: Number(product.value.service_fee),
+        },
+      })
 
-    // * Thông báo
-    notify('Update successfully!')
+      // * Thông báo
+      notify('Update successfully!')
 
-    // cập nhật trong mảng sản phẩm
-    $props.update()
+      // cập nhật trong mảng sản phẩm
+      $props.update()
+    } else {
+      // * Cập nhật sản phẩm
+      const RES = await $order.createProduct({
+        ...product.value,
+        ...{
+          cost: Number(product.value.cost),
+          price: Number(product.value.price),
+          wholesale_price: Number(product.value.wholesale_price),
+          service_fee: Number(product.value.service_fee),
+        },
+      })
+
+      // * Thông báo
+      notify('Create successfully!')
+
+      // cập nhật trong mảng sản phẩm
+      $props.create(RES)
+    }
+
+
+    
 
     // * Đóng form
     closeForm()
@@ -453,7 +516,7 @@ function validateProduct() {
   /** nếu tên sản phẩm không hợp lệ */
   if (!product.value.name?.trim()) throw 'Name is required'
 
-  /** loại sản phẩm không hợp lệ */
-  // if (!product.value.type) throw 'Product type is required'
+  /** nếu chưa nhập đơn giá */
+  if (!Number(product.value.cost)) throw 'Unit price is required'
 }
 </script>

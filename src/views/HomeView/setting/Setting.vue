@@ -38,7 +38,7 @@ import { useRouter } from 'vue-router';
 import { computed, ref, type Component } from 'vue';
 
 import PosSystem from '@/views/HomeView/setting/PosSystem.vue';
-import ProductList from '@/views/HomeView/setting/ProductList.vue';
+import ProductList from '@/views/HomeView/setting/product/ProductList.vue';
 import QrLink from '@/views/HomeView/setting/QrLink.vue';
 import SettingsHome from '@/views/HomeView/setting/SettingsHome.vue';
 import LoadingFullScreen from '@/components/ui/LoadingFullScreen.vue';

@@ -30,6 +30,7 @@
         <p
           v-if="!is_search"
           class="text-sm"
+          :class="[!v && 'text-slate-500']"
         >
           {{ getLabel(v) || placeholder }}
         </p>

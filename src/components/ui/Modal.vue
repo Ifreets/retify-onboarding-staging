@@ -7,6 +7,7 @@
       >
         <div
           class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative"
+          :class="container_class"
           @click.stop
         >
           <!-- Close button -->
@@ -36,6 +37,13 @@
 </template>
 
 <script lang="ts" setup>
+const $props = defineProps({
+  container_class: {
+    type: String,
+    default: ''
+  }
+})  
+
 /** đóng mở modal */
 const is_open = defineModel<boolean>('is_open', {
   type: Boolean,

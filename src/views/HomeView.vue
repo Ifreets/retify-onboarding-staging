@@ -26,10 +26,10 @@
       </div>
     </div>
 
-    <div
+    <!-- <div
       @click="show = !show"
       class="h-10 w-10 m-auto absolute bottom-0 left-0"
-    ></div>
+    ></div> -->
     <!-- <Navigation /> -->
   </main>
 </template>

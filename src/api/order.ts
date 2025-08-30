@@ -57,6 +57,16 @@ export class OrderServiceAPI {
     return this.#post('product/get_product', data)
   }
 
+  /** tổng số sản phẩm */
+  countProducts(data: { }) {
+    return this.#post('product/count_product',data)
+  }
+
+  /** tạo mới sản phẩm */
+  createProduct(data: Product) {
+    return this.#post('product/create_product', data)
+  }
+
   /** cập nhật sản phẩm */
   updateProduct(data: Product) {
     return this.#post('product/update_product', data)
