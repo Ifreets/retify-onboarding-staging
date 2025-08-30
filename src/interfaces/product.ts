@@ -359,3 +359,44 @@ export interface Category {
     /** Tổng số sản phẩm */
     total_products?: number;
 }
+
+
+/** dữ liệu thẻ */
+export interface Label {
+  /** ID duy nhất của nhãn */
+  id?: string;
+  /** ID của nhãn */
+  label_id?: number;
+  /** Loại nhãn (ví dụ: CUSTOM) */
+  label_type?: string;
+  /** Mã trạng thái (có thể null) */
+  status_code?: string | null;
+  /** Nhóm nhãn (ví dụ: PRODUCT) */
+  label_group?: string;
+  /** Tiêu đề của nhãn */
+  title?: string;
+  /** Màu chữ của nhãn */
+  text_color?: string;
+  /** Màu nền của nhãn */
+  bg_color?: string;
+  /** ID của ứng dụng liên quan */
+  app_id?: string;
+  /** ID doanh nghiệp */
+  business_id?: string;
+  /** ID chi nhánh */
+  branch_id?: string;
+  /** ID phòng ban */
+  department_id?: string;
+  /** ID nhóm (có thể null) */
+  team_id?: string | null;
+  /** ID nhân viên */
+  employee_id?: string;
+  /** ID người dùng */
+  user_id?: string;
+  /** Trạng thái lưu trữ của nhãn */
+  is_archived?: boolean;
+  /** Ngày tạo nhãn */
+  createdAt?: string;
+  /** Ngày cập nhật nhãn */
+  updatedAt?: string;
+}

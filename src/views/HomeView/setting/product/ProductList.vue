@@ -105,6 +105,7 @@
         :update="updateProduct"
         :delete="deleteProduct"
         :categories="categories"
+        :labels="labels"
       />
     </div>
   </section>
@@ -121,7 +122,7 @@ import ProductDetail from '@/views/HomeView/setting/product/ProductDetail.vue'
 
 import { ChevronDownIcon, CubeIcon, PlusIcon } from '@heroicons/vue/24/solid'
 
-import { type Category, type Product } from '@/interfaces'
+import { type Category, type Label, type Product } from '@/interfaces'
 
 /** màn hình hiển thị */
 const view = ref<'form' | 'list'>('list')
@@ -144,10 +145,13 @@ const search = ref<string>('')
 const category_selected = ref<string>('')
 /** danh sách danh mục */
 const categories = ref<Category[]>([])
+/** danh sách label */
+const labels = ref<Label[]>([])
 
 onMounted(() => {
   getDataFilter()
   getCategories()
+  getLabels()
 })
 
 /** debounce search sản phẩm */
@@ -217,6 +221,18 @@ async function getCategories(skip: number = 0) {
     if (RES.length < 20) return
     // nếu chưa hết thì lấy trang tiếp
     getCategories(skip + 20)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+/** hàm lấy danh sách nhãn */
+async function getLabels() {
+  try {
+    /** dữ liệu cơ bản trả về */
+    const RES = await $order.getLabels()
+    // lưu lại danh sách
+    labels.value = RES
   } catch (e) {
     console.log(e)
   }

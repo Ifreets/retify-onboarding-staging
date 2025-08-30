@@ -58,8 +58,8 @@ export class OrderServiceAPI {
   }
 
   /** tổng số sản phẩm */
-  countProducts(data: { }) {
-    return this.#post('product/count_product',data)
+  countProducts(data: {}) {
+    return this.#post('product/count_product', data)
   }
 
   /** tạo mới sản phẩm */
@@ -95,13 +95,21 @@ export class OrderServiceAPI {
   /** tạo link oauth */
   createOauthLink() {
     return this.#post('integration/authorization', {
-      platform: 'SQUARE'
+      platform: 'SQUARE',
     })
   }
 
   /** danh sách danh mục */
   getCategories(data: { skip?: number; limit?: number }) {
     return this.#post('category/get_category', data)
+  }
+
+  /** danh sách nhãn */
+  getLabels() {
+    return this.#post('label/get_label', {
+      app_id: 'PRODUCT',
+      sort: { createdAt: 'asc' },
+    })
   }
 }
 

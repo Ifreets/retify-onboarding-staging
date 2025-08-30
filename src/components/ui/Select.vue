@@ -122,7 +122,7 @@ const open = ref(false)
 const search = ref('')
 
 /** map giá trị - option */
-const MAP_VALUE_DATA = computed(() => {
+const map_value_data = computed(() => {
   // lấy field chứa giá trị được truyền vào qua props
   const { options, value_field } = $props
   // nếu không truyền vào field giá trị thì thôi
@@ -140,7 +140,7 @@ function getLabel(value: unknown) {
   // nếu không có field giá trị label thì trả về giá trị đang chọn
   if (!label_field) return value
   // nếu có thì mấy trong map ra để hiện
-  return MAP_VALUE_DATA.value?.get(value)?.[label_field] ?? value
+  return map_value_data.value?.get(value)?.[label_field] ?? value
 }
 
 /** hàm lọc theo giá trị label */

@@ -31,167 +31,153 @@ div
     <div
       class="bg-slate-100 text-sm flex flex-col gap-4 p-2 h-full overflow-auto"
     >
-      <div class="grid grid-cols-2 gap-3">
-        <!-- Left -->
-        <div class="col-span-2 rounded-lg bg-white p-3 flex flex-col gap-2">
+      <div class="rounded-lg bg-white p-3 flex flex-col gap-2">
+        <!-- Tên -->
+        <div>
+          <p class="mb-1 font-medium">
+            Product name
+            <span class="text-red-500">*</span>
+          </p>
+          <input
+            v-model="product.name"
+            type="text"
+            placeholder="Product name"
+            class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
+          />
+        </div>
+        <!-- ID -->
+        <div class="grid grid-cols-2 gap-2">
           <div>
-            <p class="mb-1 font-medium">
-              Product name
-              <span class="text-red-500">*</span>
-            </p>
+            <p class="mb-1 font-medium">Product ID</p>
             <input
-              v-model="product.name"
+              v-model="product.product_id"
               type="text"
-              placeholder="Product name"
+              placeholder="Product ID"
+              class="border px-3 py-1.5 w-full rounded-md focus:outline-none cursor-not-allowed read-only:bg-slate-100"
+              readonly
+            />
+          </div>
+          <div class="relative">
+            <p class="mb-1 font-medium">BarCode</p>
+            <input
+              v-model="product.barcode"
+              type="text"
+              placeholder="BarCode"
               class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
             />
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <p class="mb-1 font-medium">Product ID</p>
-              <input
-                v-model="product.product_id"
-                type="text"
-                placeholder="Product ID"
-                class="border px-3 py-1.5 w-full rounded-md focus:outline-none cursor-not-allowed read-only:bg-slate-100"
-                readonly
-              />
-            </div>
-            <div class="relative">
-              <p class="mb-1 font-medium">BarCode</p>
-              <input
-                v-model="product.barcode"
-                type="text"
-                placeholder="BarCode"
-                class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
-              />
-              <PlusCircleIcon
-                v-if="!product.barcode"
-                @click="createBarcode(product.id || '')"
-                class="absolute bottom-1.5 right-3 w-5 h-5 cursor-pointer"
-              />
-            </div>
-          </div>
-          <div
-            v-if="!product.variant_options"
-            class="grid grid-cols-2 gap-2"
-          >
-            <div>
-              <p class="mb-1 font-medium">
-                Cost <span class="text-red-500">*</span>
-              </p>
-              <InputMoney
-                class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
-                placeholder="Import price"
-                :min="0"
-                v-model="product.cost"
-              />
-            </div>
-            <div v-if="product.type !== 'gmv'">
-              <p class="mb-1 font-medium">Price</p>
-              <InputMoney
-                class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
-                placeholder="Selling price"
-                :min="0"
-                v-model="product.price"
-              />
-            </div>
-          </div>
-          <!-- Trạng thái -->
-          <div>
-            <p class="mb-1 font-medium">Status</p>
-            <Select
-              v-model="product.status"
-              :options="STATUS"
-              :label_field="'name'"
-              :value_field="'value'"
-              placeholder="Choose status"
+            <PlusCircleIcon
+              v-if="!product.barcode"
+              @click="createBarcode(product.id || '')"
+              class="absolute bottom-1.5 right-3 w-5 h-5 cursor-pointer"
             />
           </div>
-
-          <!-- Danh mục -->
-          <div>
-            <p class="mb-1 font-medium">Category</p>
-            <Select
-              v-model="product.category_id"
-              :options="categories"
-              :label_field="'name'"
-              :value_field="'category_id'"
-              placeholder="Seach name category"
-              :is_search="true"
-            />
-          </div>
-
-          <!-- Mô tả -->
-          <div>
-            <p class="mb-1 font-medium">Description</p>
-            <textarea
-              v-model="product.description"
-              placeholder="Enter description"
-              class="border px-3 py-1.5 w-full h-14 rounded-md focus:outline-none"
-            ></textarea>
-          </div>
-          <!-- Ghi chú nội bộ -->
-          <div>
-            <p class="mb-1 font-medium">Internal note</p>
-            <textarea
-              v-model="product.internal_note"
-              placeholder="Enter notes"
-              class="border px-3 py-1.5 w-full h-14 rounded-md focus:outline-none"
-            ></textarea>
-          </div>
-          <!-- <div>
-            <label class="inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                class="sr-only peer"
-                v-model="product.sold_when_quantity_runs_out"
-              />
-              <div
-                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-0 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-800"
-              ></div>
-              <span
-                class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-              >
-                Allow sale when quantity runs out
-              </span>
-            </label>
-          </div> -->
         </div>
-
-        <!-- Right -->
-        <div class="col-span-2 flex flex-col gap-3">
-          <!-- Ảnh -->
-          <div class="rounded-lg bg-white p-3">
-            <p class="mb-2 font-medium">Image</p>
-            <div
-              v-if="product.images"
-              class="mb-2 flex gap-2 flex-wrap"
-            >
-              <div
-                v-for="(img, index) in product.images"
-                class="relative w-fit group border-2 border-white rounded-lg"
-                :key="index"
-              >
-                <img
-                  :src="img"
-                  class="rounded-md w-16 h-16 object-cover"
-                />
-                <XCircleIcon
-                  @click="removeImage(index)"
-                  class="w-5 absolute -top-1 -right-1 cursor-pointer text-red-500"
-                />
-              </div>
-            </div>
-            <button
-              @click="selectFile"
-              class="rounded-lg border border-slate-500 border-dashed flex gap-2 px-3 py-2 bg-slate-100 text-xs text-gray-500"
-            >
-              <img :src="ImageUpload" />
-              Upload smaller image (5mb)
-            </button>
+        <!-- Giá -->
+        <div
+          v-if="!product.variant_options"
+          class="grid grid-cols-2 gap-2"
+        >
+          <div>
+            <p class="mb-1 font-medium">
+              Cost <span class="text-red-500">*</span>
+            </p>
+            <InputMoney
+              class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
+              placeholder="Import price"
+              :min="0"
+              v-model="product.cost"
+            />
           </div>
-          <!-- Ảnh -->
+          <div v-if="product.type !== 'gmv'">
+            <p class="mb-1 font-medium">Price</p>
+            <InputMoney
+              class="border px-3 py-1.5 w-full rounded-md focus:outline-none"
+              placeholder="Selling price"
+              :min="0"
+              v-model="product.price"
+            />
+          </div>
+        </div>
+        <!-- Trạng thái -->
+        <div>
+          <p class="mb-1 font-medium">Status</p>
+          <Select
+            v-model="product.status"
+            :options="STATUS"
+            :label_field="'name'"
+            :value_field="'value'"
+            placeholder="Choose status"
+          />
+        </div>
+        <!-- Danh mục -->
+        <div>
+          <p class="mb-1 font-medium">Category</p>
+          <Select
+            v-model="product.category_id"
+            :options="categories"
+            :label_field="'name'"
+            :value_field="'category_id'"
+            placeholder="Seach name category"
+            :is_search="true"
+          />
+        </div>
+        <!-- Thẻ -->
+        <div>
+          <p class="mb-1 font-medium">Tag</p>
+          <MutipleSelect
+            v-model="product.labels"
+            :options="labels"
+            :label_field="'title'"
+            :value_field="'label_id'"
+          />
+        </div>
+        <!-- Mô tả -->
+        <div>
+          <p class="mb-1 font-medium">Description</p>
+          <textarea
+            v-model="product.description"
+            placeholder="Enter description"
+            class="border px-3 py-1.5 w-full h-14 rounded-md focus:outline-none"
+          ></textarea>
+        </div>
+        <!-- Ghi chú nội bộ -->
+        <div>
+          <p class="mb-1 font-medium">Internal note</p>
+          <textarea
+            v-model="product.internal_note"
+            placeholder="Enter notes"
+            class="border px-3 py-1.5 w-full h-14 rounded-md focus:outline-none"
+          ></textarea>
+        </div>
+        <!-- Ảnh -->
+        <div class="">
+          <p class="mb-2 font-medium">Image</p>
+          <div
+            v-if="product.images"
+            class="mb-2 flex gap-2 flex-wrap"
+          >
+            <div
+              v-for="(img, index) in product.images"
+              class="relative w-fit group border-2 border-white rounded-lg"
+              :key="index"
+            >
+              <img
+                :src="img"
+                class="rounded-md w-16 h-16 object-cover"
+              />
+              <XCircleIcon
+                @click="removeImage(index)"
+                class="w-5 absolute -top-1 -right-1 cursor-pointer text-red-500"
+              />
+            </div>
+          </div>
+          <button
+            @click="selectFile"
+            class="rounded-lg border border-slate-500 border-dashed flex gap-2 px-3 py-2 bg-slate-100 text-xs text-gray-500"
+          >
+            <img :src="ImageUpload" />
+            Upload smaller image (5mb)
+          </button>
         </div>
       </div>
     </div>
@@ -215,7 +201,10 @@ div
       </button>
     </div>
 
-    <Modal v-model:is_open="is_open" :container_class="'w-[360px]'">
+    <Modal
+      v-model:is_open="is_open"
+      :container_class="'w-[360px]'"
+    >
       <div class="flex flex-col items-center font-medium">
         <QuestionMarkCircleIcon class="size-20 text-orange-400" />
         <p class="text-xl text-center">
@@ -248,6 +237,7 @@ import { ref, type PropType } from 'vue'
 
 import InputMoney from '@/components/ui/InputMoney.vue'
 import Modal from '@/components/ui/Modal.vue'
+import MutipleSelect from '@/components/ui/MutipleSelect.vue'
 import Select from '@/components/ui/Select.vue'
 
 import ImageUpload from '@/assets/icons/image-upload.svg'
@@ -261,7 +251,7 @@ import {
   XCircleIcon,
 } from '@heroicons/vue/24/solid'
 
-import type { Category, Product } from '@/interfaces'
+import type { Category, Label, Product } from '@/interfaces'
 
 /** danh sách sản phẩm */
 const STATUS = [
@@ -276,8 +266,8 @@ const STATUS = [
     description: 'The product appears in search results with a warning.',
   },
   {
-    value: 'On Sale',
-    name: 'ON_SALE',
+    value: 'ON_SALE',
+    name: 'On sale',
     description: 'The product does not appear in search results.',
   },
   {
@@ -312,6 +302,10 @@ const $props = defineProps({
   },
   categories: {
     type: Array as PropType<Category[]>,
+    required: true,
+  },
+  labels: {
+    type: Object as PropType<Label[]>,
     required: true,
   },
 })
@@ -461,7 +455,7 @@ async function updateAnProduct() {
     validateProduct()
 
     // nếu có id thì là cập nhật
-    if(product.value.id) {
+    if (product.value.id) {
       // * Cập nhật sản phẩm
       await $order.updateProduct({
         ...product.value,
@@ -496,9 +490,6 @@ async function updateAnProduct() {
       // cập nhật trong mảng sản phẩm
       $props.create(RES)
     }
-
-
-    
 
     // * Đóng form
     closeForm()
