@@ -117,7 +117,7 @@ div
             :options="categories"
             :label_field="'name'"
             :value_field="'category_id'"
-            placeholder="Seach name category"
+            placeholder="Choose category"
             :is_search="true"
           />
         </div>
@@ -129,6 +129,7 @@ div
             :options="labels"
             :label_field="'title'"
             :value_field="'label_id'"
+            placeholder="Choose tag"
           />
         </div>
         <!-- Mô tả -->
