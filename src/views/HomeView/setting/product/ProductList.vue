@@ -122,7 +122,7 @@ import ProductDetail from '@/views/HomeView/setting/product/ProductDetail.vue'
 
 import { ChevronDownIcon, CubeIcon, PlusIcon } from '@heroicons/vue/24/solid'
 
-import { type Category, type Label, type Product } from '@/interfaces'
+import { type Category, type ProductLabel, type Product } from '@/interfaces'
 
 /** màn hình hiển thị */
 const view = ref<'form' | 'list'>('list')
@@ -146,7 +146,7 @@ const category_selected = ref<string>('')
 /** danh sách danh mục */
 const categories = ref<Category[]>([])
 /** danh sách label */
-const labels = ref<Label[]>([])
+const labels = ref<ProductLabel[]>([])
 
 onMounted(() => {
   getDataFilter()
@@ -195,7 +195,7 @@ async function getTotalProduct() {
         ? { category_id: category_selected.value }
         : {}),
     })
-    
+
     // lưu lại tổng số sản phẩm
     total_product.value = RES?.count || 0
   } catch (e) {

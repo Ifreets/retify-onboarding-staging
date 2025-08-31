@@ -214,10 +214,10 @@ export interface Product {
   final_cost?: number
 
   /**Màu sắc*/
-  color?:string 
-  
-  /****/ 
-  size?:string
+  color?: string
+
+  /****/
+  size?: string
 
   /** bật tắt mẫu mã */
   variant_options?: boolean
@@ -289,114 +289,111 @@ export type TTabProduct =
   | 'TAG'
   | 'ADDON'
 
-
 /** Dữ liệu danh mục */
 export interface Category {
+  /** Id bản ghi hệ thống */
+  id?: string
 
-    /** Id bản ghi hệ thống */
-    id?: string;
+  /** Mã danh mục tạo random */
+  category_id?: string
 
-    /** Mã danh mục tạo random */
-    category_id?: string;
+  /** Tên danh mục */
+  name?: string
 
-    /** Tên danh mục */
-    name?: string;
+  /** Tên tìm kiếm */
+  search_name?: string
 
-    /** Tên tìm kiếm */
-    search_name?: string;
+  /** Mô tả danh mục */
+  description?: string
 
-    /** Mô tả danh mục */
-    description?: string;
+  /** ID danh mục cha */
+  parent_id?: string | null
 
-    /** ID danh mục cha */
-    parent_id?: string | null;
+  /** Trạng thái có phải danh mục cha hay không */
+  is_parent?: boolean
 
-    /** Trạng thái có phải danh mục cha hay không */
-    is_parent?: boolean;
+  /** Trạng thái danh mục */
+  status?: string
 
-    /** Trạng thái danh mục */
-    status?: string;
+  /** Icon */
+  icon?: string | null
 
-    /** Icon */
-    icon?: string | null;
+  /** ảnh bìa */
+  cover_photo?: string | null
 
-    /** ảnh bìa */
-    cover_photo?: string | null;
-    
-    /** đường dẫn */
-    path?:string
+  /** đường dẫn */
+  path?: string
 
-    /** Dạng danh mục */
-    type?: string;
+  /** Dạng danh mục */
+  type?: string
 
-    /** Sắp xếp */
-    sort_index?: number;
+  /** Sắp xếp */
+  sort_index?: number
 
-    /** ID doanh nghiệp */
-    business_id?: string;
+  /** ID doanh nghiệp */
+  business_id?: string
 
-    /** ID chi nhánh */
-    branch_id?: string;
+  /** ID chi nhánh */
+  branch_id?: string
 
-    /** ID Phòng ban */
-    department_id?: string;
+  /** ID Phòng ban */
+  department_id?: string
 
-    /** ID đội nhóm (dữ liệu này lúc có lúc không) */
-    team_id?: string;
+  /** ID đội nhóm (dữ liệu này lúc có lúc không) */
+  team_id?: string
 
-    /** ID nhân viên */
-    employee_id?: string;
+  /** ID nhân viên */
+  employee_id?: string
 
-    /** ID user */
-    user_id?: string;
+  /** ID user */
+  user_id?: string
 
-    /** Thời gian tạo record */
-    createdAt?: Date;
+  /** Thời gian tạo record */
+  createdAt?: Date
 
-    /** Thời gian cập nhật record */
-    updatedAt?: Date;
+  /** Thời gian cập nhật record */
+  updatedAt?: Date
 
-    /** Tổng số sản phẩm */
-    total_products?: number;
+  /** Tổng số sản phẩm */
+  total_products?: number
 }
 
-
 /** dữ liệu thẻ */
-export interface Label {
+export interface ProductLabel {
   /** ID duy nhất của nhãn */
-  id?: string;
+  id?: string
   /** ID của nhãn */
-  label_id?: number;
+  label_id?: number
   /** Loại nhãn (ví dụ: CUSTOM) */
-  label_type?: string;
+  label_type?: string
   /** Mã trạng thái (có thể null) */
-  status_code?: string | null;
+  status_code?: string | null
   /** Nhóm nhãn (ví dụ: PRODUCT) */
-  label_group?: string;
+  label_group?: string
   /** Tiêu đề của nhãn */
-  title?: string;
+  title?: string
   /** Màu chữ của nhãn */
-  text_color?: string;
+  text_color?: string
   /** Màu nền của nhãn */
-  bg_color?: string;
+  bg_color?: string
   /** ID của ứng dụng liên quan */
-  app_id?: string;
+  app_id?: string
   /** ID doanh nghiệp */
-  business_id?: string;
+  business_id?: string
   /** ID chi nhánh */
-  branch_id?: string;
+  branch_id?: string
   /** ID phòng ban */
-  department_id?: string;
+  department_id?: string
   /** ID nhóm (có thể null) */
-  team_id?: string | null;
+  team_id?: string | null
   /** ID nhân viên */
-  employee_id?: string;
+  employee_id?: string
   /** ID người dùng */
-  user_id?: string;
+  user_id?: string
   /** Trạng thái lưu trữ của nhãn */
-  is_archived?: boolean;
+  is_archived?: boolean
   /** Ngày tạo nhãn */
-  createdAt?: string;
+  createdAt?: string
   /** Ngày cập nhật nhãn */
-  updatedAt?: string;
+  updatedAt?: string
 }

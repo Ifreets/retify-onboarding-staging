@@ -252,7 +252,7 @@ import {
   XCircleIcon,
 } from '@heroicons/vue/24/solid'
 
-import type { Category, Label, Product } from '@/interfaces'
+import type { Category, ProductLabel, Product } from '@/interfaces'
 
 /** danh sách sản phẩm */
 const STATUS = [
@@ -306,7 +306,7 @@ const $props = defineProps({
     required: true,
   },
   labels: {
-    type: Object as PropType<Label[]>,
+    type: Object as PropType<ProductLabel[]>,
     required: true,
   },
 })
