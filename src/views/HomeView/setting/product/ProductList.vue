@@ -58,13 +58,23 @@
             </p>
           </div>
           <p class="text-sm text-slate-700">
-            <span>{{ '#' + item?.product_id }}</span>
+            <!-- <span class="pr-2">{{ '#' + item?.product_id }}</span> -->
+            <span
+              v-if="item?.category_id"
+              class="text-xs px-2 py-0.5 rounded-full border"
+              >{{ map_value_category.get(item?.category_id)?.name }}</span
+            >
           </p>
         </div>
         <div class="py-2 text-right px-2 flex-shrink-0">
           <div>
             <p class="text-base font-medium">
               {{ formatCurrency(item?.price) || 0 }}
+            </p>
+            <p class="text-xs">
+              <span>Unit: {{ formatCurrency(item?.cost) }}</span>
+              |
+              <span>Sale: {{ formatCurrency(item?.price) }}</span>
             </p>
           </div>
         </div>
@@ -115,7 +125,7 @@
 import { $order } from '@/api'
 import { formatCurrency } from '@/services/format'
 import { debounce, get } from 'lodash'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import Pagination from '@/components/ui/Pagination.vue'
 import ProductDetail from '@/views/HomeView/setting/product/ProductDetail.vue'
@@ -147,6 +157,17 @@ const category_selected = ref<string>('')
 const categories = ref<Category[]>([])
 /** danh sách label */
 const labels = ref<ProductLabel[]>([])
+
+/** map id danh mục - danh mục */
+const map_value_category = computed(() => {
+  // nếu có field giá trị thì tạo map giá trị - option
+  return new Map(
+    categories.value.map((category: Category) => [
+      category?.category_id,
+      category,
+    ]),
+  )
+})
 
 onMounted(() => {
   getDataFilter()
