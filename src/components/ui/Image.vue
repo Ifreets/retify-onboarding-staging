@@ -5,6 +5,7 @@
     @error="() => {
       is_error = true
     }"
+    :class="container_class"
   />
   <slot v-else />
 </template>
@@ -17,6 +18,10 @@ const $props = defineProps({
     type: String,
     required: true,
   },
+  container_class: {
+    type: String,
+    default: '',
+  }
 })
 
 const is_error = ref(false)

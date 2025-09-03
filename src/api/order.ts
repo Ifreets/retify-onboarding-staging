@@ -2,7 +2,7 @@ import { Request } from '@/api/axios'
 import { ENV } from '@/env'
 import { useAppStore } from '@/stores'
 
-import type { IEnv, Product } from '@/interfaces'
+import type { IEnv, Order, Product } from '@/interfaces'
 
 /** Đường dẫn host của merchant */
 const $HOST: IEnv = ENV[import.meta.env.VITE_APP_ENV || 'development']
@@ -41,6 +41,11 @@ export class OrderServiceAPI {
       ...data,
       sort: { created_date: 'desc' },
     })
+  }
+
+  /** api cập nhật đơn hàng */
+  updateOrder(data: Order) {
+    return this.#post('order/update_order', data)
   }
 
   /** api lấy danh sách đơn hàng bằng id contact */

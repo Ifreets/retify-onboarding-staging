@@ -1,36 +1,11 @@
 <template>
   <section class="flex flex-col h-full overflow-hidden">
     <!-- header -->
-    <header class="px-3 pb-3 flex flex-col gap-2">
-      <input
-        type="text"
-        placeholder="Search products..."
-        class="w-full border rounded-md px-3 py-2 outline-none placeholder:text-slate-400"
-        v-model="search"
-        @input="searchProduct"
-      />
-      <ul class="flex gap-2 overflow-auto w-full">
-        <li
-          class="min-w-max px-3 py-1 border border-slate-200 rounded-full cursor-pointer"
-          :class="{
-            'bg-blue-700 text-white': !category_selected,
-          }"
-          @click="selectCategory()"
-        >
-          All
-        </li>
-        <li
-          v-for="item of categories"
-          class="min-w-max px-3 py-1 border border-slate-200 rounded-full cursor-pointer"
-          :class="{
-            'bg-blue-700 text-white': category_selected === item.category_id,
-          }"
-          @click="selectCategory(item)"
-        >
-          {{ item?.name }}
-        </li>
-      </ul>
-    </header>
+    <ProductHeader
+      v-model="filter_param"
+      :categories="categories"
+      :get-data-filter="getDataFilter"
+    />
     <!-- Danh sách sản phẩm -->
     <div class="flex flex-col overflow-y-auto h-full w-full overflow-x-hidden">
       <div
@@ -124,15 +99,16 @@
 <script setup lang="ts">
 import { $order } from '@/api'
 import { formatCurrency } from '@/services/format'
-import { debounce, get } from 'lodash'
+import { get } from 'lodash'
 import { computed, onMounted, ref } from 'vue'
 
 import Pagination from '@/components/ui/Pagination.vue'
 import ProductDetail from '@/views/HomeView/setting/product/ProductDetail.vue'
+import ProductHeader from '@/views/HomeView/setting/product/ProductHeader.vue'
 
-import { ChevronDownIcon, CubeIcon, PlusIcon } from '@heroicons/vue/24/solid'
+import { CubeIcon, PlusIcon } from '@heroicons/vue/24/solid'
 
-import { type Category, type ProductLabel, type Product } from '@/interfaces'
+import { type Category, type Product, type ProductLabel } from '@/interfaces'
 
 /** màn hình hiển thị */
 const view = ref<'form' | 'list'>('list')
@@ -149,14 +125,16 @@ const product_index = ref(-1)
 const page = ref(1)
 /** số bản ghi một lần lấy */
 const PAGE_SIZE = 25
-/** Từ khóa tìm kiếm */
-const search = ref<string>('')
-/** Danh mục được chọn */
-const category_selected = ref<string>('')
 /** danh sách danh mục */
 const categories = ref<Category[]>([])
 /** danh sách label */
 const labels = ref<ProductLabel[]>([])
+
+/** filter param */
+const filter_param = ref<{ search: string; category_selected?: string, status?: string[] }>({
+  /** Từ khóa tìm kiếm */
+  search: '',
+})
 
 /** map id danh mục - danh mục */
 const map_value_category = computed(() => {
@@ -175,11 +153,6 @@ onMounted(() => {
   getLabels()
 })
 
-/** debounce search sản phẩm */
-const searchProduct = debounce(() => {
-  getDataFilter()
-}, 300)
-
 /** hàm lấy dữ liệu khi có lọc */
 function getDataFilter() {
   page.value = 1
@@ -190,12 +163,13 @@ function getDataFilter() {
 /** Lấy danh sách sản phẩm */
 async function getProduct() {
   try {
+    const { search, category_selected, status } = filter_param.value
+
     /** danh sách sản phẩm */
     const RES = await $order.getProducts({
-      ...(search.value ? { search: search.value } : {}),
-      ...(category_selected.value
-        ? { category_id: category_selected.value }
-        : {}),
+      ...(search ? { search } : {}),
+      ...(category_selected ? { category_id: category_selected } : {}),
+      ...(status?.length ? { include_status: status } : {}),
       skip: (page.value - 1) * PAGE_SIZE,
       limit: PAGE_SIZE,
     })
@@ -209,12 +183,13 @@ async function getProduct() {
 /** lấy tổng số sản phẩm */
 async function getTotalProduct() {
   try {
+    const { search, category_selected, status } = filter_param.value
+
     /** dữ liệu số lượng sản phẩm trả về */
     const RES = await $order.countProducts({
-      ...(search.value ? { search: search.value } : {}),
-      ...(category_selected.value
-        ? { category_id: category_selected.value }
-        : {}),
+      ...(search ? { search } : {}),
+      ...(category_selected ? { category_id: category_selected } : {}),
+      ...(status?.length ? { include_status: status } : {}),
     })
 
     // lưu lại tổng số sản phẩm
@@ -279,12 +254,6 @@ function updateProduct() {
 /** xóa sản phẩm trong danh sách */
 function deleteProduct(index: number) {
   products.value = products.value.filter((item, i) => i !== index)
-}
-
-/** chuyển danh mục */
-function selectCategory(item?: Category) {
-  category_selected.value = item?.category_id || ''
-  getDataFilter()
 }
 
 /** Chuyển sang màn thêm mới sản phẩm */

@@ -109,17 +109,28 @@
           </p>
           <div class="font-semibold flex gap-2.5 text-base">
             <button
-              v-if="orderStore.selected_order?.contact_info?.contact_phones?.length"
+              v-if="
+                orderStore.selected_order?.contact_info?.contact_phones?.length
+              "
               class="flex items-center gap-2 py-2 px-5 rounded-lg border text-slate-700"
-              @click="openCallPhone('page.order', orderStore.selected_order?.contact_info)"
+              @click="
+                openCallPhone(
+                  'page.order',
+                  orderStore.selected_order?.contact_info,
+                )
+              "
             >
               <SolidPhoneIcon class="size-4 text-black flex-shrink-0" />
               Call
             </button>
             <button
-              v-if="orderStore.selected_order?.contact_info?.contact_sources?.length"
+              v-if="
+                orderStore.selected_order?.contact_info?.contact_sources?.length
+              "
               class="flex items-center gap-2 py-2 px-5 text-white bg-blue-700 rounded-lg"
-              @click="toChat('page.order', orderStore.selected_order?.contact_info)"
+              @click="
+                toChat('page.order', orderStore.selected_order?.contact_info)
+              "
             >
               <ChatBubbleOvalLeftEllipsisIcon class="size-4" />
               Message
@@ -160,6 +171,29 @@
         </div>
       </section>
     </main>
+    <footer
+      v-for="(step, step_index) in orderStore.selected_order?.order_journey"
+      v-show="check_step_active === step_index"
+      class="w-full flex flex-nowrap gap-1 p-2 text-base"
+    >
+      <!-- mobile -->
+      <template v-for="(status, status_index) in step">
+        <div
+          class="flex-1 rounded-md flex items-center justify-center py-3.5 px-5 cursor-pointer font-semibold"
+          :class="{
+            [`${status.bg_color} ${status.text_color}`]: status,
+          }"
+          @click="activeStep(step_index, status_index, status)"
+          v-if="
+            orderStore.selected_order.status !== 'CANCEL_ORDER' &&
+            (orderStore.selected_order.status === 'DRART_ORDER' ||
+              status.action === 'CANCEL_ORDER')
+          "
+        >
+          {{ action_status_obj?.[status.action || '']?.name || '' }}
+        </div>
+      </template>
+    </footer>
   </article>
 </template>
 
@@ -168,8 +202,10 @@ import { $order } from '@/api'
 import { useNavigationHandler } from '@/composables/useNavigationHandler'
 import { formatCurrency } from '@/services/format'
 import { useOrderStore } from '@/stores/order'
+import { ACTION_STATUS } from '@/utils/constant'
 import { useOrder } from '@/views/HomeView/order/composables/order'
 import { format } from 'date-fns'
+import { cloneDeep } from 'lodash'
 import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -185,7 +221,7 @@ import {
   UserIcon,
 } from '@heroicons/vue/24/solid'
 
-import type { ActionStep, Order } from '@/interfaces'
+import type { ActionStatus, ActionStep, Order } from '@/interfaces'
 
 // store
 const orderStore = useOrderStore()
@@ -203,6 +239,30 @@ const last_status = computed(() => {
   return getLastStatus(orderStore.selected_order)
 })
 
+// danh sách action dạng object
+const action_status_obj = convert(ACTION_STATUS)
+
+// * Check xem trạng thái đơn hàng nào đang được kích hoạt
+const check_step_active = computed(() => {
+  /** index của bước tiếp theo */
+  let result = -1
+
+  /** hành trình đơn hàng */
+  const order_journey = orderStore.selected_order?.order_journey || []
+
+  // lặp qua các bước của hành trình
+  order_journey.forEach((step, index_step) => {
+    // lặp qua các hành động của bước
+    step.forEach(status => {
+      // hành động nào đã được kích hoạt thì ghi lại index bước chứa hàng động đó
+      if (status.is_active) result = index_step
+    })
+  })
+
+  // index bước tiếp theo
+  return result + 1
+})
+
 onMounted(() => {
   // nếu chưa có dữ liệu id thì thôi
   if (orderStore.selected_order.order_id) return
@@ -213,6 +273,21 @@ onMounted(() => {
 onUnmounted(() => {
   orderStore.selected_order = {}
 })
+
+/** hàm chuyển đổi mảng action sang object */
+function convert(array: ActionStatus[]) {
+  /** object của action */
+  let obj: { [key: string]: ActionStatus } = {}
+
+  /** duyệt qua mảng action tạo ra 1 object với key là value của action,
+   * giá trị là action đó */
+  array.forEach(item => {
+    obj[item.value] = item
+  })
+
+  // trả về dạng object
+  return obj
+}
 
 /** lấy dữ liệu cửa đơn hàng trên url */
 async function getOrderOnUrl() {
@@ -254,5 +329,59 @@ function getLastStatus(order: Order) {
     })
   })
   return last_status
+}
+
+/** Kích hoạt step tiếp theo */
+async function activeStep(
+  step_index: number,
+  status_index: number,
+  action: ActionStep,
+) {
+  /** trạng thái cũ của hàng trình đơn hàng */
+  const PRE_ORDER_JOURNEY: ActionStep[][] = cloneDeep(
+    orderStore.selected_order.order_journey || [],
+  )
+
+  try {
+    /** action hành động */
+    const ACTION = action.action
+    // nếu không có hàng động thì thôi
+    if (!ACTION) return
+    // kích hoạt trạng thái tiếp theo
+    activeStatus(step_index, status_index)
+    // call api cập nhật
+    await updateAnOrder(ACTION)
+  } catch (e) {
+    // nếu tạo đơn mới lỗi hoặc cập nhật trạng thái lỗi thì back hành trình đơn hàng về như cũ
+    if (
+      !orderStore.selected_order.id ||
+      action !== orderStore.selected_order.status
+    ) {
+      orderStore.selected_order.order_journey = PRE_ORDER_JOURNEY
+    }
+  }
+}
+
+/** Kích hoạt 1 bước trong hành trình đơn hàng */
+function activeStatus(step_index: number, status_index: number) {
+  orderStore.selected_order.order_journey?.forEach((step, index_step) => {
+    step.forEach((status, index_status) => {
+      if (index_step === step_index && index_status === status_index) {
+        status.is_active = true
+      } else status.is_active = false
+    })
+  })
+}
+
+/** hàm cập nhật trạng thái của đơn hàng */
+async function updateAnOrder(status: string) {
+  try {
+    await $order.updateOrder({
+      id: orderStore.selected_order.id,
+      status,
+    })
+  } catch (e) {
+    console.log(e)
+  }
 }
 </script>

@@ -103,7 +103,7 @@ div
           <p class="mb-1 font-medium">Status</p>
           <Select
             v-model="product.status"
-            :options="STATUS"
+            :options="PRODUCT_STATUS"
             :label_field="'name'"
             :value_field="'value'"
             placeholder="Choose status"
@@ -233,6 +233,7 @@ div
 <script setup lang="ts">
 import { $merchant, $order } from '@/api'
 import { useToast } from '@/composables/useToast'
+import { PRODUCT_STATUS } from '@/utils/constant'
 import { get, isArray } from 'lodash'
 import { ref, type PropType } from 'vue'
 
@@ -252,41 +253,7 @@ import {
   XCircleIcon,
 } from '@heroicons/vue/24/solid'
 
-import type { Category, ProductLabel, Product } from '@/interfaces'
-
-/** danh sách sản phẩm */
-const STATUS = [
-  {
-    value: 'IN_STOCK',
-    name: 'In stock',
-    description: 'The product appears in search results with a warning.',
-  },
-  {
-    value: 'OUT_OF_STOCK',
-    name: 'Out stock',
-    description: 'The product appears in search results with a warning.',
-  },
-  {
-    value: 'ON_SALE',
-    name: 'On sale',
-    description: 'The product does not appear in search results.',
-  },
-  {
-    value: 'NEW_ARRIVALS',
-    name: 'New arrivals',
-    description: 'The product does not appear in search results.',
-  },
-  {
-    value: 'ACTIVE',
-    name: 'Active',
-    description: '',
-  },
-  {
-    value: 'UNACTIVE',
-    name: 'Unactive',
-    description: 'The product does not appear in search results.',
-  },
-]
+import type { Category, Product, ProductLabel } from '@/interfaces'
 
 const $props = defineProps({
   create: {
