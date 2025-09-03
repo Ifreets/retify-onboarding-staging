@@ -5,7 +5,7 @@
   >
     <Image
       :url="contact.avatar || ''"
-      class="w-21 h-21 rounded-full object-contain flex-shrink-0"
+      container_class="w-21 h-21 rounded-full object-contain flex-shrink-0"
     >
       <div
         class="w-21 h-21 flex-shrink-0 rounded-full flex items-center justify-center bg-slate-100"

@@ -13,18 +13,18 @@
       />
       <SkeletonLoading v-if="loading.first" />
       <template v-else>
-        <CustomerList 
+        <CustomerList
           v-if="contacts.length"
           :contacts="contacts"
           :get-contacts="getMoreContact"
         />
         <EmptyState
-          v-else 
+          v-else
           add_content="New Customer"
           empty_content="Not Found Customer"
         />
       </template>
-      <Loading :loading="loading.more"/>
+      <Loading :loading="loading.more" />
     </section>
 
     <!-- <AskRetionButton /> -->
@@ -34,9 +34,10 @@
 <script setup lang="ts">
 import { $contact } from '@/api'
 import { useResumeAndPause } from '@/composables/useResumeAndPause'
+import { useContactStore } from '@/stores/contact'
 import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-import AskRetionButton from '@/components/common/AskRetionButton.vue'
 import CreateButton from '@/components/common/CreateButton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import InputSearch from '@/components/common/InputSearch.vue'
@@ -45,6 +46,9 @@ import SkeletonLoading from '@/components/common/SkeletonLoading.vue'
 import CustomerList from '@/views/HomeView/customer/CustomerList.vue'
 
 import type { Contact } from '@/interfaces'
+
+// store
+const contactStore = useContactStore()
 
 /** số bản ghi một lần lấy dữ liệu */
 const LIMIT = 20
@@ -67,12 +71,19 @@ const loading = ref({
 /** cờ check xem đã load hết dữ liệu chưa */
 const is_load_full = ref(false)
 
+// router
+const router = useRouter()
+const route = useRoute()
+
 // composable
 useResumeAndPause({ onResume: getContactsWithoutSearch })
 
 onMounted(() => {
   // Lấy danh sách danh bạ
   getContacts()
+
+  // call api lấy dữ liệu cửa đơn hàng
+  getContactOnUrl()
 })
 
 /** reset search và lấy danh sách khách hàng */
@@ -138,5 +149,26 @@ async function getContact() {
     limit: LIMIT,
     search: search.value,
   })
+}
+
+/** call api lấy dữ liệu cửa đơn hàng */
+async function getContactOnUrl() {
+  /** id khách hàng trên url */
+  const CUSTOMER_ID = route.query.customer_id
+
+  // nếu không id trên url thì thôi
+  if (!CUSTOMER_ID) return
+
+  /** dữ liệu contact của id trên url */
+  const RES = await $contact.getContact({
+    identifier_id: CUSTOMER_ID as string,
+  })
+
+  // nếu có dữ liệu
+  if (!RES?.identifier_id) return
+  // lưu lại dữ liệu cửa đơn hàng
+  contactStore.selected_contact = RES
+  // chuyển router
+  router.push('/home/customer/' + RES.identifier_id)
 }
 </script>

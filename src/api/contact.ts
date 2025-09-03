@@ -130,6 +130,15 @@ export class ContactServiceAPI {
   getLabel() {
     return this.#post('label/get_label', {})
   }
+
+  /** lấy dữ liệu ẩn */
+  showHiddenData(data: {
+    identifier_id: string,
+    action: 'GET_SOURCE' | 'GET_PHONE' | 'GET_EMAIL' | 'GET_ADDRESS',
+    object_id: string
+  }){
+    return this.#postV2('contact/get_contact', data)
+  }
 }
 
 /** instance api order */

@@ -55,10 +55,16 @@
       </section>
 
       <section class="border py-3 px-4 rounded-lg flex gap-3">
-        <img
-          :src="orderStore.selected_order?.contact_info?.avatar || ''"
-          class="w-11 h-11 rounded-full"
-        />
+        <Image
+          :url="orderStore.selected_order?.contact_info?.avatar || ''"
+          container_class="size-11 rounded-full object-contain flex-shrink-0"
+        >
+          <div
+            class="size-11 flex-shrink-0 rounded-full flex items-center justify-center bg-slate-100"
+          >
+            <UserIcon class="w-7 h-7 flex-shrink-0 text-slate-700" />
+          </div>
+        </Image>
         <div class="w-full flex flex-col gap-3">
           <div class="flex justify-between items-center">
             <div>
@@ -75,6 +81,7 @@
             </div>
             <button
               class="py-1.5 px-3 border rounded font-semibold text-slate-700"
+              @click="toCustomer(orderStore.selected_order?.contact_id)"
             >
               View Profile
             </button>
@@ -102,13 +109,17 @@
           </p>
           <div class="font-semibold flex gap-2.5 text-base">
             <button
+              v-if="orderStore.selected_order?.contact_info?.contact_phones?.length"
               class="flex items-center gap-2 py-2 px-5 rounded-lg border text-slate-700"
+              @click="openCallPhone('page.order', orderStore.selected_order?.contact_info)"
             >
               <SolidPhoneIcon class="size-4 text-black flex-shrink-0" />
               Call
             </button>
             <button
+              v-if="orderStore.selected_order?.contact_info?.contact_sources?.length"
               class="flex items-center gap-2 py-2 px-5 text-white bg-blue-700 rounded-lg"
+              @click="toChat('page.order', orderStore.selected_order?.contact_info)"
             >
               <ChatBubbleOvalLeftEllipsisIcon class="size-4" />
               Message
@@ -154,6 +165,7 @@
 
 <script setup lang="ts">
 import { $order } from '@/api'
+import { useNavigationHandler } from '@/composables/useNavigationHandler'
 import { formatCurrency } from '@/services/format'
 import { useOrderStore } from '@/stores/order'
 import { useOrder } from '@/views/HomeView/order/composables/order'
@@ -162,6 +174,7 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import ProductList from '@/components/common/ProductList.vue'
+import Image from '@/components/ui/Image.vue'
 
 import DollarSignIcon from '@/components/icons/DollarSignIcon.vue'
 import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from '@heroicons/vue/24/outline'
@@ -169,6 +182,7 @@ import {
   ChatBubbleOvalLeftEllipsisIcon,
   CheckBadgeIcon,
   PhoneIcon as SolidPhoneIcon,
+  UserIcon,
 } from '@heroicons/vue/24/solid'
 
 import type { ActionStep, Order } from '@/interfaces'
@@ -182,6 +196,7 @@ const route = useRoute()
 
 // composable
 const { ACTION_STATUS_OBJ } = useOrder()
+const { toChat, toCustomer, openCallPhone } = useNavigationHandler()
 
 /** trạng thái đang kích hoạt */
 const last_status = computed(() => {

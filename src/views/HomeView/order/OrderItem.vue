@@ -5,10 +5,10 @@
   >
     <Image
       :url="order.products?.[0]?.images?.[0] || ''"
-      class="w-21 h-21 object-contain shadow border border-slate-100 rounded-xl flex-shrink-0"
+      container_class="w-21 h-21 object-contain shadow border border-slate-100 rounded-xl flex-shrink-0"
     >
       <div
-        class="w-21 h-21 object-contain shadow border border-slate-100 rounded-xl  flex-shrink-0 flex items-center justify-center bg-slate-100"
+        class="w-21 h-21 object-contain shadow border border-slate-100 rounded-xl flex-shrink-0 flex items-center justify-center bg-slate-100"
       >
         <CubeIcon class="w-14 h-14 flex-shrink-0 text-slate-700" />
       </div>

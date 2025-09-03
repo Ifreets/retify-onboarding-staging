@@ -250,7 +250,7 @@ export enum CustomerStatus {
 /** dữ liệu nguồn của liên hệ */
 export interface ContactSource {
     /** ID nội bộ của bản ghi */
-    id?: number,
+    id?: string,
     /** ID của liên hệ (contact) gốc */
     contact_id?: string,
     /** Nguồn liên hệ, ví dụ?: 'ZALO_PERSONAL' */
