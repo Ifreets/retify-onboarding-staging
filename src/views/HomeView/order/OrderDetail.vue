@@ -176,7 +176,6 @@
       v-show="check_step_active === step_index"
       class="w-full flex flex-nowrap gap-1 p-2 text-base"
     >
-      <!-- mobile -->
       <template v-for="(status, status_index) in step">
         <div
           class="flex-1 rounded-md flex items-center justify-center py-3.5 px-5 cursor-pointer font-semibold"
@@ -194,6 +193,46 @@
         </div>
       </template>
     </footer>
+    <Modal
+      v-model:is_open="is_open"
+      :container_class="'w-[350px]'"
+    >
+      <div class="flex flex-col items-center font-medium text-sm">
+        <img
+          :src="CancelImage"
+          class="size-16"
+        />
+        <p class="text-base font-semibold text-center py-2 w-full">
+          Cancel Order
+        </p>
+        <div class="w-full flex flex-col gap-1.5">
+          <p>Reason <span class="text-red-500">*</span></p>
+          <input
+            type="text"
+            placeholder="Enter reason reject order"
+            class="w-full border rounded-md py-2.5 px-3 outline-none"
+            v-model="orderStore.selected_order.note"
+          />
+        </div>
+        <button
+          class="w-full py-3 bg-blue-700 text-white disabled:bg-slate-200 disabled:text-slate-700 rounded-full text-base mt-5"
+          @click="
+            () => {
+              activeStep(
+                cancel_data.step_index,
+                cancel_data.status_index,
+                cancel_data.action,
+                true,
+              )
+              is_open = false
+            }
+          "
+          :disabled="!orderStore.selected_order.note?.trim()"
+        >
+          Confirm cancellation
+        </button>
+      </div>
+    </Modal>
   </article>
 </template>
 
@@ -206,12 +245,13 @@ import { ACTION_STATUS } from '@/utils/constant'
 import { useOrder } from '@/views/HomeView/order/composables/order'
 import { format } from 'date-fns'
 import { cloneDeep } from 'lodash'
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import ProductList from '@/components/common/ProductList.vue'
 import Image from '@/components/ui/Image.vue'
 
+import CancelImage from '@/assets/image/cancel_order.png'
 import DollarSignIcon from '@/components/icons/DollarSignIcon.vue'
 import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from '@heroicons/vue/24/outline'
 import {
@@ -222,6 +262,7 @@ import {
 } from '@heroicons/vue/24/solid'
 
 import type { ActionStatus, ActionStep, Order } from '@/interfaces'
+import Modal from '@/components/ui/Modal.vue'
 
 // store
 const orderStore = useOrderStore()
@@ -233,6 +274,20 @@ const route = useRoute()
 // composable
 const { ACTION_STATUS_OBJ } = useOrder()
 const { toChat, toCustomer, openCallPhone } = useNavigationHandler()
+
+/** ẩn hiện modal xác nhận hủy đơn */
+const is_open = ref(false)
+
+/** cancel data */
+const cancel_data = ref<{
+  step_index: number
+  status_index: number
+  action: ActionStep
+}>({
+  step_index: -1,
+  status_index: -1,
+  action: {},
+})
 
 /** trạng thái đang kích hoạt */
 const last_status = computed(() => {
@@ -336,6 +391,7 @@ async function activeStep(
   step_index: number,
   status_index: number,
   action: ActionStep,
+  is_confirm_cancel: boolean = false,
 ) {
   /** trạng thái cũ của hàng trình đơn hàng */
   const PRE_ORDER_JOURNEY: ActionStep[][] = cloneDeep(
@@ -347,6 +403,22 @@ async function activeStep(
     const ACTION = action.action
     // nếu không có hàng động thì thôi
     if (!ACTION) return
+
+    // nếu là hủy đơn thì mở modal xác nhận hủy đơn
+    if (ACTION === 'CANCEL_ORDER' && !is_confirm_cancel) {
+      // mở modal xác nhận hủy
+      is_open.value = true
+      // reset nội dung hủy
+      orderStore.selected_order.note = ''
+      // lưu lại data hủy
+      cancel_data.value = {
+        step_index,
+        status_index,
+        action,
+      }
+      return
+    }
+
     // kích hoạt trạng thái tiếp theo
     activeStatus(step_index, status_index)
     // call api cập nhật
@@ -376,7 +448,11 @@ function activeStatus(step_index: number, status_index: number) {
 /** hàm cập nhật trạng thái của đơn hàng */
 async function updateAnOrder(status: string) {
   try {
-    await $order.updateOrder({
+    // tạm xóa hành trình đơn hàng
+    orderStore.selected_order.order_journey = []
+
+    // lưu lại dữ liệu mới sau cập nhật
+    orderStore.selected_order = await $order.updateOrder({
       id: orderStore.selected_order.id,
       status,
     })

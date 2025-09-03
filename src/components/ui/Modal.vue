@@ -4,6 +4,7 @@
       <div
         v-if="is_open"
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        @click="close()"
       >
         <div
           class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative"
