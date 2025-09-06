@@ -52,7 +52,9 @@
               <button
                 class="flex items-center gap-2 py-2 px-5 rounded-lg border text-slate-700"
                 v-if="contactStore.selected_contact.contact_phones?.length"
-                @click="openCallPhone('page.customer',contactStore.selected_contact)"
+                @click="
+                  openCallPhone('page.customer', contactStore.selected_contact)
+                "
               >
                 <SolidPhoneIcon class="size-4 text-black flex-shrink-0" />
                 Call
@@ -60,7 +62,7 @@
               <button
                 class="flex items-center gap-2 py-2 px-5 text-white bg-blue-700 rounded-lg"
                 v-if="contactStore.selected_contact.contact_sources?.length"
-                @click="toChat('page.customer',contactStore.selected_contact)"
+                @click="toChat('page.customer', contactStore.selected_contact)"
               >
                 <ChatBubbleOvalLeftEllipsisIcon class="size-4" />
                 Message
@@ -208,7 +210,10 @@
         <div class="w-full flex flex-col gap-3">
           <p class="text-lg font-semibold">Preferences & Labels</p>
           <div class="w-full h-px bg-slate-200"></div>
-          <ul class="flex gap-3 flex-wrap">
+          <ul
+            v-if="contactStore.selected_contact.label_ids?.length"
+            class="flex gap-3 flex-wrap"
+          >
             <li
               v-for="(label, index) in contactStore.selected_contact.label_ids"
               class="flex gap-1 items-center font-medium bg-slate-200 py-0.5 px-2 rounded-md"
@@ -221,6 +226,12 @@
               />
             </li>
           </ul>
+          <p
+            v-else-if="!is_edit"
+            class="text-slate-500"
+          >
+            No labels
+          </p>
           <button
             v-if="is_edit && !is_show_labels"
             class="py-2 px-5 text-white bg-blue-700 rounded-md w-fit font-medium"
@@ -257,7 +268,63 @@
         </div>
       </section>
 
+      <section class="border py-3 px-4 rounded-lg flex gap-3">
+        <ChatBubbleLeftRightIcon class="size-8 flex-shrink-0" />
+        <div class="w-full flex flex-col gap-3">
+          <p class="text-lg font-semibold">Note</p>
+          <div class="w-full h-px bg-slate-200"></div>
+          <textarea
+            type="text"
+            placeholder="Enter note..."
+            class="w-full outline-none border py-1.5 px-3 rounded-lg"
+            v-model="note"
+          />
+          <button
+            :disabled="!note"
+            class="bg-blue-700 disabled:bg-slate-400 text-white font-medium py-1.5 px-3 rounded-md w-fit"
+            @click="addNote"
+          >
+            Add note
+          </button>
+          <ul class="flex flex-col gap-2 max-h-[60dvh] pb-2 overflow-auto">
+            <li
+              v-for="item in notes"
+              class="flex flex-col gap-1 w-full rounded-xl shadow-md border px-3 py-2"
+            >
+              <div class="w-full flex gap-2 items-center">
+                <Image
+                  url="https://static.botbanhang.vn/merchant/files/business_642655457c339f9194288da9/1712568308370.jpeg"
+                  container_class="size-8 rounded-full object-contain flex-shrink-0"
+                >
+                  <div
+                    class="size-8 flex-shrink-0 rounded-full flex items-center justify-center bg-slate-100"
+                  >
+                    <UserIcon class="w-5 h-5 flex-shrink-0 text-slate-700" />
+                  </div>
+                </Image>
+                <div class="flex flex-col w-full">
+                  <div>
+                    <p class="font-semibold text-black">Nguyen Xuan Hai</p>
+                  <p class="text-xs text-slate-500">
+                    {{ format(item.createdAt, 'HH:mm dd/MM/yyyy') }}
+                  </p>
+                  </div>
+                  <!-- <button>
+                    Reply
+                  </button> -->
+                </div>
+              </div>
+              <p class="pl-10">
+                {{ item.content }}
+              </p>
+            </li>
+          </ul>
+          <!-- <p class="text-slate-500">No messages</p> -->
+        </div>
+      </section>
+
       <ProductList
+        v-if="last_order.products?.length"
         v-show="!is_edit"
         title="Last Orders"
         :products="last_order.products || []"
@@ -288,6 +355,7 @@ import {
   Square2StackIcon,
 } from '@heroicons/vue/24/outline'
 import {
+  ChatBubbleLeftRightIcon,
   ChatBubbleOvalLeftEllipsisIcon,
   PhoneIcon as SolidPhoneIcon,
   TagIcon,
@@ -305,6 +373,8 @@ import type {
   Order,
 } from '@/interfaces'
 import { useNavigationHandler } from '@/composables/useNavigationHandler'
+import { formatDate } from '@/services/format'
+import { format } from 'date-fns'
 
 // router
 const router = useRouter()
@@ -348,11 +418,18 @@ const before_edit = ref({
   address: address.value,
 })
 
+/** giá trị của input ghi chú */
+const note = ref('')
+/** danh sách ghi chú */
+const notes = ref<any[]>([])
+
 onMounted(() => {
   // nếu chưa có dữ liệu id thì thôi
   if (contactStore.selected_contact.identifier_id) {
     // lấy đơn hàng gần nhất của khách
     getLastOrders()
+    // lấy danh sách ghi chú
+    getNotes()
     return
   }
   // call api lấy dữ liệu của danh bạ trên url
@@ -432,6 +509,35 @@ async function getLastOrders() {
     console.log(e)
   }
 }
+
+/** lấy danh sách ghi chú */
+async function getNotes() {
+  try {
+    /** danh sách ghi chú */
+    const RES = await $contact.getNote({
+      contact_id: contactStore.selected_contact.identifier_id,
+    })
+
+    // lưu lại danh sách ghi chú
+    notes.value = RES?.notes
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+/** cập nhật ghi chú */
+async function addNote() {
+  try {
+    await $contact.createNote({
+      contact_id: contactStore.selected_contact.identifier_id,
+      content: note.value,
+    })
+    note.value = ''
+    getNotes()
+  } catch (e) {
+    console.log(e)
+  }
+} 
 
 /** bật chế độ edit */
 function openEdit() {

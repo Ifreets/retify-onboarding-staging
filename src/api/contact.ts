@@ -139,6 +139,18 @@ export class ContactServiceAPI {
   }){
     return this.#postV2('contact/get_contact', data)
   }
+
+  /** lấy danh sách ghi chú */
+  getNote(data: { contact_id?: string }) {
+    return this.#post('note/get_note', data)
+  }
+  /** tạo mới ghi chú */
+  createNote(data: { contact_id?: string; content: string }) {
+    return this.#post('note/create_note', {
+      ...data,
+      is_template: false
+    })
+  }
 }
 
 /** instance api order */
