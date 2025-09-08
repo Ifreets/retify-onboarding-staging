@@ -268,60 +268,8 @@
         </div>
       </section>
 
-      <section class="border py-3 px-4 rounded-lg flex gap-3">
-        <ChatBubbleLeftRightIcon class="size-8 flex-shrink-0" />
-        <div class="w-full flex flex-col gap-3">
-          <p class="text-lg font-semibold">Note</p>
-          <div class="w-full h-px bg-slate-200"></div>
-          <textarea
-            type="text"
-            placeholder="Enter note..."
-            class="w-full outline-none border py-1.5 px-3 rounded-lg"
-            v-model="note"
-          />
-          <button
-            :disabled="!note"
-            class="bg-blue-700 disabled:bg-slate-400 text-white font-medium py-1.5 px-3 rounded-md w-fit"
-            @click="addNote"
-          >
-            Add note
-          </button>
-          <ul class="flex flex-col gap-2 max-h-[60dvh] pb-2 overflow-auto">
-            <li
-              v-for="item in notes"
-              class="flex flex-col gap-1 w-full rounded-xl shadow-md border px-3 py-2"
-            >
-              <div class="w-full flex gap-2 items-center">
-                <Image
-                  url="https://static.botbanhang.vn/merchant/files/business_642655457c339f9194288da9/1712568308370.jpeg"
-                  container_class="size-8 rounded-full object-contain flex-shrink-0"
-                >
-                  <div
-                    class="size-8 flex-shrink-0 rounded-full flex items-center justify-center bg-slate-100"
-                  >
-                    <UserIcon class="w-5 h-5 flex-shrink-0 text-slate-700" />
-                  </div>
-                </Image>
-                <div class="flex flex-col w-full">
-                  <div>
-                    <p class="font-semibold text-black">Nguyen Xuan Hai</p>
-                  <p class="text-xs text-slate-500">
-                    {{ format(item.createdAt, 'HH:mm dd/MM/yyyy') }}
-                  </p>
-                  </div>
-                  <!-- <button>
-                    Reply
-                  </button> -->
-                </div>
-              </div>
-              <p class="pl-10">
-                {{ item.content }}
-              </p>
-            </li>
-          </ul>
-          <!-- <p class="text-slate-500">No messages</p> -->
-        </div>
-      </section>
+      <CustomerNotes
+        />
 
       <ProductList
         v-if="last_order.products?.length"
@@ -334,10 +282,11 @@
 </template>
 <script setup lang="ts">
 import { $contact, $order } from '@/api'
-import { useContactStore } from '@/stores/contact'
 import { get, set } from 'lodash'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useContactStore } from '@/stores'
+import { useNavigationHandler } from '@/composables/useNavigationHandler'
 
 import ProductList from '@/components/common/ProductList.vue'
 import Image from '@/components/ui/Image.vue'
@@ -355,7 +304,6 @@ import {
   Square2StackIcon,
 } from '@heroicons/vue/24/outline'
 import {
-  ChatBubbleLeftRightIcon,
   ChatBubbleOvalLeftEllipsisIcon,
   PhoneIcon as SolidPhoneIcon,
   TagIcon,
@@ -370,11 +318,10 @@ import type {
   ContactAddress,
   ContactEmail,
   ContactPhone,
+  Note,
   Order,
 } from '@/interfaces'
-import { useNavigationHandler } from '@/composables/useNavigationHandler'
-import { formatDate } from '@/services/format'
-import { format } from 'date-fns'
+import CustomerNotes from './CustomerNotes.vue'
 
 // router
 const router = useRouter()
@@ -418,18 +365,11 @@ const before_edit = ref({
   address: address.value,
 })
 
-/** giá trị của input ghi chú */
-const note = ref('')
-/** danh sách ghi chú */
-const notes = ref<any[]>([])
-
 onMounted(() => {
   // nếu chưa có dữ liệu id thì thôi
   if (contactStore.selected_contact.identifier_id) {
     // lấy đơn hàng gần nhất của khách
     getLastOrders()
-    // lấy danh sách ghi chú
-    getNotes()
     return
   }
   // call api lấy dữ liệu của danh bạ trên url
@@ -509,35 +449,6 @@ async function getLastOrders() {
     console.log(e)
   }
 }
-
-/** lấy danh sách ghi chú */
-async function getNotes() {
-  try {
-    /** danh sách ghi chú */
-    const RES = await $contact.getNote({
-      contact_id: contactStore.selected_contact.identifier_id,
-    })
-
-    // lưu lại danh sách ghi chú
-    notes.value = RES?.notes
-  } catch (e) {
-    console.log(e)
-  }
-}
-
-/** cập nhật ghi chú */
-async function addNote() {
-  try {
-    await $contact.createNote({
-      contact_id: contactStore.selected_contact.identifier_id,
-      content: note.value,
-    })
-    note.value = ''
-    getNotes()
-  } catch (e) {
-    console.log(e)
-  }
-} 
 
 /** bật chế độ edit */
 function openEdit() {

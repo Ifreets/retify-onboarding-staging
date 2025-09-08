@@ -154,6 +154,7 @@ function setTokenBusiness(business_token: string) {
   appStore.merchant_token = business_token
   $order.setTokenBusiness()
   $contact.setTokenBusiness()
+  $merchant.setMerchantToken()
   localStorage.setItem('merchant_token', appStore.merchant_token)
 }
 

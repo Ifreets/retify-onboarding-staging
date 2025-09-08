@@ -60,7 +60,12 @@ export class ContactServiceAPI {
   }
 
   /** api lấy danh sách đơn hàng */
-  getContact(data: { skip?: number; limit?: number; search?: string, identifier_id?: string }) {
+  getContact(data: {
+    skip?: number
+    limit?: number
+    search?: string
+    identifier_id?: string
+  }) {
     return this.#postV2('contact/get_contact', {
       ...data,
       sort: { createdAt: 'desc' },
@@ -70,9 +75,7 @@ export class ContactServiceAPI {
   /**
    * Cập nhật contact
    */
-  update(
-    data: Required<Pick<Contact, 'id' | 'identifier_id'>> & Contact
-  ) {
+  update(data: Required<Pick<Contact, 'id' | 'identifier_id'>> & Contact) {
     return this.#postV2('contact/update_contact', data)
   }
 
@@ -133,22 +136,27 @@ export class ContactServiceAPI {
 
   /** lấy dữ liệu ẩn */
   showHiddenData(data: {
-    identifier_id: string,
-    action: 'GET_SOURCE' | 'GET_PHONE' | 'GET_EMAIL' | 'GET_ADDRESS',
+    identifier_id: string
+    action: 'GET_SOURCE' | 'GET_PHONE' | 'GET_EMAIL' | 'GET_ADDRESS'
     object_id: string
-  }){
+  }) {
     return this.#postV2('contact/get_contact', data)
   }
 
   /** lấy danh sách ghi chú */
-  getNote(data: { contact_id?: string }) {
+  getNote(data: { contact_id?: string, skip: number, limit: number }) {
     return this.#post('note/get_note', data)
   }
   /** tạo mới ghi chú */
-  createNote(data: { contact_id?: string; content: string }) {
+  createNote(data: {
+    contact_id?: string
+    content: string
+    is_nested?: boolean
+    parent_id?: string
+  }) {
     return this.#post('note/create_note', {
       ...data,
-      is_template: false
+      is_template: false,
     })
   }
 }

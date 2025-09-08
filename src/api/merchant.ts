@@ -57,6 +57,11 @@ export class MerchantServiceAPI {
   createProductFromImage(data: { type: string; url: string }) {
     return this.#postProduct('product/import_data_url', data)
   }
+
+  /** lấy danh sách nhân sự */
+  getEmployees() {
+    return this.#post('v1/systems/employee/get_employee', {})
+  }
 }
 
 /** instance api merchant */
