@@ -256,6 +256,9 @@ async function next() {
     if(!onBoardingStore.is_setup.product) {
       // tạo token merchant
       await createTokenMerchant()
+
+      // setting cho merchant
+      await $merchant.settingMerchant()
     }
 
     $emit('next')

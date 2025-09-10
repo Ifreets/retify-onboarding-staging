@@ -38,7 +38,7 @@ export class MerchantServiceAPI {
       'token-business': this.APP_STORE.merchant_token,
     })
   }
-  
+
   /** tải hình ảnh lên merchant */
   uploadFile(data: FormData) {
     return this.#post('v1/internals/attachment/upload', data, {
@@ -61,6 +61,99 @@ export class MerchantServiceAPI {
   /** lấy danh sách nhân sự */
   getEmployees() {
     return this.#post('v1/systems/employee/get_employee', {})
+  }
+
+  /** thiết lập order merchant */
+  settingMerchant() {
+    return this.#postProduct('setting/save_setting', {
+      type: 'order',
+      value: {
+        online_staff: [],
+        trigger_capi: false,
+        offline_staff: [],
+        online_status: [
+          [
+            {
+              title: 'New Order',
+              action: 'DRART_ORDER',
+              bg_color: 'bg-black',
+              text_color: 'text-white',
+            },
+          ],
+          [
+            {
+              title: 'Cancel Order',
+              action: 'CANCEL_ORDER',
+              bg_color: 'bg-red-500',
+              text_color: 'text-white',
+            },
+            {
+              title: 'Confirm Order',
+              action: 'CONFIRM_ORDER',
+              bg_color: 'bg-blue-500',
+              text_color: 'text-white',
+            },
+          ],
+          [
+            {
+              title: 'Cancel Order',
+              action: 'CANCEL_ORDER',
+              bg_color: 'bg-red-500',
+              text_color: 'text-white',
+            },
+            {
+              title: 'Waiting payment',
+              action: 'CONFIRM_METHOD_PAY',
+              bg_color: 'bg-orange-500',
+              text_color: 'text-white',
+            },
+          ],
+          [
+            {
+              title: 'Order Paid',
+              action: 'PAID_ORDER',
+              bg_color: 'bg-green-500',
+              text_color: 'text-white',
+            },
+          ],
+        ],
+        offline_status: [
+          [
+            {
+              title: 'Đơn nháp',
+              action: 'DRART_ORDER',
+              bg_color: 'bg-black',
+              text_color: 'text-white',
+            },
+          ],
+          [
+            {
+              title: 'Đã thanh toán',
+              action: 'ORDER_SUCESS',
+              bg_color: 'bg-green-500',
+              text_color: 'text-white',
+            },
+            {
+              title: 'Huỷ đơn',
+              action: 'CANCEL_ORDER',
+              bg_color: 'bg-red-500',
+              text_color: 'text-white',
+            },
+          ],
+        ],
+        business_period: {
+          year: {
+            end_time: '2024-12-20T17:00:00.000Z',
+            start_time: '2023-12-20T17:00:00.000Z',
+          },
+          month: {
+            end_date: 20,
+            start_date: 21,
+          },
+        },
+        send_telegram_notification: false,
+      },
+    })
   }
 }
 
