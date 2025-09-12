@@ -322,6 +322,9 @@ export interface Order {
   /** nền tảng thanh toán */
   payment_platform?: string
 
+  /** id giao dịch thanh toán */
+  payment_transaction_id?: string
+
   /** mã thiết lập thanh toán */
   payment_setting_id?: string
 
@@ -354,6 +357,9 @@ export interface Order {
 
   /** id số điện thoại của người liên hệ */
   contact_phone_id?: string
+
+  /** tiền tip */
+  tip?: number
 
   //** api không trả về
 

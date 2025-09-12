@@ -15,30 +15,38 @@
           :class="`${last_status.bg_color?.replace('bg-', 'text-')}`"
         />
         <div class="w-full flex flex-col gap-3">
-          <div class="flex justify-between items-center">
-            <p
-              class="text-lg font-semibold"
-              :class="`${last_status.bg_color?.replace('bg-', 'text-')}`"
-            >
-              {{ ACTION_STATUS_OBJ?.[last_status.action || '']?.name || '' }}
-            </p>
-            <p class="text-base">
-              Order ID:
-              <span class="font-medium text-sm"
-                >#{{ orderStore.selected_order?.order_id }}</span
+            <div class="flex justify-between items-center">
+              <p
+                class="text-lg font-semibold"
+                :class="`${last_status.bg_color?.replace('bg-', 'text-')}`"
               >
-            </p>
+                {{ ACTION_STATUS_OBJ?.[last_status.action || '']?.name || '' }}
+              </p>
+              <p class="text-base">
+                Order ID:
+                <span class="font-medium text-sm">
+                  #{{ orderStore.selected_order?.order_id }}
+                </span>
+              </p>
+            
           </div>
           <div class="w-full h-px bg-slate-200"></div>
+          <p class="">
+              <span v-if="orderStore.selected_order?.payment_platform">
+                {{ orderStore.selected_order?.payment_platform }} :
+              </span>
+              <span>
+                {{ orderStore.selected_order?.payment_transaction_id }}
+              </span>
+            </p>
           <p class="text-base">
             Order Date:
             <span
               class="font-medium text-sm"
               v-if="orderStore.selected_order?.createdAt"
-              >{{
-                format(orderStore.selected_order?.createdAt, 'MMMM d, yyyy')
-              }}</span
             >
+              {{ format(orderStore.selected_order?.createdAt, 'MMMM d, yyyy') }}
+            </span>
           </p>
           <div class="flex justify-between items-center">
             <p class="text-base">
@@ -159,6 +167,18 @@
             Discount
             <span class="font-semibold text-lg">
               {{ formatCurrency(orderStore.selected_order?.discount) }}
+            </span>
+          </p>
+          <p class="flex justify-between font-medium">
+            Tax
+            <span class="font-semibold text-lg">
+              {{ formatCurrency(orderStore.selected_order?.vat) }}
+            </span>
+          </p>
+          <p class="flex justify-between font-medium">
+            Tip
+            <span class="font-semibold text-lg">
+              {{ formatCurrency(orderStore.selected_order?.tip) }}
             </span>
           </p>
           <div class="h-px w-full bg-slate-200"></div>

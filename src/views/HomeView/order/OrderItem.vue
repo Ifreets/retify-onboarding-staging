@@ -24,8 +24,8 @@
           :class="`${last_status.bg_color} ${last_status.text_color} rounded-md py-0.5 px-2`"
           class="flex gap-1"
         >
-          <p class="w-fit lg:max-w-20 truncate">
-            {{ ACTION_STATUS_OBJ?.[last_status.action || '']?.name || '' }}
+          <p class="w-fit lg:max-w-28 truncate">
+            {{ last_status.title }}
           </p>
         </div>
       </div>
