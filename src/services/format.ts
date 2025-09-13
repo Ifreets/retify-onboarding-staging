@@ -48,7 +48,7 @@ export function formatCurrency(amount?: number): string {
   // if (!amount) return ''
 
   /** loại tiền tệ */
-  const CURRENCY = localStorage.getItem('currency') || 'USD'
+  const CURRENCY = localStorage.getItem('currency') || 'CAD'
 
   // Map giữa currency và locale tương ứng
   const CURRENCY_LOCALE_MAP: Record<string, string> = {
@@ -59,6 +59,7 @@ export function formatCurrency(amount?: number): string {
     GBP: 'en-GB', // Bảng Anh
     CNY: 'zh-CN', // Nhân dân tệ (Trung Quốc)
     KRW: 'ko-KR', // Won Hàn Quốc
+    CAD: 'en-CA',
   }
 
   // Lấy locale phù hợp, nếu không có thì mặc định 'en-US'

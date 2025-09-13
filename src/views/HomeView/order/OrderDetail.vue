@@ -9,36 +9,36 @@
       <div class="w-6"></div>
     </header>
     <main class="w-full h-full px-2 py-3 gap-5 flex flex-col overflow-auto">
+      <!-- Thông tin đơn hàng -->
       <section class="border py-3 px-4 rounded-lg flex gap-2">
         <CheckBadgeIcon
           class="size-8"
           :class="`${last_status.bg_color?.replace('bg-', 'text-')}`"
         />
         <div class="w-full flex flex-col gap-3">
-            <div class="flex justify-between items-center">
-              <p
-                class="text-lg font-semibold"
-                :class="`${last_status.bg_color?.replace('bg-', 'text-')}`"
-              >
-                {{ ACTION_STATUS_OBJ?.[last_status.action || '']?.name || '' }}
-              </p>
-              <p class="text-base">
-                Order ID:
-                <span class="font-medium text-sm">
-                  #{{ orderStore.selected_order?.order_id }}
-                </span>
-              </p>
-            
+          <div class="flex justify-between items-center">
+            <p
+              class="text-lg font-semibold"
+              :class="`${last_status.bg_color?.replace('bg-', 'text-')}`"
+            >
+              {{ last_status.title || '' }}
+            </p>
+            <p class="text-base">
+              Order ID:
+              <span class="font-medium text-sm">
+                #{{ orderStore.selected_order?.order_id }}
+              </span>
+            </p>
           </div>
           <div class="w-full h-px bg-slate-200"></div>
           <p class="">
-              <span v-if="orderStore.selected_order?.payment_platform">
-                {{ orderStore.selected_order?.payment_platform }} :
-              </span>
-              <span>
-                {{ orderStore.selected_order?.payment_transaction_id }}
-              </span>
-            </p>
+            <span v-if="orderStore.selected_order?.payment_platform">
+              {{ orderStore.selected_order?.payment_platform }} :
+            </span>
+            <span>
+              {{ orderStore.selected_order?.payment_transaction_id }}
+            </span>
+          </p>
           <p class="text-base">
             Order Date:
             <span
@@ -62,6 +62,7 @@
         </div>
       </section>
 
+      <!-- Thông tin khách hàng -->
       <section class="border py-3 px-4 rounded-lg flex gap-3">
         <Image
           :url="orderStore.selected_order?.contact_info?.avatar || ''"
@@ -147,11 +148,13 @@
         </div>
       </section>
 
+      <!-- sản phẩm -->
       <ProductList
         title="Ordered Items"
         :products="orderStore.selected_order?.products || []"
       />
 
+      <!-- Thông tin thanh toán -->
       <section class="border py-3 px-4 rounded-lg flex gap-2">
         <DollarSignIcon class="size-8 flex-shrink-0" />
         <div class="flex flex-col gap-3 w-full">
@@ -191,6 +194,7 @@
         </div>
       </section>
     </main>
+    <!-- Các action -->
     <footer
       v-for="(step, step_index) in orderStore.selected_order?.order_journey"
       v-show="check_step_active === step_index"
@@ -198,18 +202,17 @@
     >
       <template v-for="(status, status_index) in step">
         <div
+          v-if="
+            STATUS?.includes(orderStore.selected_order.status || '') ||
+            status.action === 'CANCEL_ORDER'
+          "
           class="flex-1 rounded-md flex items-center justify-center py-3.5 px-5 cursor-pointer font-semibold"
           :class="{
             [`${status.bg_color} ${status.text_color}`]: status,
           }"
           @click="activeStep(step_index, status_index, status)"
-          v-if="
-            orderStore.selected_order.status !== 'CANCEL_ORDER' &&
-            (orderStore.selected_order.status === 'DRART_ORDER' ||
-              status.action === 'CANCEL_ORDER')
-          "
         >
-          {{ action_status_obj?.[status.action || '']?.name || '' }}
+          {{ status.title || '' }}
         </div>
       </template>
     </footer>
@@ -268,8 +271,10 @@ import { cloneDeep } from 'lodash'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import ProductList from '@/components/common/ProductList.vue'
+
+import Modal from '@/components/ui/Modal.vue'
 import Image from '@/components/ui/Image.vue'
+import ProductList from '@/components/common/ProductList.vue'
 
 import CancelImage from '@/assets/image/cancel_order.png'
 import DollarSignIcon from '@/components/icons/DollarSignIcon.vue'
@@ -282,7 +287,9 @@ import {
 } from '@heroicons/vue/24/solid'
 
 import type { ActionStatus, ActionStep, Order } from '@/interfaces'
-import Modal from '@/components/ui/Modal.vue'
+
+/** trạng thái đơn hàng được phép hiển thị tiếp */
+const STATUS = ['PAID_ORDER', 'WAITING_ITEM', 'PACKING_ORDER', 'DELIVERY_ORDER']
 
 // store
 const orderStore = useOrderStore()
@@ -292,7 +299,6 @@ const router = useRouter()
 const route = useRoute()
 
 // composable
-const { ACTION_STATUS_OBJ } = useOrder()
 const { toChat, toCustomer, openCallPhone } = useNavigationHandler()
 
 /** ẩn hiện modal xác nhận hủy đơn */

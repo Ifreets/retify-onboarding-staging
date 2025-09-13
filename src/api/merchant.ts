@@ -74,7 +74,7 @@ export class MerchantServiceAPI {
         online_status: [
           [
             {
-              title: 'New Order',
+              title: 'New',
               action: 'DRART_ORDER',
               bg_color: 'bg-black',
               text_color: 'text-white',
@@ -82,37 +82,45 @@ export class MerchantServiceAPI {
           ],
           [
             {
-              title: 'Cancel Order',
+              title: 'Cancel',
               action: 'CANCEL_ORDER',
               bg_color: 'bg-red-500',
               text_color: 'text-white',
             },
             {
-              title: 'Confirm Order',
-              action: 'CONFIRM_ORDER',
+              title: 'Paid',
+              action: 'PAID_ORDER',
+              bg_color: 'bg-green-500',
+              text_color: 'text-white',
+            },
+          ],
+          [
+            {
+              title: 'Cancel',
+              action: 'CANCEL_ORDER',
+              bg_color: 'bg-red-500',
+              text_color: 'text-white',
+            },
+            {
+              title: 'Processing',
+              action: 'WAITING_ITEM',
               bg_color: 'bg-blue-500',
               text_color: 'text-white',
             },
           ],
           [
             {
-              title: 'Cancel Order',
-              action: 'CANCEL_ORDER',
-              bg_color: 'bg-red-500',
-              text_color: 'text-white',
-            },
-            {
-              title: 'Waiting payment',
-              action: 'CONFIRM_METHOD_PAY',
+              title: 'Ready',
+              action: 'PACKING_ORDER',
               bg_color: 'bg-orange-500',
               text_color: 'text-white',
             },
           ],
           [
             {
-              title: 'Order Paid',
-              action: 'PAID_ORDER',
-              bg_color: 'bg-green-500',
+              title: 'Delivered',
+              action: 'DELIVERY_ORDER',
+              bg_color: 'bg-purple-500',
               text_color: 'text-white',
             },
           ],

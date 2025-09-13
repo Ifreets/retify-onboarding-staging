@@ -159,6 +159,14 @@ export class ContactServiceAPI {
       is_template: false,
     })
   }
+
+  /** cập nhật ghi chú */
+  updateNote(data: {
+    id: string
+    content: string
+  }) {
+    return this.#post('note/update_note', data)
+  }
 }
 
 /** instance api order */

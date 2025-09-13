@@ -268,8 +268,7 @@
         </div>
       </section>
 
-      <CustomerNotes
-        />
+      <CustomerNotes :is_edit="is_edit" ref="note" />
 
       <ProductList
         v-if="last_order.products?.length"
@@ -332,6 +331,9 @@ const contactStore = useContactStore()
 
 // composable
 const { openCallPhone, toChat } = useNavigationHandler()
+
+/** ref tới khối ghi chú */
+const note = ref<InstanceType<typeof CustomerNotes> | null>(null)
 
 /** chế độ edit */
 const is_edit = ref(false)
@@ -463,6 +465,10 @@ function openEdit() {
 /** lưu thông tin */
 async function save() {
   try {
+    // cập nhật dữ liệu ghi chú
+    note.value?.saveNote()
+
+    // cập nhật liên hệ
     await updateContactInfo()
     closeEdit()
   } catch (e) {

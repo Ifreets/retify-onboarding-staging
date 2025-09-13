@@ -4,20 +4,24 @@
     <div class="w-full flex flex-col gap-3">
       <p class="text-lg font-semibold">Note</p>
       <div class="w-full h-px bg-slate-200"></div>
+      <p v-if="!is_edit">
+        {{ note }}
+      </p>
       <textarea
+        v-else
         type="text"
         placeholder="Enter note..."
         class="w-full outline-none border py-1.5 px-3 rounded-lg"
         v-model="note"
       />
-      <button
+      <!-- <button
         :disabled="!note"
         class="bg-blue-700 disabled:bg-slate-400 text-white font-medium py-1.5 px-3 rounded-md w-fit"
         @click="addNote"
       >
         Add note
-      </button>
-      <ul
+      </button> -->
+      <!-- <ul
         v-if="notes.length"
         class="flex flex-col gap-2 max-h-[60dvh] pb-2 overflow-auto"
       >
@@ -125,22 +129,16 @@
             </template>
           </div>
         </li>
-      </ul>
-      <p
-        v-else
-        class="text-slate-500"
-      >
-        No notes
-      </p>
+      </ul> -->
 
-      <Pagination
-      class="pt-2"
-      v-model:page="page"
-      :total="total_note"
-      :sibling-count="1"
-      :items-per-page="PAGE_SIZE"
-      :change-page="getNotes"
-    />
+      <!-- <Pagination
+        class="pt-2"
+        v-model:page="page"
+        :total="total_note"
+        :sibling-count="1"
+        :items-per-page="PAGE_SIZE"
+        :change-page="getNotes"
+      /> -->
     </div>
   </section>
 </template>
@@ -158,6 +156,13 @@ import { ChatBubbleLeftRightIcon, UserIcon } from '@heroicons/vue/24/solid'
 import type { Note } from '@/interfaces'
 
 const PAGE_SIZE = 10
+
+const props = defineProps({
+  is_edit: {
+    type: Boolean,
+    default: false,
+  }
+})
 
 // store
 const appStore = useAppStore()
@@ -196,23 +201,55 @@ async function getNotes() {
     // lưu lại tổng số bản ghi
     total_note.value = RES?.total
 
+    // lấy ghi chú đầu tiên và hiện ra
+    note.value = notes.value?.[0]?.content || ''
+
     // lấy các comment trả lời cho vào trong các comment chính
-    notes.value = notes.value.filter(note => {
-      // nếu có parent_id => comment trả lời thì xóa khỏi mảng
-      if (note.parent_id) return false
+    // notes.value = notes.value.filter(note => {
+    //   // nếu có parent_id => comment trả lời thì xóa khỏi mảng
+    //   if (note.parent_id) return false
 
-      // lặp qua mảng snap copy để lấy ra các ghi chú comment thêm vào note chính
-      RES?.notes.forEach((snap_note: Note) => {
-        // nếu không phải comment trả lời của ghi chú chính thì thôi
-        if (snap_note.parent_id !== note.id) return
-        // Khởi tạo giá trị comments cho ghi chú chính nếu chưa có
-        if (!note.replies) note.replies = []
+    //   // lặp qua mảng snap copy để lấy ra các ghi chú comment thêm vào note chính
+    //   RES?.notes.forEach((snap_note: Note) => {
+    //     // nếu không phải comment trả lời của ghi chú chính thì thôi
+    //     if (snap_note.parent_id !== note.id) return
+    //     // Khởi tạo giá trị comments cho ghi chú chính nếu chưa có
+    //     if (!note.replies) note.replies = []
 
-        // thêm ghi chú comment thêm vào ghi chú chính
-        note.replies.push(snap_note)
-      })
+    //     // thêm ghi chú comment thêm vào ghi chú chính
+    //     note.replies.push(snap_note)
+    //   })
 
-      return true
+    //   return true
+    // })
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+/** lưu lại ghi chú */
+async function saveNote() {
+  try {
+    // cập nhật ghi chú nếu đã có
+    if(notes.value?.[0]?.id) {
+      await updateNote(notes.value?.[0]?.id)
+    } 
+    // nếu chưa có ghi chú nây, tạo ghi chú mới
+    else {
+      await addNote()
+    }
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+
+/** cập nhật ghi chú */
+async function updateNote(id: string) {
+  try {
+    await $contact.updateNote({
+      id,
+      content: note.value,
     })
   } catch (e) {
     console.log(e)
@@ -228,7 +265,7 @@ async function addNote() {
       content: note.value,
     })
     // reset input
-    note.value = ''
+    // note.value = ''
 
     // thêm vào đầu mảng
     notes.value = [RES, ...(notes.value || [])]
@@ -269,4 +306,6 @@ function getNameEmployee(id: string) {
 
   return `${EMPLOYEE?.first_name || ''}`?.trim()
 }
+
+defineExpose({ saveNote })
 </script>
