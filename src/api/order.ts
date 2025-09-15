@@ -58,7 +58,11 @@ export class OrderServiceAPI {
   }
 
   /** danh sách sản phẩm */
-  getProducts(data: { skip?: number; limit?: number }) {
+  getProducts(data: {
+    skip?: number
+    limit?: number
+    sort?: Record<string, 'asc' | 'desc'>
+  }) {
     return this.#post('product/get_product', data)
   }
 

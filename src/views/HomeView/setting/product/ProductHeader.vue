@@ -8,6 +8,7 @@
         v-model="filter_param.search"
         @input="searchProduct"
       />
+
       <DropdownMenuRoot v-model:open="is_open_filter_status">
         <DropdownMenuTrigger
           class="p-2 border rounded-md flex-shrink-0 flex gap-1.5"
@@ -52,6 +53,70 @@
           </DropdownMenuContent>
         </DropdownMenuPortal>
       </DropdownMenuRoot>
+
+      <DropdownMenuRoot v-model:open="is_open_sort">
+        <DropdownMenuTrigger
+          class="p-2 border rounded-md flex-shrink-0 flex gap-1.5"
+          :class="{
+            'bg-blue-200 text-blue-700 border-blue-700': filter_param.sort,
+          }"
+        >
+          <ArrowsUpDownIcon class="size-5 flex-shrink-0" />
+        </DropdownMenuTrigger>
+        <DropdownMenuPortal>
+          <DropdownMenuContent
+            class="border p-2 bg-white rounded-lg text-sm flex flex-col gap-1"
+            align="end"
+            :sideOffset="6"
+          >
+            <template v-for="sort in SORT_BY">
+              <p class="text-xs bg-slate-100 px-2 py-1 font-medium rounded-md">
+                {{ sort.title }}
+              </p>
+              <DropdownMenuItem
+                class="hover:bg-slate-100 rounded-md py-1.5 px-2 cursor-pointer flex gap-2 justify-between"
+                @select="selectSort(sort.key, 'asc')"
+              >
+                {{ sort.asc_title }}
+                <CheckIcon
+                  v-if="filter_param.sort?.[sort.key] === 'asc'"
+                  class="w-4 h-4"
+                />
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                class="hover:bg-slate-100 rounded-md py-1.5 px-2 cursor-pointer flex gap-2 justify-between"
+                @select="selectSort(sort.key, 'desc')"
+              >
+                {{ sort.desc_title }}
+                <CheckIcon
+                  v-if="filter_param.sort?.[sort.key] === 'desc'"
+                  class="w-4 h-4"
+                />
+              </DropdownMenuItem>
+            </template>
+            <DropdownMenuSeparator class="h-[1px] bg-slate-200 m-[5px]" />
+            <p
+              class="text-red-500 cursor-pointer text-center"
+              @click="clearSort"
+            >
+              Clear
+            </p>
+          </DropdownMenuContent>
+        </DropdownMenuPortal>
+      </DropdownMenuRoot>
+
+      <button
+        v-if="
+          filter_param.search ||
+          filter_param.status?.length ||
+          filter_param.sort ||
+          filter_param.category_selected
+        "
+        class="p-2 border rounded-md flex-shrink-0 border-red-500 bg-red-100 text-red-500"
+        @click="clearAllFilter"
+      >
+        <XMarkIcon class="size-5 flex-shrink-0" />
+      </button>
     </div>
     <ul class="flex gap-2 overflow-auto w-full">
       <li
@@ -79,21 +144,27 @@
 </template>
 
 <script setup lang="ts">
-import { PRODUCT_STATUS } from '@/utils/constant'
-import { FunnelIcon } from '@heroicons/vue/24/outline'
+import { PRODUCT_STATUS, SORT_BY } from '@/utils/constant'
 import { debounce } from 'lodash'
+import { ref, type PropType } from 'vue'
+
 import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuItemIndicator,
   DropdownMenuPortal,
   DropdownMenuRoot,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from 'radix-vue'
-import { ref, type PropType } from 'vue'
 
 import { CheckIcon } from '@heroicons/vue/24/solid'
+import {
+  ArrowsUpDownIcon,
+  FunnelIcon,
+  XMarkIcon,
+} from '@heroicons/vue/24/outline'
 
 import type { Category } from '@/interfaces'
 
@@ -113,6 +184,7 @@ const filter_param = defineModel<{
   search: string
   category_selected?: string
   status?: string[]
+  sort?: Record<string, 'asc' | 'desc'>
 }>({
   default: {
     search: '',
@@ -121,6 +193,9 @@ const filter_param = defineModel<{
 
 /** ẩn hiện dropdown lọc trạng thái */
 const is_open_filter_status = ref(false)
+
+/** ẩn hiện dropdown sắp xếp */
+const is_open_sort = ref(false)
 
 /** debounce search sản phẩm */
 const searchProduct = debounce(() => {
@@ -153,10 +228,34 @@ function selectStatus(event: Event, status: string) {
   $props.getDataFilter()
 }
 
+/** chọn loại sắp xếp */
+function selectSort(key: string, type: 'asc' | 'desc') {
+  filter_param.value.sort = {
+    [`${key}`]: type,
+  }
+  $props.getDataFilter()
+}
+
 /** xóa tất cả lọc trạng thái */
 function clearAllStatus() {
   filter_param.value.status = []
   is_open_filter_status.value = false
+  $props.getDataFilter()
+}
+
+/** xóa sort */
+function clearSort() {
+  filter_param.value.sort = undefined
+  is_open_sort.value = false
+  $props.getDataFilter()
+}
+
+/** xóa tất cả lọc */
+function clearAllFilter() {
+  filter_param.value.search = ''
+  filter_param.value.category_selected = ''
+  filter_param.value.status = []
+  filter_param.value.sort = undefined
   $props.getDataFilter()
 }
 </script>

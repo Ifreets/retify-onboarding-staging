@@ -166,16 +166,16 @@
               {{ formatCurrency(orderStore.selected_order?.price) }}
             </span>
           </p>
+          <p class="flex justify-between font-medium">
+            Tax(13%)
+            <span class="font-semibold text-lg">
+              {{ formatCurrency(orderStore.selected_order?.vat) }}
+            </span>
+          </p>
           <p class="flex justify-between font-medium text-red-500">
             Discount
             <span class="font-semibold text-lg">
               {{ formatCurrency(orderStore.selected_order?.discount) }}
-            </span>
-          </p>
-          <p class="flex justify-between font-medium">
-            Tax
-            <span class="font-semibold text-lg">
-              {{ formatCurrency(orderStore.selected_order?.vat) }}
             </span>
           </p>
           <p class="flex justify-between font-medium">

@@ -131,7 +131,12 @@ const categories = ref<Category[]>([])
 const labels = ref<ProductLabel[]>([])
 
 /** filter param */
-const filter_param = ref<{ search: string; category_selected?: string, status?: string[] }>({
+const filter_param = ref<{
+  search: string
+  category_selected?: string
+  status?: string[]
+  sort?: Record<string, 'asc' | 'desc'>
+}>({
   /** Từ khóa tìm kiếm */
   search: '',
 })
@@ -163,13 +168,17 @@ function getDataFilter() {
 /** Lấy danh sách sản phẩm */
 async function getProduct() {
   try {
-    const { search, category_selected, status } = filter_param.value
+    const { search, category_selected, status, sort } = filter_param.value
 
     /** danh sách sản phẩm */
     const RES = await $order.getProducts({
-      ...(search ? { search } : {}),
-      ...(category_selected ? { category_id: category_selected } : {}),
-      ...(status?.length ? { include_status: status } : {}),
+      ...(search
+        ? { search }
+        : {
+            ...(category_selected ? { category_id: category_selected } : {}),
+            ...(status?.length ? { include_status: status } : {}),
+          }),
+      sort: sort || undefined,
       skip: (page.value - 1) * PAGE_SIZE,
       limit: PAGE_SIZE,
     })

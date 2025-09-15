@@ -97,7 +97,7 @@ export const ACTION_STATUS = [
   },
 ]
 
-/** danh sách sản phẩm */
+/** danh sách trạng thái sản phẩm sản phẩm */
 export const PRODUCT_STATUS = [
   {
     value: 'IN_STOCK',
@@ -122,5 +122,27 @@ export const PRODUCT_STATUS = [
   {
     value: 'UNACTIVE',
     name: 'Unactive',
+  },
+]
+
+/** danh sách các loại sắp xếp của sản phẩm */
+export const SORT_BY = [
+  {
+    title: 'Sort by name',
+    key: 'search_name',
+    asc_title: 'A-Z',
+    desc_title: 'Z-A',
+  },
+  {
+    title: 'Sort by price',
+    key: 'price',
+    asc_title: 'Low to high',
+    desc_title: 'High to low',
+  },
+  {
+    title: 'Sort by update time',
+    key: 'updatedAt',
+    asc_title: 'Update latest',
+    desc_title: 'Update oldest',
   },
 ]
