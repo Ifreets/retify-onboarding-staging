@@ -1,12 +1,11 @@
 <template>
   <header class="px-3 pb-3 flex flex-col gap-2">
     <div class="flex gap-2">
-      <input
-        type="text"
+      <InputSearch
+        class="w-full"
+        v-model:search="filter_param.search"
         placeholder="Search products..."
-        class="w-full border rounded-md px-3 py-2 outline-none placeholder:text-slate-400"
-        v-model="filter_param.search"
-        @input="searchProduct"
+        :call-api-search="searchProduct"
       />
 
       <DropdownMenuRoot v-model:open="is_open_filter_status">
@@ -158,6 +157,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from 'radix-vue'
+import InputSearch from '@/components/common/InputSearch.vue'
 
 import { CheckIcon } from '@heroicons/vue/24/solid'
 import {

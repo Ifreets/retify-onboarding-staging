@@ -97,7 +97,7 @@ export const ACTION_STATUS = [
   },
 ]
 
-/** danh sách trạng thái sản phẩm sản phẩm */
+/** danh sách trạng thái sản phẩm */
 export const PRODUCT_STATUS = [
   {
     value: 'IN_STOCK',
@@ -144,5 +144,33 @@ export const SORT_BY = [
     key: 'updatedAt',
     asc_title: 'Update latest',
     desc_title: 'Update oldest',
+  },
+]
+
+/** danh sách trạng thái đơn hàng để lọc */
+export const ORDER_STATUS = [
+  {
+    value: 'DRART_ORDER',
+    name: 'New Order',
+  },
+  {
+    value: 'PAID_ORDER',
+    name: 'Paid',
+  },
+  {
+    value: 'WAITING_ITEM',
+    name: 'Processing',
+  },
+  {
+    value: 'PACKING_ORDER',
+    name: 'Ready',
+  },
+  {
+    value: 'DELIVERY_ORDER',
+    name: 'Delivered',
+  },
+  {
+    value: 'CANCEL_ORDER',
+    name: 'Cancelled',
   },
 ]

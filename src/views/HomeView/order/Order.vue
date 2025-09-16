@@ -7,10 +7,10 @@
       <!-- <CreateButton /> -->
     </header>
     <section class="w-full h-full py-2 flex flex-col overflow-hidden">
-      <InputSearch
+      <OrderHeader
         v-model:search="search"
-        placeholder="Search Orders..."
-        :call-api-search="getOrders"
+        v-model:filter_param="filter_param"
+        :get-orders="getOrders"
       />
       <SkeletonLoading v-if="loading.first" />
       <template v-else>
@@ -47,6 +47,7 @@ import SkeletonLoading from '@/components/common/SkeletonLoading.vue'
 import OrderList from '@/views/HomeView/order/OrderList.vue'
 
 import type { Order } from '@/interfaces'
+import OrderHeader from './OrderHeader.vue'
 
 // route
 const router = useRouter()
@@ -64,6 +65,11 @@ const orders = ref<Order[]>([])
 /** từ khóa tìm kiếm */
 const search = ref('')
 
+/** dữ liệu lọc */
+const filter_param = ref({
+  status_list: [],
+})
+
 /** số bản ghi bắt đầu lấy */
 const skip = ref(0)
 
@@ -79,7 +85,6 @@ const is_load_full = ref(false)
 // composable
 const { initSocket, closeSocket } = useSocket()
 useResumeAndPause({ onResume: getOrdersWithoutSearch, onPaused: closeSocket })
-
 
 onMounted(() => {
   // nếu có id trên url thì chuyển qua màn chi tiết luôn
@@ -164,16 +169,32 @@ async function getMoreOrder() {
 
 /** call api lấy danh sách đơn hàng */
 async function getOrder() {
-  return await $order.getOrder({
+  /** dữ liệu truyền vào body */
+  let body: Record<string, any> = {
     skip: skip.value,
     limit: LIMIT,
-    search: search.value,
-  })
+  }
+  // nếu có search
+  if (search.value) {
+    body = {
+      ...body,
+      search: search.value,
+    }
+  }
+  // nếu có trạng thái cần lọc
+  if(!search.value && filter_param.value.status_list.length) {
+    body = {
+      ...body,
+      status_list: filter_param.value.status_list,
+    }
+  }
+
+  return await $order.getOrder(body)
 }
 
 /** hàm xử lý socket */
 function handleSocket(data: any) {
-  if(data.event === 'new_order') {
+  if (data.event === 'new_order') {
     orders.value = [data.data, ...orders.value]
   }
 }
@@ -184,7 +205,7 @@ function openDetailWithOrderIdUrl() {
   const ORDER_ID = route.query.order_id
 
   // nếu có id trên url thì chuyển về màn chi tiết
-  if(ORDER_ID) {
+  if (ORDER_ID) {
     router.push('/home/order/' + ORDER_ID)
   }
 }
