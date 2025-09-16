@@ -38,9 +38,8 @@ import { useResumeAndPause } from '@/composables/useResumeAndPause'
 import { useSocket } from '@/composables/useSocket'
 import { useAppStore } from '@/stores'
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-import AskRetionButton from '@/components/common/AskRetionButton.vue'
-import CreateButton from '@/components/common/CreateButton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import InputSearch from '@/components/common/InputSearch.vue'
 import Loading from '@/components/common/Loading.vue'
@@ -48,6 +47,10 @@ import SkeletonLoading from '@/components/common/SkeletonLoading.vue'
 import OrderList from '@/views/HomeView/order/OrderList.vue'
 
 import type { Order } from '@/interfaces'
+
+// route
+const router = useRouter()
+const route = useRoute()
 
 // store
 const appStore = useAppStore()
@@ -79,6 +82,9 @@ useResumeAndPause({ onResume: getOrdersWithoutSearch, onPaused: closeSocket })
 
 
 onMounted(() => {
+  // nếu có id trên url thì chuyển qua màn chi tiết luôn
+  openDetailWithOrderIdUrl()
+
   // call api lấy danh sách đơn hàng
   getOrders()
 
@@ -169,6 +175,17 @@ async function getOrder() {
 function handleSocket(data: any) {
   if(data.event === 'new_order') {
     orders.value = [data.data, ...orders.value]
+  }
+}
+
+/** hàm xử lý khi có id order trên url thì chuyển qua màn chi tiết */
+function openDetailWithOrderIdUrl() {
+  /** id của đơn hàng trên url */
+  const ORDER_ID = route.query.order_id
+
+  // nếu có id trên url thì chuyển về màn chi tiết
+  if(ORDER_ID) {
+    router.push('/home/order/' + ORDER_ID)
   }
 }
 </script>

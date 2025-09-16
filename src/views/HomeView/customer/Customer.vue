@@ -82,7 +82,7 @@ onMounted(() => {
   // Lấy danh sách danh bạ
   getContacts()
 
-  // call api lấy dữ liệu cửa đơn hàng
+  // nếu có id trên url thì chuyển về màn chi tiết
   getContactOnUrl()
 })
 
@@ -151,24 +151,24 @@ async function getContact() {
   })
 }
 
-/** call api lấy dữ liệu cửa đơn hàng */
+/** Nếu có id của customer thì chuyển sang màn chi tiết với luôn */
 async function getContactOnUrl() {
   /** id khách hàng trên url */
   const CUSTOMER_ID = route.query.customer_id
 
+  /** id đơn hàng trên url */
+  const ORDER_ID = route.query.order_id
+
   // nếu không id trên url thì thôi
   if (!CUSTOMER_ID) return
 
-  /** dữ liệu contact của id trên url */
-  const RES = await $contact.getContact({
-    identifier_id: CUSTOMER_ID as string,
-  })
-
-  // nếu có dữ liệu
-  if (!RES?.identifier_id) return
-  // lưu lại dữ liệu cửa đơn hàng
-  contactStore.selected_contact = RES
-  // chuyển router
-  router.push('/home/customer/' + RES.identifier_id)
+  router.push(
+    {
+      path: `/home/customer/${CUSTOMER_ID}`,
+      query: {
+        order_id: ORDER_ID,
+      },
+    },
+  )
 }
 </script>

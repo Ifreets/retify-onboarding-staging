@@ -330,7 +330,7 @@ const route = useRoute()
 const contactStore = useContactStore()
 
 // composable
-const { openCallPhone, toChat } = useNavigationHandler()
+const { openCallPhone, toChat, toOrder } = useNavigationHandler()
 
 /** ref tới khối ghi chú */
 const note = ref<InstanceType<typeof CustomerNotes> | null>(null)
@@ -635,6 +635,15 @@ async function createAndUpdateData<T extends { id?: string }>(
 
 /** hàm trở lại danh sách khách hàng */
 function back() {
+  /** id order trên url */
+  const ORDER_ID = route.query.order_id
+
+  // nếu có thì chuyển về đúng màn order đó
+  if(ORDER_ID) {
+    toOrder(ORDER_ID as string)
+    return
+  }
+
   // nếu đang ở màn edit thì lấy lại giá trị trước khi sửa
   if (is_edit.value) {
     // lấy lại giá trị trước khi sửa

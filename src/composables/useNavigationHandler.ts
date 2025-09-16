@@ -11,21 +11,40 @@ export function useNavigationHandler() {
   // composables
   const { notify } = useToast()
 
+  /** chuyển sang màn đơn hàng */
+  function toOrder(order_id?: string) {
+    // nếu không có id đơn hàng
+    if (!order_id) {
+      notify('ID order not found!')
+      return
+    }
+
+    // chuyển sang màn đơn hàng
+    window.ReactNativeWebView?.postMessage(
+      JSON.stringify({
+        type: 'page.customer',
+        payload: {
+          action: 'navigate',
+          target: 'order',
+          order_id,
+        },
+      }),
+    )
+  }
+
   /** chuyển sang màn thông tin khách hàng */
-  function toCustomer(customer_id?: string) {
+  function toCustomer(customer_id?: string, order_id?: string) {
     // nếu không có id khách hàng
     if (!customer_id) {
       notify('ID customer not found!')
       return
     }
-    console.log({
-      type: 'page.order',
-      payload: {
-        action: 'navigate',
-        target: 'customer',
-        customer_id,
-      },
-    })
+
+    // nếu không có id đơn hàng
+    if (!order_id) {
+      notify('ID order not found!')
+      return
+    }
 
     // chuyển sang màn thông tin khách hàng
     window.ReactNativeWebView?.postMessage(
@@ -35,6 +54,7 @@ export function useNavigationHandler() {
           action: 'navigate',
           target: 'customer',
           customer_id,
+          order_id,
         },
       }),
     )
@@ -51,15 +71,6 @@ export function useNavigationHandler() {
       notify('ID page or client not found!')
       return
     }
-    console.log({
-      type: current_page,
-      payload: {
-        action: 'navigate',
-        target: 'conversation',
-        page_id,
-        client_id,
-      },
-    })
 
     // chuyển sang trang chat
     window.ReactNativeWebView?.postMessage(
@@ -118,14 +129,6 @@ export function useNavigationHandler() {
       notify('Phone number not found!')
       return
     }
-    console.log({
-      type: current_page,
-      payload: {
-        action: 'navigate',
-        target: 'phone',
-        phone: RES,
-      },
-    })
 
     window.ReactNativeWebView?.postMessage(
       JSON.stringify({
@@ -166,6 +169,7 @@ export function useNavigationHandler() {
   }
 
   return {
+    toOrder,
     toCustomer,
     toChat,
     openCallPhone,

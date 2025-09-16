@@ -4,7 +4,7 @@
       <img :src="EmptyOrderImage" class="w-24 drop-shadow-xl" />
       <p class="text-xl font-medium text-slate-500">{{ empty_content }}</p>
       <button class="flex gap-1 items-center rounded-xl py-3 px-5 font-medium bg-black text-white">
-        <PlusIcon class="size-4" />
+        <!-- <PlusIcon class="size-4" /> -->
         {{ add_content }}
       </button>
     </div>

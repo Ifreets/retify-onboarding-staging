@@ -264,17 +264,15 @@ import { $order } from '@/api'
 import { useNavigationHandler } from '@/composables/useNavigationHandler'
 import { formatCurrency } from '@/services/format'
 import { useOrderStore } from '@/stores/order'
-import { ACTION_STATUS } from '@/utils/constant'
-import { useOrder } from '@/views/HomeView/order/composables/order'
 import { format } from 'date-fns'
 import { cloneDeep } from 'lodash'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 
-import Modal from '@/components/ui/Modal.vue'
-import Image from '@/components/ui/Image.vue'
 import ProductList from '@/components/common/ProductList.vue'
+import Image from '@/components/ui/Image.vue'
+import Modal from '@/components/ui/Modal.vue'
 
 import CancelImage from '@/assets/image/cancel_order.png'
 import DollarSignIcon from '@/components/icons/DollarSignIcon.vue'
@@ -319,9 +317,6 @@ const cancel_data = ref<{
 const last_status = computed(() => {
   return getLastStatus(orderStore.selected_order)
 })
-
-// danh sách action dạng object
-const action_status_obj = convert(ACTION_STATUS)
 
 // * Check xem trạng thái đơn hàng nào đang được kích hoạt
 const check_step_active = computed(() => {
