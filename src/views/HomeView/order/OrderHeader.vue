@@ -118,5 +118,6 @@ function selectStatus(event: Event, status: string) {
 function clearAllStatus() {
   filter_param.value.status_list = []
   $props.getOrders()
+  is_open_filter_status.value = false
 }
 </script>
