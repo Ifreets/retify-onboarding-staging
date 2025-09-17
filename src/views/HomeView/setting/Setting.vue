@@ -11,7 +11,9 @@
           Back
         </button>
       </div>
-      <h3 class="text-2xl font-semibold">{{ VIEWS[view]?.title || 'Settings' }}</h3>
+      <h3 class="text-2xl font-semibold">
+        {{ VIEWS[view]?.title || 'Settings' }}
+      </h3>
       <div class="w-14"></div>
     </header>
     <main class="h-full w-full relative overflow-hidden py-3">
@@ -23,27 +25,28 @@
           v-if="view === 'home'"
           @open-view="openView"
         />
-        <component v-else :is="VIEWS[view]?.template" />
+        <component
+          v-else
+          :is="VIEWS[view]?.template"
+        />
       </Transition>
     </main>
-    <LoadingFullScreen
-      :loading="appStore.loading"
-    />
+    <LoadingFullScreen :loading="appStore.loading" />
   </article>
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '@/stores';
-import { useRouter } from 'vue-router';
-import { computed, ref, type Component } from 'vue';
+import { useAppStore } from '@/stores'
+import { useRouter } from 'vue-router'
+import { computed, ref, type Component } from 'vue'
 
-import PosSystem from '@/views/HomeView/setting/PosSystem.vue';
-import ProductList from '@/views/HomeView/setting/product/ProductList.vue';
-import QrLink from '@/views/HomeView/setting/QrLink.vue';
-import SettingsHome from '@/views/HomeView/setting/SettingsHome.vue';
-import LoadingFullScreen from '@/components/ui/LoadingFullScreen.vue';
+import PosSystem from '@/views/HomeView/setting/PosSystem.vue'
+import ProductList from '@/views/HomeView/setting/product/ProductList.vue'
+import QrLink from '@/views/HomeView/setting/QrLink.vue'
+import SettingsHome from '@/views/HomeView/setting/SettingsHome.vue'
+import LoadingFullScreen from '@/components/ui/LoadingFullScreen.vue'
 
-import { ArrowLeftIcon } from '@heroicons/vue/24/solid';
+import { ArrowLeftIcon } from '@heroicons/vue/24/solid'
 
 const VIEWS: Record<string, { title: string; template: Component }> = {
   qr_link: {
@@ -57,7 +60,7 @@ const VIEWS: Record<string, { title: string; template: Component }> = {
   pos_system: {
     title: 'POS System',
     template: PosSystem,
-  }
+  },
 }
 
 // store
@@ -69,9 +72,9 @@ const route = useRouter()
 /** màn hình hiện tại */
 const view = ref(getView())
 
-function getView(){
+function getView() {
   const VIEW_URL = route.currentRoute.value.query.view as string
-  if(VIEW_URL) return VIEW_URL
+  if (VIEW_URL) return VIEW_URL
   return 'home'
 }
 
@@ -86,7 +89,6 @@ const title = computed(() => {
     case 'home':
       return 'Settings'
     case 'qr_link':
-
       return 'QR code & Link'
   }
 })
@@ -107,7 +109,7 @@ function openView(data: string) {
   width: 100%;
   top: 12px;
   left: 12px;
-  height: calc(100% - 24px);  
+  height: calc(100% - 24px);
 }
 
 /* Slide left */

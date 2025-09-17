@@ -5,14 +5,17 @@
       v-model="filter_param"
       :categories="categories"
       :get-data-filter="getDataFilter"
+      @toggle-view="is_grid_view = $event"
     />
     <!-- Danh sách sản phẩm -->
-    <div class="flex flex-col overflow-y-auto h-full w-full overflow-x-hidden">
+    <div class="overflow-y-auto h-full w-full overflow-x-hidden">
       <div
+        v-if="!is_grid_view"
         v-for="(item, index) of products"
         class="hover:bg-slate-100 cursor-pointer flex gap-x-2 group w-full px-3"
         @click="chooseProduct(item, index)"
       >
+        <!-- list view như cũ -->
         <div class="cursor-pointer py-2 flex-shrink-0 min-w-max">
           <img
             v-if="get(item, 'images[0]')"
@@ -33,7 +36,6 @@
             </p>
           </div>
           <p class="text-sm text-slate-700">
-            <!-- <span class="pr-2">{{ '#' + item?.product_id }}</span> -->
             <span
               v-if="item?.category_id"
               class="text-xs px-2 py-0.5 rounded-full border"
@@ -54,7 +56,62 @@
           </div>
         </div>
       </div>
+
+      <!-- grid view -->
+      <div
+        v-else
+        class="grid grid-cols-2 gap-4 p-3"
+      >
+        <div
+          v-for="(item, index) of products"
+          :key="item?.product_id ?? index"
+          class="cursor-pointer rounded-lg border hover:shadow hover:bg-slate-100 flex flex-col h-64"
+          @click="chooseProduct(item, index)"
+        >
+          <!-- IMAGE -->
+          <div class="w-full h-40 overflow-hidden flex-shrink-0 rounded-t-lg">
+            <img
+              v-if="get(item, 'images[0]')"
+              :src="get(item, 'images[0]')"
+              class="w-full h-full object-cover"
+            />
+            <CubeIcon
+              v-else
+              class="w-full h-full text-cube_green"
+            />
+          </div>
+
+          <!-- CONTENT -->
+          <div class="p-2 flex flex-col flex-1">
+            <!-- HEADER -->
+            <div class="flex items-start justify-between gap-2">
+              <p class="font-medium line-clamp-2 flex-1 break-words">
+                {{ item?.name }}
+              </p>
+              <span
+                v-if="item?.category_id"
+                class="text-xs text-slate-700 px-1 py-0.5 rounded-full border flex-shrink-0 ml-1"
+              >
+                {{ map_value_category.get(item?.category_id)?.name }}
+              </span>
+            </div>
+
+            <!-- GIÁ + DETAIL: ép xuống đáy -->
+            <div class="mt-auto">
+              <p class="text-base font-medium">
+                {{ formatCurrency(item?.price) || 0 }}
+              </p>
+              <p class="text-xs text-slate-600">
+                <span>Unit: {{ formatCurrency(item?.cost) }}</span>
+                <span class="px-1">|</span>
+                <span>Sale: {{ formatCurrency(item?.price) }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
     <!-- Phân trang -->
     <Pagination
       class="pt-2"
@@ -112,6 +169,9 @@ import { type Category, type Product, type ProductLabel } from '@/interfaces'
 
 /** màn hình hiển thị */
 const view = ref<'form' | 'list'>('list')
+
+/** chế độ hiển thị sản phẩm (grid = true, list = false) */
+const is_grid_view = ref(false) // mặc định list view
 
 /** tổng số sản phẩm */
 const total_product = ref(0)
