@@ -115,5 +115,8 @@ function selectStatus(event: Event, status: string) {
 }
 
 /** xóa tất cả lọc trạng thái */
-function clearAllStatus() {}
+function clearAllStatus() {
+  filter_param.value.status_list = []
+  $props.getOrders()
+}
 </script>
