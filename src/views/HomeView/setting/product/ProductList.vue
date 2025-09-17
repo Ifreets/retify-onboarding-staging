@@ -65,15 +65,17 @@
         <div
           v-for="(item, index) of products"
           :key="item?.product_id ?? index"
-          class="cursor-pointer rounded-lg border hover:shadow hover:bg-slate-100 flex flex-col h-64"
+          class="cursor-pointer rounded-lg shadow-lg border-blue-300 border hover:bg-slate-100 flex flex-col"
           @click="chooseProduct(item, index)"
         >
           <!-- IMAGE -->
-          <div class="w-full h-40 overflow-hidden flex-shrink-0 rounded-t-lg">
+          <div
+            class="w-full aspect-square border-blue-300 border-b overflow-hidden flex-shrink-0 rounded-t-lg"
+          >
             <img
               v-if="get(item, 'images[0]')"
               :src="get(item, 'images[0]')"
-              class="w-full h-full object-cover"
+              class="w-full h-full object-contain"
             />
             <CubeIcon
               v-else
@@ -82,20 +84,13 @@
           </div>
 
           <!-- CONTENT -->
-          <div class="p-2 flex flex-col flex-1">
+          <div class="p-2 flex flex-col flex-1 gap-1">
             <!-- HEADER -->
             <div class="flex items-start justify-between gap-2">
               <p class="font-medium line-clamp-2 flex-1 break-words">
                 {{ item?.name }}
               </p>
-              <span
-                v-if="item?.category_id"
-                class="text-xs text-slate-700 px-1 py-0.5 rounded-full border flex-shrink-0 ml-1"
-              >
-                {{ map_value_category.get(item?.category_id)?.name }}
-              </span>
             </div>
-
             <!-- GIÁ + DETAIL: ép xuống đáy -->
             <div class="mt-auto">
               <p class="text-base font-medium">
@@ -107,6 +102,12 @@
                 <span>Sale: {{ formatCurrency(item?.price) }}</span>
               </p>
             </div>
+            <span
+              v-if="item?.category_id"
+              class="text-xs text-slate-700 px-1 py-0.5 rounded-full border flex-shrink-0 w-fit"
+            >
+              {{ map_value_category.get(item?.category_id)?.name }}
+            </span>
           </div>
         </div>
       </div>
