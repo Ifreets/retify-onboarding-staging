@@ -151,7 +151,8 @@ div
           ></textarea>
         </div>
         <!-- Ảnh -->
-        <div class="">
+
+        <!-- <div class="">
           <p class="mb-2 font-medium">Image</p>
           <div
             v-if="product.images"
@@ -159,12 +160,13 @@ div
           >
             <div
               v-for="(img, index) in product.images"
-              class="relative w-fit group border-2 border-white rounded-lg"
               :key="index"
+              class="relative w-fit group border-2 border-white rounded-lg"
             >
               <img
                 :src="img"
-                class="rounded-md w-16 h-16 object-cover"
+                class="rounded-md w-16 h-16 object-cover cursor-pointer"
+                @click="openPreview(img)"
               />
               <XCircleIcon
                 @click="removeImage(index)"
@@ -172,6 +174,7 @@ div
               />
             </div>
           </div>
+
           <button
             @click="selectFile"
             class="rounded-lg border border-slate-500 border-dashed flex gap-2 px-3 py-2 bg-slate-100 text-xs text-gray-500"
@@ -179,6 +182,72 @@ div
             <img :src="ImageUpload" />
             Upload smaller image (5mb)
           </button>
+
+          <div
+            v-if="previewImage"
+            class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+            @click="closePreview"
+          >
+            <img
+              :src="previewImage"
+              class="max-h-[90%] max-w-[90%] object-contain"
+            />
+          </div>
+        </div> -->
+        <div class="">
+          <p class="mb-2 font-medium">Image</p>
+          <div
+            v-if="product.images"
+            class="mb-2 flex gap-2 flex-wrap"
+          >
+            <draggable
+              v-model="product.images"
+              group="images"
+              item-key="index"
+              class="flex gap-2 flex-wrap"
+            >
+              <template #item="{ element, index }">
+                <div
+                  class="relative w-fit group border-2 border-white rounded-lg"
+                >
+                  <img
+                    :src="element"
+                    class="rounded-md w-16 h-16 object-cover cursor-move"
+                    @click="openPreview(element)"
+                  />
+                  <XCircleIcon
+                    @click="removeImage(index)"
+                    class="w-5 absolute -top-1 -right-1 cursor-pointer text-red-500"
+                  />
+                </div>
+              </template>
+            </draggable>
+          </div>
+
+          <button
+            @click="selectFile"
+            class="rounded-lg border border-slate-500 border-dashed flex gap-2 px-3 py-2 bg-slate-100 text-xs text-gray-500"
+          >
+            <img :src="ImageUpload" />
+            Upload smaller image (5mb)
+          </button>
+
+          <!-- Overlay preview -->
+          <div
+            v-if="previewImage"
+            class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+            @click="closePreview"
+          >
+            <XCircleIcon
+              class="absolute top-4 right-4 w-8 h-8 text-white"
+              @click="closePreview"
+            />
+
+            <img
+              :src="previewImage"
+              class="max-h-[90%] max-w-[90%] object-contain"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -241,7 +310,7 @@ import InputMoney from '@/components/ui/InputMoney.vue'
 import Modal from '@/components/ui/Modal.vue'
 import MutipleSelect from '@/components/ui/MutipleSelect.vue'
 import Select from '@/components/ui/Select.vue'
-
+import draggable from 'vuedraggable'
 import ImageUpload from '@/assets/icons/image-upload.svg'
 import {
   PlusCircleIcon,
@@ -277,6 +346,15 @@ const $props = defineProps({
     required: true,
   },
 })
+
+const previewImage = ref<string | null>(null)
+
+function openPreview(url: string) {
+  previewImage.value = url
+}
+function closePreview() {
+  previewImage.value = null
+}
 
 /** màn hình hiển thị */
 const view = defineModel<'form' | 'list'>('view', {
