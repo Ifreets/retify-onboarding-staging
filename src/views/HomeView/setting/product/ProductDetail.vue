@@ -152,48 +152,6 @@ div
         </div>
         <!-- Ảnh -->
 
-        <!-- <div class="">
-          <p class="mb-2 font-medium">Image</p>
-          <div
-            v-if="product.images"
-            class="mb-2 flex gap-2 flex-wrap"
-          >
-            <div
-              v-for="(img, index) in product.images"
-              :key="index"
-              class="relative w-fit group border-2 border-white rounded-lg"
-            >
-              <img
-                :src="img"
-                class="rounded-md w-16 h-16 object-cover cursor-pointer"
-                @click="openPreview(img)"
-              />
-              <XCircleIcon
-                @click="removeImage(index)"
-                class="w-5 absolute -top-1 -right-1 cursor-pointer text-red-500"
-              />
-            </div>
-          </div>
-
-          <button
-            @click="selectFile"
-            class="rounded-lg border border-slate-500 border-dashed flex gap-2 px-3 py-2 bg-slate-100 text-xs text-gray-500"
-          >
-            <img :src="ImageUpload" />
-            Upload smaller image (5mb)
-          </button>
-
-          <div
-            v-if="previewImage"
-            class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
-            @click="closePreview"
-          >
-            <img
-              :src="previewImage"
-              class="max-h-[90%] max-w-[90%] object-contain"
-            />
-          </div>
-        </div> -->
         <div class="">
           <p class="mb-2 font-medium">Image</p>
           <div
@@ -204,6 +162,8 @@ div
               v-model="product.images"
               group="images"
               item-key="index"
+              :delay="150"
+              :delayOnTouchOnly="true"
               class="flex gap-2 flex-wrap"
             >
               <template #item="{ element, index }">
