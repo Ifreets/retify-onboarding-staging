@@ -51,7 +51,7 @@
           <p class="text-base"
             v-if="orderStore.selected_order?.schedule_time"
           >
-            Schedule Time:
+            Pickup Time:
             <span
               class="font-medium text-sm"
             >
