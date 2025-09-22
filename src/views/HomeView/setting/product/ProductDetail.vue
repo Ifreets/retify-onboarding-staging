@@ -6,7 +6,7 @@ div
       class="w-full flex justify-between items-center px-3 py-2 border-b bg-white"
     >
       <button
-        @click="closeForm()"
+        @click="checkChanged(closeForm)"
         class="flex items-center text-sm"
       >
         <ChevronDownIcon class="text-sky-600 w-4 rotate-90" />
@@ -194,7 +194,7 @@ div
 
           <!-- Overlay preview -->
           <div
-            v-if="previewImage"
+            v-if="preview_image"
             class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
             @click="closePreview"
           >
@@ -204,7 +204,7 @@ div
             />
 
             <img
-              :src="previewImage"
+              :src="preview_image"
               class="max-h-[90%] max-w-[90%] object-contain"
             />
           </div>
@@ -218,7 +218,15 @@ div
     >
       <button
         class="flex items-center bg-red-100 py-2 px-4 w-1/2 rounded-md justify-center gap-2 text-red-500"
-        @click="is_open = true"
+        @click="
+          () => {
+            is_open_modal_confirm = true
+            confirm_modal_data = {
+              title: 'Are you sure you want to confirm delete this product?',
+              action: deleteAnProduct,
+            }
+          }
+        "
       >
         <TrashIcon class="size-5" />
         Delete
@@ -232,24 +240,29 @@ div
     </div>
 
     <Modal
-      v-model:is_open="is_open"
+      v-model:is_open="is_open_modal_confirm"
       :container_class="'w-[360px]'"
     >
       <div class="flex flex-col items-center font-medium">
         <QuestionMarkCircleIcon class="size-20 text-orange-400" />
         <p class="text-xl text-center">
-          Are you sure you want to confirm delete this product?
+          {{ confirm_modal_data.title }}
         </p>
         <div class="flex justify-between gap-2 w-full pt-4 px-7">
           <button
             class="px-7 py-2 bg-red-100 text-red-500 rounded-md"
-            @click="is_open = false"
+            @click="is_open_modal_confirm = false"
           >
             Cancel
           </button>
           <button
             class="px-7 py-2 bg-blue-100 text-blue-700 rounded-md"
-            @click="deleteAnProduct()"
+            @click="
+              () => {
+                confirm_modal_data?.action?.()
+                is_open_modal_confirm = false
+              }
+            "
           >
             Confirm
           </button>
@@ -263,8 +276,8 @@ div
 import { $merchant, $order } from '@/api'
 import { useToast } from '@/composables/useToast'
 import { PRODUCT_STATUS } from '@/utils/constant'
-import { get, isArray } from 'lodash'
-import { ref, type PropType } from 'vue'
+import { get, isArray, isEqual } from 'lodash'
+import { onMounted, ref, type PropType } from 'vue'
 
 import InputMoney from '@/components/ui/InputMoney.vue'
 import Modal from '@/components/ui/Modal.vue'
@@ -285,6 +298,10 @@ import {
 import type { Category, Product, ProductLabel } from '@/interfaces'
 
 const $props = defineProps({
+  products: {
+    type: Object as PropType<Product[]>,
+    required: true,
+  },
   create: {
     type: Function,
     default: () => {},
@@ -307,13 +324,16 @@ const $props = defineProps({
   },
 })
 
-const previewImage = ref<string | null>(null)
+/** biến lưu ảnh preview */
+const preview_image = ref<string | null>(null)
 
+/** màn hình preview */
 function openPreview(url: string) {
-  previewImage.value = url
+  preview_image.value = url
 }
+/** đóng màn hình preview */
 function closePreview() {
-  previewImage.value = null
+  preview_image.value = null
 }
 
 /** màn hình hiển thị */
@@ -331,7 +351,13 @@ const product_index = defineModel<number>('product_index', {
 })
 
 /** đóng mở modal */
-const is_open = ref(false)
+const is_open_modal_confirm = ref(false)
+
+/** dữ liệu của modal */
+const confirm_modal_data = ref<{
+  title?: string
+  action?: Function
+}>({})
 
 // composable
 const { notify } = useToast()
@@ -445,8 +471,6 @@ async function deleteAnProduct() {
     // Thông báo
     notify('Delete successfully!')
 
-    // đóng modal
-    is_open.value = false
     // * Đóng form
     closeForm()
   } catch (e) {
@@ -463,18 +487,13 @@ async function updateAnProduct() {
     // nếu có id thì là cập nhật
     if (product.value.id) {
       // * Cập nhật sản phẩm
-      await $order.updateProduct({
-        ...product.value,
-        ...{
-          cost: Number(product.value.cost),
-          price: Number(product.value.price),
-          wholesale_price: Number(product.value.wholesale_price),
-          service_fee: Number(product.value.service_fee),
-        },
-      })
+      await $order.updateProduct(formatProduct())
 
       // * Thông báo
       notify('Update successfully!')
+
+      // * Đóng form
+      closeForm()
 
       // cập nhật trong mảng sản phẩm
       $props.update()
@@ -493,12 +512,12 @@ async function updateAnProduct() {
       // * Thông báo
       notify('Create successfully!')
 
+      // * Đóng form
+      closeForm()
+
       // cập nhật trong mảng sản phẩm
       $props.create(RES)
     }
-
-    // * Đóng form
-    closeForm()
   } catch (e) {
     notify(e as string, {
       type: 'error',
@@ -515,5 +534,35 @@ function validateProduct() {
 
   /** nếu chưa nhập đơn giá */
   if (!Number(product.value.cost)) throw 'Unit price is required'
+}
+
+/** hàm format dữ liệu */
+function formatProduct() {
+  /** format lai dữ liệu */
+  return {
+    ...product.value,
+    ...{
+      cost: Number(product.value.cost),
+      price: Number(product.value.price),
+      wholesale_price: Number(product.value.wholesale_price),
+      service_fee: Number(product.value.service_fee),
+    },
+  }
+}
+
+/** hàm kiểm tra xem có thay đổi gì không */
+function checkChanged(next: Function) {
+  // nếu không sửa gì thì thôi
+  if (isEqual(formatProduct(), $props.products[product_index.value])) {
+    next()
+    return
+  }
+
+  // nếu sửa bật modal xác nhận
+  is_open_modal_confirm.value = true
+  confirm_modal_data.value = {
+    title: 'There are unsaved changes. Do you want to exit without saving?',
+    action: closeForm,
+  }
 }
 </script>

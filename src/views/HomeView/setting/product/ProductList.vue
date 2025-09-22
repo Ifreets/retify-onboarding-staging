@@ -5,17 +5,16 @@
       v-model="filter_param"
       :categories="categories"
       :get-data-filter="getDataFilter"
-      @toggle-view="is_grid_view = $event"
     />
     <!-- Danh sách sản phẩm -->
     <div class="overflow-y-auto h-full w-full overflow-x-hidden">
+      <!-- list view như cũ -->
       <div
         v-if="!is_grid_view"
         v-for="(item, index) of products"
         class="hover:bg-slate-100 cursor-pointer flex gap-x-2 group w-full px-3"
         @click="chooseProduct(item, index)"
       >
-        <!-- list view như cũ -->
         <div class="cursor-pointer py-2 flex-shrink-0 min-w-max">
           <img
             v-if="get(item, 'images[0]')"
@@ -65,12 +64,12 @@
         <div
           v-for="(item, index) of products"
           :key="item?.product_id ?? index"
-          class="cursor-pointer rounded-lg shadow-lg border-blue-300 border hover:bg-slate-100 flex flex-col"
+          class="cursor-pointer rounded-lg shadow-lg shadow-blue-300 flex flex-col p-2 gap-2"
           @click="chooseProduct(item, index)"
         >
           <!-- IMAGE -->
           <div
-            class="w-full aspect-square border-blue-300 border-b overflow-hidden flex-shrink-0 rounded-t-lg"
+            class="w-full aspect-square shadow-[0_0_3px] shadow-blue-500 overflow-hidden flex-shrink-0 rounded-lg"
           >
             <img
               v-if="get(item, 'images[0]')"
@@ -84,7 +83,7 @@
           </div>
 
           <!-- CONTENT -->
-          <div class="p-2 flex flex-col flex-1 gap-1">
+          <div class=" flex flex-col flex-1 gap-1">
             <!-- HEADER -->
             <div class="flex items-start justify-between gap-2">
               <p class="font-medium line-clamp-2 flex-1 break-words">
@@ -114,16 +113,33 @@
     </div>
 
     <!-- Phân trang -->
-    <Pagination
-      class="pt-2"
-      v-model:page="page"
-      :total="total_product"
-      :sibling-count="1"
-      :items-per-page="PAGE_SIZE"
-      :change-page="getProduct"
-    />
+    <footer
+      class="flex flex-col justify-between items-center px-3 pt-2 gap-2 border-t rounded-t-lg"
+    >
+      <div class="flex justify-between items-center w-full">
+        <p class="font-medium">Total product: {{ total_product }}</p>
+        <button
+          class="border-2 p-0.5 border-blue-700 rounded-md flex-shrink-0 h-fit flex text-blue-700"
+          @click="is_grid_view = !is_grid_view"
+        >
+          <div class="p-0.5 rounded" :class="{ 'bg-blue-700 text-white': !is_grid_view }">
+            <Squares2X2Icon class="size-5" />
+          </div>
+          <div class="p-0.5 rounded" :class="{ 'bg-blue-700 text-white': is_grid_view }">
+            <ListBulletIcon class="size-5" />
+          </div>
+        </button>
+      </div>
+      <Pagination
+        v-model:page="page"
+        v-model:page_size="page_size"
+        :total="total_product"
+        :sibling-count="1"
+        :change-page="getProduct"
+      />
+    </footer>
     <!-- Nút tạo mới -->
-    <div class="absolute bottom-14 right-5">
+    <div class="absolute bottom-24 right-5">
       <button
         class="rounded-full flex justify-center items-center bg-blue-700 text-white px-4 py-2 font-medium gap-2"
         @click="addProduct()"
@@ -144,6 +160,7 @@
         v-model:view="view"
         v-model:product="product"
         v-model:product_index="product_index"
+        :products="products"
         :create="createProduct"
         :update="updateProduct"
         :delete="deleteProduct"
@@ -164,9 +181,10 @@ import Pagination from '@/components/ui/Pagination.vue'
 import ProductDetail from '@/views/HomeView/setting/product/ProductDetail.vue'
 import ProductHeader from '@/views/HomeView/setting/product/ProductHeader.vue'
 
-import { CubeIcon, PlusIcon } from '@heroicons/vue/24/solid'
+import { Bars3Icon, CubeIcon, ListBulletIcon, PlusIcon } from '@heroicons/vue/24/solid'
 
 import { type Category, type Product, type ProductLabel } from '@/interfaces'
+import { Squares2X2Icon } from '@heroicons/vue/24/outline'
 
 /** màn hình hiển thị */
 const view = ref<'form' | 'list'>('list')
@@ -185,7 +203,7 @@ const product_index = ref(-1)
 /** số trang hiện tại */
 const page = ref(1)
 /** số bản ghi một lần lấy */
-const PAGE_SIZE = 25
+const page_size = ref(25)
 /** danh sách danh mục */
 const categories = ref<Category[]>([])
 /** danh sách label */
@@ -240,8 +258,8 @@ async function getProduct() {
             ...(status?.length ? { include_status: status } : {}),
           }),
       sort: sort || undefined,
-      skip: (page.value - 1) * PAGE_SIZE,
-      limit: PAGE_SIZE,
+      skip: (page.value - 1) * page_size.value,
+      limit: page_size.value,
     })
     // lưu lại danh sách
     products.value = RES
@@ -306,7 +324,7 @@ async function getLabels() {
 
 /** hàm chọn sản phẩm */
 function chooseProduct(item: Product, index: number) {
-  product.value = item
+  product.value = JSON.parse(JSON.stringify(item))
   product_index.value = index
   view.value = 'form'
 }

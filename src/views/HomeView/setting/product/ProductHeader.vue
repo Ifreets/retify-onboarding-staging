@@ -115,25 +115,7 @@
         @click="clearAllFilter"
       >
         <XMarkIcon class="size-5 flex-shrink-0" />
-      </button>
-      <button
-        class="p-2 border rounded-md flex-shrink-0"
-        :class="
-          is_grid_view
-            ? 'bg-blue-100 text-blue-700 border-blue-700'
-            : 'bg-white text-slate-600 border-gray-200'
-        "
-        @click="toggleView"
-      >
-        <template v-if="is_grid_view">
-          <!-- icon grid -->
-          <Squares2X2Icon class="size-5" />
-        </template>
-        <template v-else>
-          <Bars3Icon class="size-5" />
-          <!-- icon list -->
-        </template>
-      </button>
+    </button>
     </div>
     <ul class="flex gap-2 overflow-auto w-full">
       <li
@@ -165,6 +147,7 @@ import { PRODUCT_STATUS, SORT_BY } from '@/utils/constant'
 import { debounce } from 'lodash'
 import { ref, type PropType } from 'vue'
 
+import InputSearch from '@/components/common/InputSearch.vue'
 import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -175,15 +158,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from 'radix-vue'
-import InputSearch from '@/components/common/InputSearch.vue'
 
-import { CheckIcon, Bars3Icon } from '@heroicons/vue/24/solid'
 import {
   ArrowsUpDownIcon,
   FunnelIcon,
-  XMarkIcon,
-  Squares2X2Icon,
+  XMarkIcon
 } from '@heroicons/vue/24/outline'
+import { CheckIcon } from '@heroicons/vue/24/solid'
 
 import type { Category } from '@/interfaces'
 
@@ -276,17 +257,5 @@ function clearAllFilter() {
   filter_param.value.status = []
   filter_param.value.sort = undefined
   $props.getDataFilter()
-}
-/** trạng thái view (grid / list) */
-const is_grid_view = ref(false)
-/**
- * Hàm emit các sự kiện từ component con ra ngoài
- * Ở đây định nghĩa sự kiện 'toggle-view' để cha có thể lắng nghe
- */
-const emit = defineEmits(['toggle-view'])
-/** chuyển chế độ view */
-function toggleView() {
-  is_grid_view.value = !is_grid_view.value
-  emit('toggle-view', is_grid_view.value)
 }
 </script>
