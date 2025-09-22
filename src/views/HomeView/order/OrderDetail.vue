@@ -48,6 +48,16 @@
               {{ format(orderStore.selected_order?.createdAt, 'MMMM d, yyyy') }}
             </span>
           </p>
+          <p class="text-base"
+            v-if="orderStore.selected_order?.schedule_time"
+          >
+            Schedule Time:
+            <span
+              class="font-medium text-sm"
+            >
+              {{ format(orderStore.selected_order?.schedule_time, 'HH:mm - MMMM d, yyyy') }}
+            </span>
+          </p>
           <div class="flex justify-between items-center">
             <p class="text-base">
               Total Items:

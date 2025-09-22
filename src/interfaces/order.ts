@@ -361,6 +361,9 @@ export interface Order {
   /** tiền tip */
   tip?: number
 
+  /** thời gian hẹn */
+  schedule_time?: Date
+
   //** api không trả về
 
   /** action thực hiện thanh toán */
