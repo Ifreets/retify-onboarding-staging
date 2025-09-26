@@ -154,6 +154,8 @@ export class ChatbotServiceAPI {
   public async updateSettingAIAgent(data: { page_id: string }) {
     return await this.#postServiceV3('app/page/update_page_setting', {
       ...data,
+      //TODO: đang fix cứng tạm để dùng do api tạo của bổ sung
+      ai_agent_version: 'v2.1',
       ai_agent_use_external_knowledge: { is_active: true },
       ai_agent_typing_wait: 1,
       ai_agent_custom_prompt: `* Important: If the customer answers with a confirmation like "okay", "yes", "ok", "sure", "I want", "yeah" → then classify it based on the last assistant question:\n- If the assistant was asking about menu, product, dish, clothes → reply @retion-product.\n- If the assistant was asking about ordering, buying, pickup → reply @retion-order.\n\nIf the content is related to greeting → just reply @retion-introduce. Do not add anything else, let my system handle it.\nIf the content is about making or checking an appointment → just reply @retion-shedule. Do not add anything else, let my system handle it.\nIf the content is about ordering, buying, in-store, pickup → just reply @retion-order. Do not add anything else, let my system handle it.\nIf the content is about agreeing to view menu, checking a menu, checking a product, checking a dish, checking clothes → just reply @retion-product. Do not add anything else, let my system handle it.\nIf the customer asks or speaks in a certain language, reply in that language.\nIf the customer says thank you, please return it in the most sincere way.`,
