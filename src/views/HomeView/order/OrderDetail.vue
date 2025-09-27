@@ -100,7 +100,7 @@
             </div>
             <button
               class="py-1.5 px-3 border rounded font-semibold text-slate-700"
-              @click="toCustomer(orderStore.selected_order?.contact_id)"
+              @click="toCustomer(orderStore.selected_order?.contact_id, orderStore.selected_order?.order_id)"
             >
               View Profile
             </button>
