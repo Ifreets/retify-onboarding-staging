@@ -83,13 +83,34 @@ function downloadQR() {
   /** link download */
   const DATA_URL = canvas_ref.value.toDataURL('image/png')
 
-  /** tạo 1 thẻ a */
-  const LINK = document.createElement('a')
-  // gán cá thuộc tính cho thẻ đó
-  LINK.href = DATA_URL
-  LINK.download = 'qr-code.png'
-  // click để tải xuống
-  LINK.click()
+  /** hàm kiểm tra có phải mobile không */
+  const IS_MOBILE = () => {
+    if (typeof navigator === "undefined") return false;
+    return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  };
+
+  // nếu là PC
+  if(!IS_MOBILE()) {
+    /** tạo 1 thẻ a */
+    const LINK = document.createElement('a')
+    // gán cá thuộc tính cho thẻ đó
+    LINK.href = DATA_URL
+    LINK.download = 'qr-code.png'
+    // click để tải xuống
+    LINK.click()
+    return
+  }
+
+  // nếu là mobile
+  window.ReactNativeWebView?.postMessage(
+    JSON.stringify({
+      type: "page.downloadQR",
+      payload: {
+        image_url: DATA_URL,
+        name: 'qr-code',
+      },
+    })
+  )
 }
 
 /** copy link chat */
