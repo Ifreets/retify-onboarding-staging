@@ -58,6 +58,23 @@
           </div>
           <div class="ml-12 border-b h-4 border-slate-200"></div>
         </li> -->
+        <li @click="$emit('open-view-business', 'business')">
+          <div class="flex gap-3 items-center">
+            <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
+              <BriefcaseIcon class="size-5 text-blue-700" />
+            </div>
+            <div class="flex-grow flex gap-6 items-center">
+              <div class="text-base flex-grow">
+                <p class="font-semibold">Business Profile</p>
+                <p>
+                  Operating hours, contact info, legal details, Parking info
+                </p>
+              </div>
+              <ChevronRightIcon class="size-5 text-slate-500 flex-shrink-0" />
+            </div>
+          </div>
+          <div class="ml-12 border-b h-4 border-slate-200"></div>
+        </li>
         <li @click="$emit('open-view', 'product')">
           <div class="flex gap-3 items-center">
             <div class="p-2 rounded-full bg-blue-100 w-fit h-fit">
@@ -207,7 +224,7 @@ import {
 } from '@heroicons/vue/24/solid'
 
 // emit
-const $emit = defineEmits(['open-view'])
+const $emit = defineEmits(['open-view', 'open-view-business'])
 
 // store
 const appStore = useAppStore()

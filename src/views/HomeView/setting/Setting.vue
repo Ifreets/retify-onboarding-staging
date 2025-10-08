@@ -24,6 +24,7 @@
         <SettingsHome
           v-if="view === 'home'"
           @open-view="openView"
+          @open-view-business="openViewBusiness"
         />
         <component
           v-else
@@ -47,6 +48,7 @@ import SettingsHome from '@/views/HomeView/setting/SettingsHome.vue'
 import LoadingFullScreen from '@/components/ui/LoadingFullScreen.vue'
 
 import { ArrowLeftIcon } from '@heroicons/vue/24/solid'
+import BusinessProfile from './business-profile/BusinessProfile.vue'
 
 const VIEWS: Record<string, { title: string; template: Component }> = {
   qr_link: {
@@ -56,6 +58,10 @@ const VIEWS: Record<string, { title: string; template: Component }> = {
   product: {
     title: 'Products',
     template: ProductList,
+  },
+  business: {
+    title: 'Business Profile',
+    template: BusinessProfile,
   },
   pos_system: {
     title: 'POS System',
@@ -74,6 +80,8 @@ const view = ref(getView())
 
 function getView() {
   const VIEW_URL = route.currentRoute.value.query.view as string
+
+  console.log(VIEW_URL, 'VIEW_URL')
   if (VIEW_URL) return VIEW_URL
   return 'home'
 }
@@ -95,6 +103,10 @@ const title = computed(() => {
 
 /** hàm mở view */
 function openView(data: string) {
+  view.value = data
+}
+/** hàm mở view */
+function openViewBusiness(data: string) {
   view.value = data
 }
 </script>
