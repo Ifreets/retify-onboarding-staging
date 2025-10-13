@@ -1,8 +1,8 @@
-import { Request } from '@/api/axios'
 import { ENV } from '@/env'
-import { useAppStore } from '@/stores'
-
 import type { IEnv } from '@/interfaces'
+import { Request } from '@/api/axios'
+import { get } from 'lodash'
+import { useAppStore } from '@/stores'
 
 /** Đường dẫn host của merchant */
 const $HOST: IEnv = ENV[import.meta.env.VITE_APP_ENV || 'development']
@@ -21,6 +21,10 @@ export class MerchantServiceAPI {
   /** Gửi request post */
   #post(url: string, data: any, headers?: object) {
     return this.REQUEST.post(`${this.HOST.merchant}/${url}`, data, headers)
+  }
+  /** Gửi request post */
+  #get(url: string, headers?: object) {
+    return this.REQUEST.get(`${this.HOST.merchant}/${url}`, headers)
   }
 
   /** Gửi request post đến server product merchant */
@@ -56,6 +60,17 @@ export class MerchantServiceAPI {
   /** tạo danh sách sản phẩm từ ảnh */
   createProductFromImage(data: { type: string; url: string }) {
     return this.#postProduct('product/import_data_url', data)
+  }
+  /** tạo danh sách sản phẩm từ ảnh
+   * @param device_id
+   */
+  updateEmployeeId(device_id: string) {
+    return this.#get(
+      `v1/systems/employee/update_employee_id?one_signal_id=${device_id}`,
+      {
+        'token-business': this.APP_STORE.merchant_token,
+      },
+    )
   }
 
   /** lấy danh sách nhân sự */

@@ -9,7 +9,10 @@
       <RouterView />
     </div>
 
-    <section v-if="is_ai_working" class="absolute bottom-0 left-0 mx-2 mb-3">
+    <section
+      v-if="is_ai_working"
+      class="absolute bottom-0 left-0 mx-2 mb-3"
+    >
       <AIWorking />
     </section>
 
@@ -57,7 +60,30 @@ const show_data = ref({
 const is_ai_working = ref(false)
 
 // interval
-let interval:any
+let interval: any
+/** Đồng bộ onesignal với device id */
+const handleSaveOneSignal = async (device_id: string) => {
+  /** danh sách sản phẩm */
+  const RES = await $merchant.updateEmployeeId(device_id)
+}
+/** Gọi hàm tạo token merchant và lưu one signal
+ * @param page_id
+ * @param chatbox_token
+ * @param device_id
+ */
+const handleTokenAndSync = async (
+  page_id?: string,
+  chatbot_token?: string,
+  device_id?: string,
+) => {
+  /** xử lý tạo token merchant */
+  await handleCreateTokenMerchant(page_id, chatbot_token)
+  /** Nếu có device thiết bị */
+  if (device_id) {
+    /** Gọi hàm đồng bộ Onesignal */
+    handleSaveOneSignal(device_id)
+  }
+}
 
 onMounted(() => {
   /** id của trang */
@@ -66,25 +92,30 @@ onMounted(() => {
   const LOCALE = queryString('locale')
   /** token chatbox */
   const CHATBOX_TOKEN = queryString('access_token')
+  /** Device thiết bị */
+  const DEVICE_ID = queryString('device_id')
+  /** Lấy token và đồng bộ one signal */
+  handleTokenAndSync(PAGE_ID, CHATBOX_TOKEN, DEVICE_ID)
 
-  // xử lý tạo token merchant
-  handleCreateTokenMerchant(PAGE_ID, CHATBOX_TOKEN)
-
-  // lưu các giá trị xuống local
+  /** lưu các giá trị xuống local */
   if (PAGE_ID) {
+    /** Lưu giá trị page id vào store */
     onBoardingStore.selected_data.page_id = PAGE_ID
-    // lưu dữ liệu xuống local
+    /** lưu dữ liệu xuống local */
     localStorage.setItem(
       'selected_data',
       JSON.stringify(onBoardingStore.selected_data),
     )
   }
+  /** Nếu có chatbox token  */
   if (CHATBOX_TOKEN) {
+    /** Lưu token vào app store */
     appStore.chatbot_token = CHATBOX_TOKEN
+    /** Lưu vào local storage */
     localStorage.setItem('chatbot_token', appStore.chatbot_token)
   }
 
-  // lắng nghe post message
+  /** lắng nghe post message */
   window.addEventListener('message', handlePostMessage)
 })
 
@@ -94,9 +125,14 @@ onUnmounted(() => {
 })
 
 /** hàm xử lý tạo mới token merchat với dữ liệu từ url */
-function handleCreateTokenMerchant(page_id?: string, chatbox_token?: string) {
+async function handleCreateTokenMerchant(
+  page_id?: string,
+  chatbox_token?: string,
+) {
   try {
+    /** Lấy data từ storage */
     const SELECTED_DATA = localStorage.getItem('selected_data')
+    /** lưu data vào Onboarding store */
     onBoardingStore.selected_data = SELECTED_DATA
       ? JSON.parse(SELECTED_DATA)
       : {}
@@ -117,30 +153,31 @@ function handleCreateTokenMerchant(page_id?: string, chatbox_token?: string) {
   // nếu có thì lưu vào store và set token vào service api order
   // if (BUSINESS_TOKEN) setTokenBusiness(BUSINESS_TOKEN)
 
-  // nếu không có token hoặc page id không giống ở local thì tạo lại token merchant
+  /** nếu không có token hoặc page id không giống ở local thì tạo lại token merchant */
   if (NO_CHATBOX_TOKEN && page_id) {
-    createToken(chatbox_token, page_id)
+    await createToken(chatbox_token, page_id)
   }
 }
 
 /** hàm tạo token */
 async function createToken(chatbot_token: string, page_id: string) {
   try {
+    /** Tạo token */
     const RES: any = await $merchant.createToken({
       access_token: chatbot_token,
       page_id: page_id,
     })
 
-    // lưu lại dữ liệu data
+    /** lưu lại dữ liệu data */
     appStore.merchant_data = {
       branch_id: RES?.branch?.branch_id,
       employee_id: RES?.branch?.employee_id,
     }
-    // trả về token
+    /** trả về token */
     setTokenBusiness(RES?.branch?.token_business)
 
     checkAIWorking()
-    // 10s check xem AI đã chạy xong chưa
+    /** 10s check xem AI đã chạy xong chưa */
     interval = setInterval(() => {
       checkAIWorking()
     }, 3000)
@@ -168,12 +205,11 @@ async function checkAIWorking() {
   try {
     /** danh sách sản phẩm */
     const RES = await $order.getProducts({ skip: 0, limit: 1 })
-    // nếu có sản phẩm thì tắt cờ check
+    /** nếu có sản phẩm thì tắt cờ check */
     if (RES?.length) {
       is_ai_working.value = false
       clearInterval(interval)
-    }
-    else is_ai_working.value = true
+    } else is_ai_working.value = true
   } catch (e) {
     console.log(e)
   }
