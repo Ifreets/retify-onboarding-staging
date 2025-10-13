@@ -210,7 +210,7 @@ function selectCategory(item?: Category) {
 
 /** chọn trạng thái cần lọc */
 function selectStatus(event: Event, status: string) {
-  // ngăn hành động tắt dropdown
+  /** ngăn hành động tắt dropdown */
   event.preventDefault()
 
   // nếu trạng thái đang chọn thì xóa đi
