@@ -83,7 +83,7 @@
           </div>
 
           <!-- CONTENT -->
-          <div class=" flex flex-col flex-1 gap-1">
+          <div class="flex flex-col flex-1 gap-1">
             <!-- HEADER -->
             <div class="flex items-start justify-between gap-2">
               <p class="font-medium line-clamp-2 flex-1 break-words">
@@ -122,10 +122,16 @@
           class="border-2 p-0.5 border-blue-700 rounded-md flex-shrink-0 h-fit flex text-blue-700"
           @click="is_grid_view = !is_grid_view"
         >
-          <div class="p-0.5 rounded" :class="{ 'bg-blue-700 text-white': !is_grid_view }">
+          <div
+            class="p-0.5 rounded"
+            :class="{ 'bg-blue-700 text-white': !is_grid_view }"
+          >
             <Squares2X2Icon class="size-5" />
           </div>
-          <div class="p-0.5 rounded" :class="{ 'bg-blue-700 text-white': is_grid_view }">
+          <div
+            class="p-0.5 rounded"
+            :class="{ 'bg-blue-700 text-white': is_grid_view }"
+          >
             <ListBulletIcon class="size-5" />
           </div>
         </button>
@@ -181,7 +187,12 @@ import Pagination from '@/components/ui/Pagination.vue'
 import ProductDetail from '@/views/HomeView/setting/product/ProductDetail.vue'
 import ProductHeader from '@/views/HomeView/setting/product/ProductHeader.vue'
 
-import { Bars3Icon, CubeIcon, ListBulletIcon, PlusIcon } from '@heroicons/vue/24/solid'
+import {
+  Bars3Icon,
+  CubeIcon,
+  ListBulletIcon,
+  PlusIcon,
+} from '@heroicons/vue/24/solid'
 
 import { type Category, type Product, type ProductLabel } from '@/interfaces'
 import { Squares2X2Icon } from '@heroicons/vue/24/outline'
@@ -280,7 +291,7 @@ async function getTotalProduct() {
       ...(status?.length ? { include_status: status } : {}),
     })
 
-    // lưu lại tổng số sản phẩm
+    /** lưu lại tổng số sản phẩm */
     total_product.value = RES?.count || 0
   } catch (e) {
     console.log(e)
@@ -315,7 +326,7 @@ async function getLabels() {
   try {
     /** dữ liệu cơ bản trả về */
     const RES = await $order.getLabels()
-    // lưu lại danh sách
+    /** lưu lại danh sách */
     labels.value = RES
   } catch (e) {
     console.log(e)
@@ -335,8 +346,16 @@ function createProduct(product: Product) {
 }
 
 /** cập nhật sản phẩm trong danh sách */
-function updateProduct() {
-  products.value[product_index.value] = product.value
+function updateProduct(item: Product) {
+  /** Nếu có index của sản phẩm chỉnh sửa */
+  if (product_index.value >= 0) {
+    /** Cập nhật sản phẩm trong danh sách */
+    products.value[product_index.value] = item
+  }
+  /** Reset lại thông tin sản phẩm đang chỉnh sửa */
+  product_index.value = -1
+  /** Reset lại thông tin sản phẩm đang chỉnh sửa */
+  product.value = {}
 }
 
 /** xóa sản phẩm trong danh sách */

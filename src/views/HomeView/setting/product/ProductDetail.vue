@@ -359,13 +359,14 @@ const confirm_modal_data = ref<{
   action?: Function
 }>({})
 
-// composable
+/** composable */
 const { notify } = useToast()
 
 /** đóng form */
 function closeForm() {
-  product.value = {}
-  product_index.value = -1
+  /** Tạm ẩn, không reset thông tin sản phẩm */
+  /** product.value = {} */
+  /** product_index.value = -1 */
   view.value = 'list'
 }
 
@@ -373,9 +374,9 @@ function closeForm() {
 async function createBarcode(id: string) {
   /** dữ liệu sản phẩm sau khi tạo barcode  */
   const NEW_PRODUCT = await $order.updateBarcode(id)
-  // lưu lại barcode mới
+  /**  lưu lại barcode mới */
   product.value.barcode = NEW_PRODUCT.barcode
-  //cập nhật dữ liệu trong mảng
+  /** cập nhật dữ liệu trong mảng */
   $props.update()
 }
 
@@ -384,28 +385,28 @@ function selectFile() {
   /**input upload file */
   const INPUT = document.createElement('input')
 
-  // * Thêm các thuộc tính cần thiết
+  /**  * Thêm các thuộc tính cần thiết */
   INPUT.type = 'file'
   INPUT.accept = 'image/*'
   INPUT.style.display = 'none'
   INPUT.multiple = true
 
-  // * Hàm xử lý sau khi upload thành công
+  /**  * Hàm xử lý sau khi upload thành công */
   INPUT.onchange = () => {
-    // * Nếu không có file nào được chọn thì thoát
+    /**  * Nếu không có file nào được chọn thì thoát */
     if (!INPUT.files) return
 
-    // * Upload file
+    /**  * Upload file */
     uploadFile(INPUT.files)
 
-    // * xoá input sau khi xong việc
+    /**  * xoá input sau khi xong việc */
     if (INPUT && INPUT.parentNode) INPUT.parentNode.removeChild(INPUT)
   }
 
-  // * Thêm input vào html
+  /**  * Thêm input vào html */
   document.body.appendChild(INPUT)
 
-  // * Click vào input
+  /**  * Click vào input */
   INPUT.click()
 }
 
@@ -413,18 +414,18 @@ function selectFile() {
 async function uploadFile(files: FileList) {
   try {
     for (let i = 0; i < files.length; i++) {
-      // * Lấy file
+      /** * Lấy file */
       let file = files[i]
 
-      // * Kiểm tra kích thước file (5MB = 5 * 1024 * 1024 bytes)
+      /** * Kiểm tra kích thước file (5MB = 5 * 1024 * 1024 bytes) */
       if (file.size > 5 * 1024 * 1024) {
         throw new Error(`File ${file.name} đã lớn hơn 5MB.`)
       }
 
-      // * Tạo form data
+      /** * Tạo form data */
       let form_data = new FormData()
 
-      // * Thêm file vào form data
+      /** * Thêm file vào form data */
       form_data.append('file', file)
 
       /** Upload ảnh lên merchant */
@@ -433,7 +434,7 @@ async function uploadFile(files: FileList) {
       /** Lấy về dữ liệu ảnh upload lên merchants */
       let image = get(res, 'file_path')
 
-      // * Thêm ảnh vào sản phẩm
+      /** * Thêm ảnh vào sản phẩm */
       if (image && product.value.images && isArray(product.value.images)) {
         product.value.images = [...product.value.images, image]
       } else {
@@ -449,9 +450,9 @@ async function uploadFile(files: FileList) {
 function removeImage(index: number) {
   /** danh sách ảnh */
   const IMGS = product.value.images
-  // nếu không có ảnh nào trong danh sách thì thôi
+  /** nếu không có ảnh nào trong danh sách thì thôi */
   if (!IMGS?.length) return
-  // xóa ảnh tại index
+  /** xóa ảnh tại index */
   product.value.images = IMGS.filter((item, i) => {
     return i !== index
   })
@@ -460,18 +461,18 @@ function removeImage(index: number) {
 /** hàm xóa sản phẩm */
 async function deleteAnProduct() {
   try {
-    // nếu không có id sản phẩm thì thôi
+    /** nếu không có id sản phẩm thì thôi */
     if (!product.value.id) return
-    // * Xóa san pham
+    /** * Xóa san pham */
     await $order.deleteProduct(product.value.id)
 
-    // xóa trong mảng
+    /** xóa trong mảng */
     $props.delete(product_index.value)
 
-    // Thông báo
+    /** Thông báo */
     notify('Delete successfully!')
 
-    // * Đóng form
+    /** * Đóng form */
     closeForm()
   } catch (e) {
     console.log(e)
@@ -484,21 +485,22 @@ async function updateAnProduct() {
     /** validate các field */
     validateProduct()
 
-    // nếu có id thì là cập nhật
+    /** nếu có id thì là cập nhật */
     if (product.value.id) {
-      // * Cập nhật sản phẩm
-      await $order.updateProduct(formatProduct())
+      /** * Cập nhật sản phẩm */
+      const RES = await $order.updateProduct(formatProduct())
 
-      // * Thông báo
+      /** * Thông báo */
       notify('Update successfully!')
 
-      // * Đóng form
+      /** * Đóng form */
       closeForm()
 
-      // cập nhật trong mảng sản phẩm
-      $props.update()
+      /** cập nhật trong mảng sản phẩm */
+      $props.update(RES)
     } else {
-      // * Cập nhật sản phẩm
+      console.log(product.value, 'product.value')
+      /** * Cập nhật sản phẩm */
       const RES = await $order.createProduct({
         ...product.value,
         ...{
@@ -509,13 +511,13 @@ async function updateAnProduct() {
         },
       })
 
-      // * Thông báo
+      /** * Thông báo */
       notify('Create successfully!')
 
-      // * Đóng form
+      /** * Đóng form */
       closeForm()
 
-      // cập nhật trong mảng sản phẩm
+      /** cập nhật trong mảng sản phẩm */
       $props.create(RES)
     }
   } catch (e) {
@@ -552,13 +554,13 @@ function formatProduct() {
 
 /** hàm kiểm tra xem có thay đổi gì không */
 function checkChanged(next: Function) {
-  // nếu không sửa gì thì thôi
+  /** nếu không sửa gì thì thôi */
   if (isEqual(formatProduct(), $props.products[product_index.value])) {
     next()
     return
   }
 
-  // nếu sửa bật modal xác nhận
+  /** nếu sửa bật modal xác nhận */
   is_open_modal_confirm.value = true
   confirm_modal_data.value = {
     title: 'There are unsaved changes. Do you want to exit without saving?',
