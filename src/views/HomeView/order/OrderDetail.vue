@@ -48,14 +48,18 @@
               {{ format(orderStore.selected_order?.createdAt, 'MMMM d, yyyy') }}
             </span>
           </p>
-          <p class="text-base"
+          <p
+            class="text-base"
             v-if="orderStore.selected_order?.schedule_time"
           >
             Pickup Time:
-            <span
-              class="font-medium text-sm"
-            >
-              {{ format(orderStore.selected_order?.schedule_time, 'HH:mm - MMMM d, yyyy') }}
+            <span class="font-medium text-sm">
+              {{
+                format(
+                  orderStore.selected_order?.schedule_time,
+                  'HH:mm - MMMM d, yyyy',
+                )
+              }}
             </span>
           </p>
           <div class="flex justify-between items-center">
@@ -100,7 +104,12 @@
             </div>
             <button
               class="py-1.5 px-3 border rounded font-semibold text-slate-700"
-              @click="toCustomer(orderStore.selected_order?.contact_id, orderStore.selected_order?.order_id)"
+              @click="
+                toCustomer(
+                  orderStore.selected_order?.contact_id,
+                  orderStore.selected_order?.order_id,
+                )
+              "
             >
               View Profile
             </button>
@@ -278,7 +287,6 @@ import { format } from 'date-fns'
 import { cloneDeep } from 'lodash'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-
 
 import ProductList from '@/components/common/ProductList.vue'
 import Image from '@/components/ui/Image.vue'
@@ -476,19 +484,40 @@ function activeStatus(step_index: number, status_index: number) {
   })
 }
 
-/** hàm cập nhật trạng thái của đơn hàng */
+/**
+ * Hàm cập nhật trạng thái của đơn hàng
+ */
 async function updateAnOrder(status: string) {
   try {
-    // tạm xóa hành trình đơn hàng
-    orderStore.selected_order.order_journey = []
+    /** Lấy selected order */
+    const SELECTED_ORDER = orderStore.selected_order
+    /** Lấy data note */
+    const NOTE = SELECTED_ORDER.note?.trim() || undefined
 
-    // lưu lại dữ liệu mới sau cập nhật
-    orderStore.selected_order = await $order.updateOrder({
-      id: orderStore.selected_order.id,
+    /** Sao lưu hành trình đơn hàng (phòng trường hợp cần khôi phục) */
+    const OLD_JOURNEY = [...(SELECTED_ORDER.order_journey || [])]
+
+    /** Xóa tạm hành trình đơn hàng để tránh lỗi khi cập nhật */
+    SELECTED_ORDER.order_journey = []
+
+    /** Tạo payload */
+    const PAYLOAD: Record<string, any> = {
+      id: SELECTED_ORDER.id,
       status,
-    })
-  } catch (e) {
-    console.log(e)
+    }
+    if (NOTE) PAYLOAD.note = NOTE
+
+    /** Gọi API cập nhật đơn hàng */
+    const UPDATED_ORDER = await $order.updateOrder(PAYLOAD)
+    /** reset note */
+    orderStore.selected_order.note = ''
+
+    /** Lưu lại dữ liệu mới sau khi cập nhật */
+    orderStore.selected_order = UPDATED_ORDER
+
+    console.log('✅ Cập nhật trạng thái đơn hàng thành công:', status)
+  } catch (error) {
+    console.error('❌ Lỗi khi cập nhật đơn hàng:', error)
   }
 }
 </script>
