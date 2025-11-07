@@ -223,7 +223,8 @@
         <div
           v-if="
             STATUS?.includes(orderStore.selected_order.status || '') ||
-            status.action === 'CANCEL_ORDER'
+            status.action === 'CANCEL_ORDER' ||
+            status.action === 'PAID_ORDER'
           "
           class="flex-1 rounded-md flex items-center justify-center py-3.5 px-5 cursor-pointer font-semibold"
           :class="{
@@ -330,6 +331,8 @@ const cancel_data = ref<{
   status_index: -1,
   action: {},
 })
+
+console.log(orderStore.selected_order, 'hahahahha')
 
 /** trạng thái đang kích hoạt */
 const last_status = computed(() => {
