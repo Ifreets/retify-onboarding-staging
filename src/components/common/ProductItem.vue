@@ -16,19 +16,48 @@
       <p class="text-lg font-semibold text-blue-700">
         {{ formatCurrency(product.price) }}
       </p>
+      <div v-if="product.addons && product.addons.length">
+        <div
+          v-for="group in product.addons"
+          :key="group.id"
+          class="mt-1"
+        >
+          <p
+            v-show="!isEmpty(group.addons)"
+            class="font-semibold text-sm text-gray-700"
+          >
+            {{ group.name }}:
+          </p>
+          <ul class="ml-3 text-sm text-gray-600">
+            <li
+              v-for="addon in group.addons"
+              :key="addon.id"
+              class="flex justify-between"
+            >
+              <span>
+                {{ addon.name }}
+              </span>
+              <span>
+                {{ formatCurrency(addon.price) }}
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { formatCurrency } from '@/services/format';
-import type { PropType } from 'vue';
+import { formatCurrency } from '@/services/format'
+import type { PropType } from 'vue'
 
-import Image from '@/components/ui/Image.vue';
+import Image from '@/components/ui/Image.vue'
 
-import { CubeIcon } from '@heroicons/vue/24/solid';
+import { CubeIcon } from '@heroicons/vue/24/solid'
 
-import type { OrderProduct } from '@/interfaces';
+import type { OrderProduct } from '@/interfaces'
+import { isEmpty } from 'lodash'
 
 const $props = defineProps({
   product: {
@@ -36,4 +65,6 @@ const $props = defineProps({
     required: true,
   },
 })
+
+console.log($props.product, 'checkkkk')
 </script>
