@@ -332,8 +332,6 @@ const cancel_data = ref<{
   action: {},
 })
 
-console.log(orderStore.selected_order, 'hahahahha')
-
 /** trạng thái đang kích hoạt */
 const last_status = computed(() => {
   return getLastStatus(orderStore.selected_order)
