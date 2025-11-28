@@ -2,7 +2,10 @@
   <section class="border py-3 px-4 rounded-lg flex flex-col gap-3">
     <div class="w-full flex justify-between text-base">
       <p class="font-semibold">{{ title }}</p>
-      <p>Total Items: <span class="font-medium text-sm">{{ products.length }}</span></p>
+      <p>
+        Total Items:
+        <span class="font-medium text-sm">{{ products.length }}</span>
+      </p>
     </div>
     <div class="w-full h-px bg-slate-200"></div>
     <ProductItem
@@ -10,6 +13,13 @@
       :key="product.id"
       :product="product"
     />
+    <div
+      v-if="note"
+      class="w-full text-sm text-slate-500"
+    >
+      Note:
+      {{ note }}
+    </div>
   </section>
 </template>
 
@@ -27,6 +37,10 @@ const $props = defineProps({
   products: {
     type: Array as PropType<OrderProduct[]>,
     required: true,
+  },
+  note: {
+    type: String,
+    required: false,
   },
 })
 </script>

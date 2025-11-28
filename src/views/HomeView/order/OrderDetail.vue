@@ -171,8 +171,8 @@
       <ProductList
         title="Ordered Items"
         :products="orderStore.selected_order?.products || []"
+        :note="orderStore.selected_order?.note"
       />
-
       <!-- Thông tin thanh toán -->
       <section class="border py-3 px-4 rounded-lg flex gap-2">
         <DollarSignIcon class="size-8 flex-shrink-0" />
