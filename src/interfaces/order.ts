@@ -56,6 +56,8 @@ export interface OrderProduct {
   addons?: OptionAddon[]
   /** tổn tiền addons */
   addons_price?: number
+  /** ghi chú sản phẩm */
+  note?: string
 
   // * API KHÔNG TRẢ VỀ
   id?: string

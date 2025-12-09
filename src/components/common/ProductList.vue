@@ -14,18 +14,18 @@
       :product="product"
     />
     <div
-      v-if="note"
+      v-if="filtered_note"
       class="w-full text-sm text-slate-500"
     >
       Note:
-      {{ note }}
+      {{ filtered_note }}
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import ProductItem from '@/components/common/ProductItem.vue'
-import type { PropType } from 'vue'
+import { computed, type PropType } from 'vue'
 
 import type { OrderProduct } from '@/interfaces'
 
@@ -42,5 +42,22 @@ const $props = defineProps({
     type: String,
     required: false,
   },
+})
+
+/** ghi chú hiển thị (đã lọc trùng lặp) */
+const filtered_note = computed(() => {
+  /** nếu không có ghi chú thì thôi */
+  if (!$props.note) return ''
+
+  /** check xem ghi chú có trùng với ghi chú của sản phẩm nào không */
+  const IS_DUPLICATE = $props.products.some(
+    product => product.note?.trim() === $props.note?.trim(),
+  )
+
+  /** nếu trùng thì không hiển thị */
+  if (IS_DUPLICATE) return ''
+
+  /** trả về ghi chú */
+  return $props.note
 })
 </script>

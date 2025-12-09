@@ -44,6 +44,12 @@
           </ul>
         </div>
       </div>
+      <p
+        v-if="product.note"
+        class="text-sm text-slate-500"
+      >
+        Note: {{ product.note }}
+      </p>
     </div>
   </div>
 </template>
