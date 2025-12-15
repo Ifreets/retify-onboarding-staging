@@ -740,22 +740,6 @@ async function handleSave(is_publish: boolean) {
       active: !d.closed,
     }))
 
-    /** Chuyển đổi specialHours từ form sang định dạng API */
-    const HOLIDAY_LIST = form.specialHours
-      .filter(s => !s.is_system) // Lọc bỏ system holidays, không lưu lại
-      .map(s => ({
-        /** Ngày đặc biệt */
-        date: s.date,
-        /** Thời gian bắt đầu */
-        checkin: parseTime(s.from || '09:00'),
-        /** Thời gian kết thúc */
-        checkout: parseTime(s.to || '17:00'),
-        /** Trạng thái hoạt động */
-        active: !s.closed, // closed = true => active = false
-        /** Tiêu đề */
-        title: s.title || 'Holiday',
-      }))
-
     /** Gọi API để lưu cài đặt giờ làm việc */
     await $merchant.saveSetting({
       /** ID doanh nghiệp */
@@ -959,16 +943,21 @@ onMounted(async () => {
           is_new: false, // Dữ liệu đã lưu -> không cho sửa
         }))
 
-        // Nếu có holiday setting riêng thì xử lý thêm (để hiển thị)
+        /** Nếu có holiday setting riêng thì xử lý thêm (để hiển thị) */
         let holiday_list_from_setting: any[] = []
+        /** Nếu có holiday setting */
         if (HOLIDAY_SETTING?.setting_data) {
+          /** Lấy năm hiện tại */
           const CURRENT_YEAR = new Date().getFullYear()
-          // Duyệt qua các key ngày tháng (d/m)
+          /** Duyệt qua các key ngày tháng (d/m) */
           Object.keys(HOLIDAY_SETTING.setting_data).forEach(key => {
+            /** Tách ngày và tháng */
             const [day, month] = key.split('/')
+            /** Lấy thông tin ngày lễ */
             const HOLIDAY_DATA = HOLIDAY_SETTING.setting_data[key]
+            /** Nếu có ngày và tháng */
             if (day && month) {
-              // Tạo date string YYYY-MM-DD
+              /** Tạo date string YYYY-MM-DD */
               const dateStr = `${CURRENT_YEAR}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
               holiday_list_from_setting.push({
                 id: uid(),
@@ -984,38 +973,36 @@ onMounted(async () => {
           })
         }
 
-        // Merge vào form (ưu tiên dữ liệu đã lưu trong working_time nếu có trùng ngày?)
-        // Hiện tại cứ push vào, người dùng có thể xóa hoặc sửa
-        // Lọc trùng lặp đơn giản theo date
-        const existingDates = new Set(
+        /** Merge vào form (ưu tiên dữ liệu đã lưu trong working_time nếu có trùng ngày?) */
+        const EXISTING_DATES = new Set(
           MAPPED_WT_HOLIDAYS.map((h: any) => h.date),
         )
-        const newHolidays = holiday_list_from_setting.filter(
-          h => !existingDates.has(h.date),
+        /** Lọc ra các ngày lễ mới */
+        const NEW_HOLIDAYS = holiday_list_from_setting.filter(
+          h => !EXISTING_DATES.has(h.date),
         )
-
-        form.specialHours = [...MAPPED_WT_HOLIDAYS, ...newHolidays]
+        /** Gộp dữ liệu */
+        form.specialHours = [...MAPPED_WT_HOLIDAYS, ...NEW_HOLIDAYS]
       }
 
       /** 2. Xử lý Background (Cover) */
       const BG_SETTING = SETTINGS.find(
         (s: any) => s.setting_type === 'background',
       )
-
-      console.log('BG_SETTING', BG_SETTING)
+      /** Nếu có setting background */
       if (BG_SETTING?.setting_data) {
         const { pc, mobile } = BG_SETTING.setting_data
         /** Lấy ảnh đầu tiên từ pc hoắc mobile làm cover */
-        const coverObj =
+        const COVER_OBJ =
           pc && pc.length > 0
             ? pc[0]
             : mobile && mobile.length > 0
               ? mobile[0]
               : null
-
-        if (coverObj && coverObj.link) {
-          form.cover = coverObj.link
-          preview.cover = coverObj.link
+        /** Nếu có ảnh cover */
+        if (COVER_OBJ && COVER_OBJ.link) {
+          form.cover = COVER_OBJ.link
+          preview.cover = COVER_OBJ.link
         }
       }
     }
