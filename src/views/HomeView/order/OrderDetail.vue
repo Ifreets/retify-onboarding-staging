@@ -13,7 +13,7 @@
         Orders #{{ route.params.id }}
       </h3>
       <!-- Nút Pay và Print bên phải -->
-      <div class="flex gap-1.5 z-10">
+      <div class="flex gap-1.5 z-10 hidden">
         <!-- Nút Pay -->
         <button
           class="flex items-center gap-1 py-1 px-2 bg-green-600 text-white rounded-md font-medium text-xs hover:bg-green-700 transition-colors"

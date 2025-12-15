@@ -44,7 +44,7 @@
           </div>
 
           <input
-            ref="coverInput"
+            ref="cover_input"
             type="file"
             class="hidden"
             accept="image/*"
@@ -811,10 +811,10 @@ async function handleSave(is_publish: boolean) {
     /** Hiển thị thông báo thành công dựa trên trạng thái xuất bản */
     if (is_publish) {
       /** Thông báo đã lưu và xuất bản thành công */
-      notify('Lưu thành công!', { type: 'success' })
+      notify('Save and publish successfully!', { type: 'success' })
     } else {
       /** Thông báo đã lưu bản nháp thành công */
-      notify('Lưu bản nháp thành công!', { type: 'success' })
+      notify('Save draft successfully!', { type: 'success' })
     }
 
     /** Cập nhật lại trạng thái is_new cho tất cả các item đã lưu thành công */
