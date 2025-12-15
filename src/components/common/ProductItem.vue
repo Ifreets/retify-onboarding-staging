@@ -46,7 +46,7 @@
       </div>
       <p
         v-if="product.note"
-        class="text-sm text-slate-500"
+        class="text-sm text-red-500 pt-2"
       >
         Note: {{ product.note }}
       </p>
@@ -64,7 +64,7 @@ import { CubeIcon } from '@heroicons/vue/24/solid'
 
 import type { OrderProduct } from '@/interfaces'
 import { isEmpty } from 'lodash'
-
+/** Props */
 const $props = defineProps({
   product: {
     type: Object as PropType<OrderProduct>,

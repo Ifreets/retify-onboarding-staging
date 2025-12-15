@@ -15,7 +15,7 @@
     />
     <div
       v-if="filtered_note"
-      class="w-full text-sm text-slate-500"
+      class="w-full text-sm text-red-500 font-medium"
     >
       Note:
       {{ filtered_note }}

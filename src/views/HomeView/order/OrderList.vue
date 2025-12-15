@@ -32,7 +32,7 @@ import OrderItem from '@/views/HomeView/order/OrderItem.vue'
 
 import type { Order } from '@/interfaces'
 
-// props
+/** props */
 const $props = defineProps({
   orders: {
     type: Array as PropType<Order[]>,
@@ -56,16 +56,16 @@ const show_order = computed(() => {
     }
   } = {}
 
-  // lặp qua danh sách đơn hàng
+  /** lặp qua danh sách đơn hàng */
   $props.orders?.forEach((order: Order) => {
     /** ngày hạch toán */
     const DATE = order.created_date
-    // nếu không có ngày hạch toán thì thôi
+    /** nếu không có ngày hạch toán thì thôi */
     if (!DATE) return
     /** định dạng lại ngày hạch toán */
     const FORMATED_DATE = formatDate(DATE)
 
-    // nếu đã có đơn hàng nào với ngày hiện tại thì thêm và mảng và cộng thêm tổng tiền
+    /** nếu đã có đơn hàng nào với ngày hiện tại thì thêm và mảng và cộng thêm tổng tiền */
     if (result[FORMATED_DATE]?.list) {
       /** tổng tiền của các đơn hàng của ngày hiện tại */
       const TOTAL_MONEY = result[FORMATED_DATE].total + (order.total_money || 0)
@@ -73,20 +73,19 @@ const show_order = computed(() => {
         list: [...result[FORMATED_DATE].list, order],
         total: roundMoney(TOTAL_MONEY),
       }
-    }
-    // nếu chưa có thì khởi tạo
-    else {
+    } else {
+      /** nếu chưa có thì khởi tạo */
       result[FORMATED_DATE] = {
         list: [order],
         total: roundMoney(order.total_money || 0),
       }
     }
   })
-  console.log(result, 'result')
+  /** Trả về danh sách đơn hàng */
   return result
 })
 
-// composable
+/** composable */
 useInfiniteScroll({
   element: ref_order_list,
   offset: 100,

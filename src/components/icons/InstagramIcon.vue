@@ -1,5 +1,11 @@
 <template>
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
     <path
       d="M1.56521 1.66625C-0.315007 3.61924 0.0698086 5.69385 0.0698086 11.9964C0.0698086 17.2303 -0.843381 22.4772 3.93591 23.7124C5.42831 24.0962 18.6516 24.0962 20.142 23.7104C22.1319 23.197 23.7509 21.5829 23.9722 18.7686C24.0031 18.3758 24.0031 5.62406 23.9712 5.2233C23.736 2.22553 21.8906 0.497844 19.4591 0.147921C18.9018 0.0671697 18.7902 0.0432434 15.931 0.0382587C5.7892 0.0432434 3.56605 -0.408367 1.56521 1.66625Z"
       fill="url(#paint0_linear_18339_3342)"
@@ -18,8 +24,14 @@
         gradientUnits="userSpaceOnUse"
       >
         <stop stop-color="#FFDD55" />
-        <stop offset="0.5" stop-color="#FF543E" />
-        <stop offset="1" stop-color="#C837AB" />
+        <stop
+          offset="0.5"
+          stop-color="#FF543E"
+        />
+        <stop
+          offset="1"
+          stop-color="#C837AB"
+        />
       </linearGradient>
     </defs>
   </svg>

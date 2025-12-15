@@ -16,9 +16,15 @@
 
     <div class="flex flex-col w-full">
       <div class="flex justify-between font-medium">
-        <p class="text-base text-slate-700">
-          #{{ order.order_id }} -
-          {{ order.created_date && format(order.created_date, 'HH:mm') }}
+        <p class="text-base text-slate-700 flex items-center gap-1">
+          <span class="truncate"> #{{ order.order_id }} - </span>
+          <span class="flex-shrink-0">
+            {{ order.created_date && format(order.created_date, 'HH:mm') }}
+          </span>
+          <component
+            :is="SOURCE_ICON"
+            class="size-5 flex-shrink-0"
+          />
         </p>
         <div
           :class="`${last_status.bg_color} ${last_status.text_color} rounded-md py-0.5 px-2`"
@@ -30,7 +36,9 @@
         </div>
       </div>
       <p class="text-lg font-semibold">{{ order.contact_info?.first_name }}</p>
-      <p class="text-lg font-semibold text-blue-700">{{ formatCurrency(order.total_money) }}</p>
+      <p class="text-lg font-semibold text-blue-700">
+        {{ formatCurrency(order.total_money) }}
+      </p>
     </div>
   </li>
 </template>
@@ -46,6 +54,10 @@ import { useRouter } from 'vue-router'
 import type { ActionStep, Order } from '@/interfaces'
 import Image from '@/components/ui/Image.vue'
 import { CubeIcon } from '@heroicons/vue/24/solid'
+import FacebookIcon from '@/components/icons/FacebookIcon.vue'
+import InstagramIcon from '@/components/icons/InstagramIcon.vue'
+import WebsiteIcon from '@/components/icons/WebsiteIcon.vue'
+import ZaloIcon from '@/components/icons/ZaloIcon.vue'
 
 // props
 const $props = defineProps({
@@ -67,6 +79,32 @@ const { ACTION_STATUS_OBJ } = useOrder()
 /** trạng thái đang kích hoạt */
 const last_status = computed(() => {
   return getLastStatus($props.order)
+})
+
+/** Icon nguồn đơn hàng */
+const SOURCE_ICON = computed(() => {
+  /** danh sách nguồn */
+  const SOURCES = $props.order.contact_info?.contact_sources || []
+
+  /** Nếu không có source nào thì mặc định là website */
+  if (!SOURCES.length) return WebsiteIcon
+
+  /** Lấy source đầu tiên */
+  const SOURCE_TYPE = SOURCES[0].source
+
+  switch (SOURCE_TYPE) {
+    case 'FB_MESS':
+    case 'FB_POST':
+      return FacebookIcon
+    case 'FB_INSTAGRAM':
+      return InstagramIcon
+    case 'ZALO_OA':
+    case 'ZALO_PERSONAL':
+      return ZaloIcon
+    case 'WEBSITE':
+    default:
+      return WebsiteIcon
+  }
 })
 
 /** mở chi tiết đơn hàng */

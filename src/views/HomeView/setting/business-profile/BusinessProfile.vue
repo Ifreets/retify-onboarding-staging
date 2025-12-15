@@ -231,61 +231,55 @@
         </div>
       </section>
 
-      <!-- Special Hours -->
+      <!-- Holiday -->
       <section class="bg-white shadow-sm rounded-xl p-4 space-y-3">
-        <h2 class="text-lg font-medium">Special Hours</h2>
+        <h2 class="text-lg font-medium">Holidays</h2>
         <div class="space-y-2">
           <div
             v-for="(s, i) in form.specialHours"
             :key="s.id"
             class="border border-gray-200 rounded-lg p-3 space-y-2"
           >
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <input
+                  type="date"
+                  v-model="s.date"
+                  class="input w-full text-sm"
+                  :disabled="!s.is_new"
+                />
+                <button
+                  @click="form.specialHours.splice(i, 1)"
+                  class="text-red-500 text-sm font-medium hover:text-red-600 flex-shrink-0 ml-2"
+                >
+                  Remove
+                </button>
+              </div>
               <input
-                type="date"
-                v-model="s.date"
-                class="input w-40 text-sm"
-              />
-              <button
-                @click="form.specialHours.splice(i, 1)"
-                class="text-red-500 text-sm font-medium hover:text-red-600"
-              >
-                Remove
-              </button>
-            </div>
-            <div
-              v-if="!s.closed"
-              class="flex items-center gap-2"
-            >
-              <input
-                v-model="s.from"
-                type="time"
-                class="input w-28 text-sm"
-              />
-              <span class="text-gray-400">to</span>
-              <input
-                v-model="s.to"
-                type="time"
-                class="input w-28 text-sm"
+                type="text"
+                v-model="s.title"
+                placeholder="Holiday Name"
+                class="input text-sm w-full"
+                :disabled="!s.is_new"
               />
             </div>
-            <label class="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                v-model="s.closed"
-                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span class="text-gray-500">Closed this day</span>
-            </label>
           </div>
         </div>
-        <button
-          @click="addSpecialHour"
-          class="flex items-center gap-1 text-blue-600 text-sm font-medium hover:text-blue-700"
-        >
-          <PlusIcon class="size-4" />
-          Add Special Hour
-        </button>
+        <div class="flex gap-4">
+          <button
+            @click="addSpecialHour"
+            class="flex items-center gap-1 text-blue-600 text-sm font-medium hover:text-blue-700"
+          >
+            <PlusIcon class="size-4" />
+            Add Holiday
+          </button>
+          <button
+            @click="restoreHolidayDefaults"
+            class="flex items-center gap-1 text-gray-500 text-sm font-medium hover:text-gray-700"
+          >
+            Restore Defaults
+          </button>
+        </div>
       </section>
 
       <!-- Locations -->
@@ -423,6 +417,12 @@ interface SpecialHour {
   to?: string
   /** Trạng thái đóng cửa trong ngày đặc biệt. */
   closed: boolean
+  /** Tiêu đề ngày lễ */
+  title: string
+  /** Có phải là system holiday hay không */
+  is_system?: boolean
+  /** Item mới chưa lưu */
+  is_new?: boolean
 }
 
 /**
@@ -613,8 +613,36 @@ function addSpecialHour() {
     /** Đặt thời gian kết thúc mặc định là 17:00 */
     to: '17:00',
     /** Đặt trạng thái đóng cửa mặc định là false */
-    closed: false,
+    closed: true, // Mặc định là holiday nên closed = true
+    /** Tiêu đề */
+    title: '',
+    /** Đánh dấu là item mới */
+    is_new: true,
   })
+}
+
+/** Khôi phục mặc định danh sách ngày lễ */
+function restoreHolidayDefaults() {
+  const CURRENT_YEAR = new Date().getFullYear()
+
+  /** Danh sách ngày lễ mặc định */
+  const DEFAULT_HOLIDAYS = [
+    { date: `${CURRENT_YEAR}-01-01`, name: 'Nghỉ tết dương lịch' },
+    { date: `${CURRENT_YEAR}-04-30`, name: 'Nghỉ lễ quốc tế lao động' },
+    { date: `${CURRENT_YEAR}-05-01`, name: 'Nghỉ lễ quốc tế lao động' },
+    { date: `${CURRENT_YEAR}-09-02`, name: 'Nghỉ lễ quốc khánh' },
+  ]
+
+  /** Map sang format form */
+  form.specialHours = DEFAULT_HOLIDAYS.map(h => ({
+    id: uid(),
+    date: h.date,
+    from: '09:00',
+    to: '17:00',
+    closed: true,
+    title: h.name,
+    is_system: true,
+  }))
 }
 
 /**
@@ -643,9 +671,9 @@ function removeLocation(i: number) {
 
 /**
  * Hàm xử lý lưu tất cả dữ liệu doanh nghiệp và cài đặt.
- * @param {boolean} isPublish - Xác định xem có phải là thao tác xuất bản hay không.
+ * @param {boolean} is_publish - Xác định xem có phải là thao tác xuất bản hay không.
  */
-async function handleSave(isPublish: boolean) {
+async function handleSave(is_publish: boolean) {
   /** Xử lý lưu dữ liệu */
   try {
     /** Lấy ID doanh nghiệp từ dữ liệu gốc */
@@ -712,6 +740,22 @@ async function handleSave(isPublish: boolean) {
       active: !d.closed,
     }))
 
+    /** Chuyển đổi specialHours từ form sang định dạng API */
+    const HOLIDAY_LIST = form.specialHours
+      .filter(s => !s.is_system) // Lọc bỏ system holidays, không lưu lại
+      .map(s => ({
+        /** Ngày đặc biệt */
+        date: s.date,
+        /** Thời gian bắt đầu */
+        checkin: parseTime(s.from || '09:00'),
+        /** Thời gian kết thúc */
+        checkout: parseTime(s.to || '17:00'),
+        /** Trạng thái hoạt động */
+        active: !s.closed, // closed = true => active = false
+        /** Tiêu đề */
+        title: s.title || 'Holiday',
+      }))
+
     /** Gọi API để lưu cài đặt giờ làm việc */
     await $merchant.saveSetting({
       /** ID doanh nghiệp */
@@ -730,6 +774,35 @@ async function handleSave(isPublish: boolean) {
           working_time: TIME_LIST,
         },
       },
+    })
+
+    /** 2. Lưu cài đặt ngày lễ (Holiday) */
+    /** Tạo object setting_data cho holiday */
+    const HOLIDAY_DATA: Record<string, any> = {}
+
+    /** Duyệt qua danh sách specialHours để tạo payload */
+    form.specialHours.forEach(s => {
+      if (s.date) {
+        /** Parse ngày tháng từ chuỗi YYYY-MM-DD */
+        const [year, month, day] = s.date.split('-').map(Number)
+        /** Tạo key dạng D/M (ví dụ 1/1, 30/4) */
+        const KEY = `${day}/${month}`
+
+        /** Thêm vào payload */
+        HOLIDAY_DATA[KEY] = {
+          name: s.title || 'Holiday',
+          /** Giữ lại thông tin cũ nếu có (đối với system holiday), hoặc để trống */
+          created_by: '',
+          created_time: '',
+        }
+      }
+    })
+
+    /** Gọi API lưu cài đặt holiday */
+    await $merchant.saveSetting({
+      business_id: BUSINESS_ID,
+      setting_type: 'holiday',
+      setting_data: HOLIDAY_DATA,
     })
 
     /** 3. Lưu cài đặt ảnh nền */
@@ -752,13 +825,18 @@ async function handleSave(isPublish: boolean) {
     }
 
     /** Hiển thị thông báo thành công dựa trên trạng thái xuất bản */
-    if (isPublish) {
+    if (is_publish) {
       /** Thông báo đã lưu và xuất bản thành công */
       notify('Lưu thành công!', { type: 'success' })
     } else {
       /** Thông báo đã lưu bản nháp thành công */
       notify('Lưu bản nháp thành công!', { type: 'success' })
     }
+
+    /** Cập nhật lại trạng thái is_new cho tất cả các item đã lưu thành công */
+    form.specialHours.forEach(h => {
+      h.is_new = false
+    })
   } catch (e) {
     /** Ghi log lỗi nếu quá trình lưu dữ liệu thất bại */
     console.error('Lỗi khi lưu dữ liệu:', e)
@@ -813,10 +891,15 @@ onMounted(async () => {
       /** Lưu settings */
       const SETTINGS = RES_SETTING
 
-      /** 1. Xử lý Working Time */
+      /** 2. Xử lý Working Time */
       const WORKING_TIME_SETTING = SETTINGS.find(
         (s: any) => s.setting_type === 'working_time',
       )
+      /** 3. Xử lý Holiday (Lấy ngày lễ từ setting type holiday) */
+      const HOLIDAY_SETTING = SETTINGS.find(
+        (s: any) => s.setting_type === 'holiday',
+      )
+
       /** Nếu có settings */
       if (
         WORKING_TIME_SETTING?.setting_data?.organization_working_time
@@ -859,6 +942,59 @@ onMounted(async () => {
           }
           return day
         })
+
+        /** Lưu thông tin ngày lễ từ working_time */
+        const WT_HOLIDAYS =
+          WORKING_TIME_SETTING.setting_data.organization_working_time
+            .holidays || []
+
+        /** Map dữ liệu ngày lễ từ working_time vào form */
+        const MAPPED_WT_HOLIDAYS = WT_HOLIDAYS.map((h: any) => ({
+          id: uid(),
+          date: h.date,
+          from: fmt(h.checkin),
+          to: fmt(h.checkout),
+          closed: !h.active,
+          title: h.title || 'Holiday',
+          is_new: false, // Dữ liệu đã lưu -> không cho sửa
+        }))
+
+        // Nếu có holiday setting riêng thì xử lý thêm (để hiển thị)
+        let holiday_list_from_setting: any[] = []
+        if (HOLIDAY_SETTING?.setting_data) {
+          const CURRENT_YEAR = new Date().getFullYear()
+          // Duyệt qua các key ngày tháng (d/m)
+          Object.keys(HOLIDAY_SETTING.setting_data).forEach(key => {
+            const [day, month] = key.split('/')
+            const HOLIDAY_DATA = HOLIDAY_SETTING.setting_data[key]
+            if (day && month) {
+              // Tạo date string YYYY-MM-DD
+              const dateStr = `${CURRENT_YEAR}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+              holiday_list_from_setting.push({
+                id: uid(),
+                date: dateStr,
+                from: '09:00',
+                to: '17:00',
+                closed: true, // Mặc định là nghỉ lễ
+                title: HOLIDAY_DATA?.name || 'Holiday',
+                is_system: true, // Đánh dấu là ngày lễ hệ thống
+                is_new: false, // Dữ liệu đã lưu -> không cho sửa
+              })
+            }
+          })
+        }
+
+        // Merge vào form (ưu tiên dữ liệu đã lưu trong working_time nếu có trùng ngày?)
+        // Hiện tại cứ push vào, người dùng có thể xóa hoặc sửa
+        // Lọc trùng lặp đơn giản theo date
+        const existingDates = new Set(
+          MAPPED_WT_HOLIDAYS.map((h: any) => h.date),
+        )
+        const newHolidays = holiday_list_from_setting.filter(
+          h => !existingDates.has(h.date),
+        )
+
+        form.specialHours = [...MAPPED_WT_HOLIDAYS, ...newHolidays]
       }
 
       /** 2. Xử lý Background (Cover) */
