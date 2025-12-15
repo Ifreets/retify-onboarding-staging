@@ -47,8 +47,8 @@ export class MerchantServiceAPI {
   uploadFile(data: FormData) {
     return this.#post('v1/internals/attachment/upload', data, {
       'Content-Type': 'multipart/form-data',
-      'token-business':
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJidXNpbmVzc19pZCI6IjY0MjY1NTQ1N2MzMzlmOTE5NDI4OGRhOSIsImJyYW5jaF9pZCI6IjY0MjY1NTQ1N2MzMzlmOTE5NDI4OGRhYyIsImRlcGFydG1lbnRfaWQiOiI2NDI2NWU5YzNkOGU5MjkxMDMwZTc1ZTgiLCJlbXBsb3llZV9pZCI6IjY2MTNhZjk4ZTdjYjc4M2I5YzdiZGM0OCIsInVzZXJfaWQiOiI2NjEzYWVlOWU3Y2I3ODNiOWM3YmRiOWYiLCJwZXJtaXNzaW9uX2lkIjoiNjQyNjk2ZmExZmZhMzBjNjA5OWIxZjJlIiwieG5vZGUiOiJ0ZW5hbnRfMDIzMzc5NzkiLCJpc19vd25lcl9idXNpbmVzcyI6ZmFsc2UsImlhdCI6MTc1Mzg2NTIyOSwiZXhwIjoxNzYxNjQxMjI5fQ.u2LGKft23NR8AHmSs28gCE-BWVK-3BR1dzBY6V_0iSc',
+      'token-business': this.APP_STORE.merchant_token,
+      'token-user': this.APP_STORE.chatbot_token,
     })
   }
 
@@ -176,6 +176,37 @@ export class MerchantServiceAPI {
         },
         send_telegram_notification: false,
       },
+    })
+  }
+  /** lấy thông tin doanh nghiệp */
+  getBusinessInfo(data: { business_id: string }) {
+    return this.#post('v1/business/get_business_info', data, {
+      'token-user': this.APP_STORE.merchant_token, // Tạm thời dùng merchant_token, cần verify lại với user sau nếu sai
+    })
+  }
+
+  /** lấy cài đặt doanh nghiệp */
+  getBusinessSetting(data: { business_id: string }) {
+    return this.#post('v1/business/get_setting', data, {
+      'token-user': this.APP_STORE.merchant_token,
+    })
+  }
+
+  /** cập nhật thông tin doanh nghiệp */
+  updateBusiness(data: any) {
+    return this.#post('v1/business/update_business', data, {
+      'token-user': this.APP_STORE.merchant_token,
+    })
+  }
+
+  /** lưu cài đặt doanh nghiệp */
+  saveSetting(data: {
+    business_id: string
+    setting_type: string
+    setting_data: any
+  }) {
+    return this.#post('v1/business/save_setting', data, {
+      'token-user': this.APP_STORE.merchant_token,
     })
   }
 }

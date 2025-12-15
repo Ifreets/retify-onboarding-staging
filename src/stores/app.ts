@@ -14,6 +14,8 @@ export const useAppStore = defineStore('app', () => {
   const merchant_data = ref({
     employee_id: '',
     branch_id: '',
+    org_id: '',
+    business_id: '',
   })
 
   /** loading */
@@ -26,6 +28,6 @@ export const useAppStore = defineStore('app', () => {
     merchant_token,
     merchant_data,
     loading,
-    employees_obj
+    employees_obj,
   }
 })

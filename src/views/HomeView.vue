@@ -167,11 +167,13 @@ async function createToken(chatbot_token: string, page_id: string) {
       access_token: chatbot_token,
       page_id: page_id,
     })
-
+    console.log('RES', RES)
     /** lưu lại dữ liệu data */
     appStore.merchant_data = {
       branch_id: RES?.branch?.branch_id,
       employee_id: RES?.branch?.employee_id,
+      org_id: RES?.branch?.chatbox_org_id,
+      business_id: RES?.branch?.business_id,
     }
     /** trả về token */
     setTokenBusiness(RES?.branch?.token_business)

@@ -1,12 +1,36 @@
 <template>
   <article class="h-full flex flex-col items-center justify-center">
-    <header class="flex justify-between items-center w-full px-2">
+    <header class="relative flex justify-between items-center w-full px-2">
+      <!-- Nút back bên trái -->
       <ArrowLeftIcon
-        class="size-6"
+        class="size-6 cursor-pointer z-10"
         @click="back"
       />
-      <h3 class="text-2xl font-semibold">Orders #{{ route.params.id }}</h3>
-      <div class="w-6"></div>
+      <!-- Tiêu đề căn giữa absolute -->
+      <h3
+        class="absolute left-1/2 transform -translate-x-1/2 text-2xl font-semibold"
+      >
+        Orders #{{ route.params.id }}
+      </h3>
+      <!-- Nút Pay và Print bên phải -->
+      <div class="flex gap-1.5 z-10">
+        <!-- Nút Pay -->
+        <button
+          class="flex items-center gap-1 py-1 px-2 bg-green-600 text-white rounded-md font-medium text-xs hover:bg-green-700 transition-colors"
+          @click="handlePay"
+        >
+          <CreditCardIcon class="size-3.5" />
+          Pay
+        </button>
+        <!-- Nút Print -->
+        <button
+          class="flex items-center gap-1 py-1 px-2 bg-blue-600 text-white rounded-md font-medium text-xs hover:bg-blue-700 transition-colors"
+          @click="handlePrint"
+        >
+          <PrinterIcon class="size-3.5" />
+          Print
+        </button>
+      </div>
     </header>
     <main class="w-full h-full px-2 py-3 gap-5 flex flex-col overflow-auto">
       <!-- Thông tin đơn hàng -->
@@ -299,7 +323,9 @@ import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from '@heroicons/vue/24/outline'
 import {
   ChatBubbleOvalLeftEllipsisIcon,
   CheckBadgeIcon,
+  CreditCardIcon,
   PhoneIcon as SolidPhoneIcon,
+  PrinterIcon,
   UserIcon,
 } from '@heroicons/vue/24/solid'
 
@@ -472,6 +498,52 @@ async function activeStep(
       orderStore.selected_order.order_journey = PRE_ORDER_JOURNEY
     }
   }
+}
+
+/**
+ * Xử lý khi bấm nút Pay
+ * Gửi event cho React Native để xử lý thanh toán
+ */
+function handlePay() {
+  /** Lấy order_id từ store */
+  const ORDER_ID = orderStore.selected_order?.order_id
+  /** Nếu không có order_id thì thôi */
+  if (!ORDER_ID) return
+
+  /** Gửi event cho React Native */
+  window.ReactNativeWebView?.postMessage(
+    JSON.stringify({
+      type: 'page.order',
+      payload: {
+        action: 'pay',
+        order_id: ORDER_ID,
+        order: orderStore.selected_order,
+      },
+    }),
+  )
+}
+
+/**
+ * Xử lý khi bấm nút Print
+ * Gửi event cho React Native để xử lý in hóa đơn
+ */
+function handlePrint() {
+  /** Lấy order_id từ store */
+  const ORDER_ID = orderStore.selected_order?.order_id
+  /** Nếu không có order_id thì thôi */
+  if (!ORDER_ID) return
+
+  /** Gửi event cho React Native */
+  window.ReactNativeWebView?.postMessage(
+    JSON.stringify({
+      type: 'page.order',
+      payload: {
+        action: 'print',
+        order_id: ORDER_ID,
+        order: orderStore.selected_order,
+      },
+    }),
+  )
 }
 
 /** Kích hoạt 1 bước trong hành trình đơn hàng */

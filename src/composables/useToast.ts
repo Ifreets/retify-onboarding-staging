@@ -16,12 +16,15 @@ const DEFAULT: NotifySetup = {
 }
 
 export function useToast() {
-  /** thông báo */
-  function notify(text:string, data: NotifySetup = DEFAULT) {
+  /** Gọi toast thông báo */
+  function notify(text: string, data: NotifySetup = {}) {
+    /** Cấu hình thông báo */
+    const options = { ...DEFAULT, ...data }
+    /** Gọi toast thông báo */
     toast(text, {
-      autoClose: data.duration,
-      type: data.type,
-      position: data.position,
+      autoClose: options.duration,
+      type: options.type,
+      position: options.position,
     })
   }
 

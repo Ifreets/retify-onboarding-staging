@@ -10,13 +10,16 @@ export function useCreateTokenMerchant() {
   /** hàm lấy partner token */
   async function getPageInfo() {
     try {
-      // nếu không có id tổ chức hoặc id page thì thôi
-      if (!onBoardingStore.selected_data.org_id || !onBoardingStore.selected_data.page_id) {
+      /** nếu không có id tổ chức hoặc id page thì thôi */
+      if (
+        !onBoardingStore.selected_data.org_id ||
+        !onBoardingStore.selected_data.page_id
+      ) {
         console.log('chưa có id tổ chức hoặc id page')
         return
       }
 
-      // lấy thông tin của trang
+      /** lấy thông tin của trang */
       const DATA: any = await $chatbot.getPageInfo({
         org_id: onBoardingStore.selected_data.org_id,
         list_page_id: [onBoardingStore.selected_data.page_id],
@@ -53,10 +56,18 @@ export function useCreateTokenMerchant() {
         page_id: onBoardingStore.selected_data.page_id,
       })
 
-      // trả về token
+      /** trả về token */
       appStore.merchant_token = RES?.branch?.token_business
 
-      // lưu lại token vào service api
+      /** lưu lại dữ liệu merchant */
+      appStore.merchant_data = {
+        branch_id: RES?.branch?.branch_id,
+        employee_id: RES?.branch?.employee_id,
+        org_id: RES?.branch?.chatbox_org_id,
+        business_id: RES?.branch?.business_id,
+      }
+
+      /** lưu lại token vào service api */
       $merchant.setMerchantToken()
     } catch (e) {
       console.error(e)

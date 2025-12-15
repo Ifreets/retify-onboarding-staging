@@ -41,7 +41,7 @@ const $props = defineProps({
   getOrders: {
     type: Function,
     required: true,
-  }
+  },
 })
 
 /** danh sách đơn hàng */
@@ -82,7 +82,7 @@ const show_order = computed(() => {
       }
     }
   })
-
+  console.log(result, 'result')
   return result
 })
 
