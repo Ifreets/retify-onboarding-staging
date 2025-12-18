@@ -13,10 +13,10 @@
         Orders #{{ route.params.id }}
       </h3>
       <!-- Nút Pay và Print bên phải -->
-      <div class="flex gap-1.5 z-10 hidden">
+      <div class="flex gap-1.5 z-10">
         <!-- Nút Pay -->
         <button
-          class="flex items-center gap-1 py-1 px-2 bg-green-600 text-white rounded-md font-medium text-xs hover:bg-green-700 transition-colors"
+          class="flex items-center gap-1 py-1 px-2 bg-blue-600 text-white rounded-md font-medium text-xs hover:bg-blue-700 transition-colors"
           @click="handlePay"
         >
           <CreditCardIcon class="size-3.5" />
