@@ -20,13 +20,16 @@
         }"
         @click="business_type = item.id"
       >
-        <component :is="item.icon" class="w-8 h-8" />
+        <component
+          :is="item.icon"
+          class="w-8 h-8"
+        />
         <span>{{ item.name }}</span>
       </li>
     </ul>
     <footer class="flex justify-between font-semibold">
       <div>
-        <button 
+        <button
           v-if="is_has_back"
           @click="back"
           class="py-1.5 px-10 rounded-md bg-slate-200 text-slate-700"
@@ -103,9 +106,9 @@ const onBoardingStore = useOnBoardingStore()
 
 const business_type = computed({
   get: () => onBoardingStore.business_info.type,
-  set: (value) => {
+  set: value => {
     onBoardingStore.business_info.type = value
-  }
+  },
 })
 
 /** tiến trước */
@@ -115,6 +118,9 @@ function next() {
 
 /** lùi lại */
 function back() {
+  /** Gửi postMessage về mobile app để back về màn login */
+  window.parent.postMessage({ action: 'back_to_login' }, '*')
+
   $emit('back')
 }
 </script>

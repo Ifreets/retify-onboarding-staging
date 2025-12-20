@@ -5,19 +5,21 @@
       class="flex flex-col gap-3"
     >
       <li class="text-2xl font-semibold text-center">Select Organization</li>
-      <li
-        v-for="organization in organizations"
-        @click="selectOrg(organization?.org_id)"
-        class="text-base py-2 px-4 rounded-md cursor-pointer border border-transparent hover:border-blue-700"
-        :class="{
-          'bg-blue-500 text-white':
-            organization?.org_id === onBoardingStore.selected_data.org_id,
-          'bg-white hover:bg-blue-100':
-            organization?.org_id !== onBoardingStore.selected_data.org_id,
-        }"
-      >
-        {{ organization?.org_info?.org_name }}
-      </li>
+      <div class="flex flex-col gap-2 overflow-y-auto h-[calc(100vh-200px)]">
+        <li
+          v-for="organization in organizations"
+          @click="selectOrg(organization?.org_id)"
+          class="text-base py-2 px-4 rounded-md cursor-pointer border border-transparent hover:border-blue-700"
+          :class="{
+            'bg-blue-500 text-white':
+              organization?.org_id === onBoardingStore.selected_data.org_id,
+            'bg-white hover:bg-blue-100':
+              organization?.org_id !== onBoardingStore.selected_data.org_id,
+          }"
+        >
+          {{ organization?.org_info?.org_name }}
+        </li>
+      </div>
     </ul>
     <article
       v-if="current_step > 0"
@@ -57,7 +59,9 @@ import Tabs from '@/views/OnBoarding/Tabs.vue'
 
 /** fake token chat bot để chạy trên pc */
 const MOCK_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiODk5NzY3MzE1Mzk2MTcxIiwiX2lkIjoiNjg1ZTQ2MDg0ZGM3M2MwYjhkMTQzYTJlIiwiaWF0IjoxNzUxNTk4OTQyLCJleHAiOjMxNTUzNTE1OTg5NDJ9.iUqlmnVACz5uuW-CCgOGshbJr15g8gN5SJSO3Tj7zW8'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmI1ZWNjZGIyZjk3NGRhNDkyNDBjNzM4YWI0MjZjNTQiLCJmYl9zdGFmZl9pZCI6IjEwNDkyMzQ4NzM0ODUwMjkiLCJpc19kaXNhYmxlIjpmYWxzZSwiX2lkIjoiNjcwMGI0ZGZkMDM4NTYwOTFlM2I5OGU3IiwiaWF0IjoxNzY1ODU3NTYyLCJleHAiOjMxNTUzNjU4NTc1NjJ9.i2fUFgpBpsv_9BLbtnSofBUQUDVMC6b8i_e11Hnjr1o'
+// const MOCK_TOKEN =
+//   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiODk5NzY3MzE1Mzk2MTcxIiwiX2lkIjoiNjg1ZTQ2MDg0ZGM3M2MwYjhkMTQzYTJlIiwiaWF0IjoxNzUxNTk4OTQyLCJleHAiOjMxNTUzNTE1OTg5NDJ9.iUqlmnVACz5uuW-CCgOGshbJr15g8gN5SJSO3Tj7zW8'
 
 // store
 const appStore = useAppStore()
@@ -80,7 +84,7 @@ onMounted(() => {
   window.addEventListener('message', handleMessage)
 
   /** lấy token chatbot */
-  // getChatbotToken(MOCK_TOKEN)
+  getChatbotToken(MOCK_TOKEN)
 
   // khởi tạo các guias
   initData()
@@ -276,30 +280,30 @@ async function selectOrg(org_id: string) {
 /** reset data */
 function reset() {
   // reset data đã nhập
-    onBoardingStore.selected_data = {
-      org_id: '',
-      page_id: '',
-      user_id: '',
-    }
+  onBoardingStore.selected_data = {
+    org_id: '',
+    page_id: '',
+    user_id: '',
+  }
 
-    // reset data doanh nghiệp
-    onBoardingStore.business_info = {
-      name: '',
-      web_url: '',
-      menu_url: '',
-      type: '',
-    }
+  // reset data doanh nghiệp
+  onBoardingStore.business_info = {
+    name: '',
+    web_url: '',
+    menu_url: '',
+    type: '',
+  }
 
-    // reset data các cờ
-    onBoardingStore.is_setup = {
-      page: false,
-      product: false,
-      ai_agent: false,
-      auto_assign_staff: false,
-    }
+  // reset data các cờ
+  onBoardingStore.is_setup = {
+    page: false,
+    product: false,
+    ai_agent: false,
+    auto_assign_staff: false,
+  }
 
-    // reset merchant token
-    appStore.merchant_token = ''
+  // reset merchant token
+  appStore.merchant_token = ''
 }
 
 /** tạo page chatbot của retify */
