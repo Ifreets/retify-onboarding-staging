@@ -300,6 +300,13 @@
         </button>
       </div>
     </Modal>
+    <BillPreview
+      v-if="orderStore.selected_order"
+      :order="orderStore.selected_order"
+      :is-open="is_show_bill"
+      @close="is_show_bill = false"
+      @print="onConfirmPrint"
+    />
   </article>
 </template>
 
@@ -316,6 +323,7 @@ import { useRoute, useRouter } from 'vue-router'
 import ProductList from '@/components/common/ProductList.vue'
 import Image from '@/components/ui/Image.vue'
 import Modal from '@/components/ui/Modal.vue'
+import BillPreview from './components/BillPreview.vue'
 
 import CancelImage from '@/assets/image/cancel_order.png'
 import DollarSignIcon from '@/components/icons/DollarSignIcon.vue'
@@ -345,7 +353,10 @@ const route = useRoute()
 const { toChat, toCustomer, openCallPhone } = useNavigationHandler()
 
 /** ẩn hiện modal xác nhận hủy đơn */
+/** ẩn hiện modal xác nhận hủy đơn */
 const is_open = ref(false)
+/** ẩn hiện modal bill */
+const is_show_bill = ref(false)
 
 /** cancel data */
 const cancel_data = ref<{
@@ -525,9 +536,17 @@ function handlePay() {
 
 /**
  * Xử lý khi bấm nút Print
- * Gửi event cho React Native để xử lý in hóa đơn
+ * Mở modal preview hóa đơn
  */
 function handlePrint() {
+  is_show_bill.value = true
+}
+
+/**
+ * Xử lý xác nhận in
+ * Gửi event cho React Native để xử lý in hóa đơn
+ */
+function onConfirmPrint() {
   /** Lấy order_id từ store */
   const ORDER_ID = orderStore.selected_order?.order_id
   /** Nếu không có order_id thì thôi */
@@ -544,6 +563,8 @@ function handlePrint() {
       },
     }),
   )
+  /** đóng modal sau khi in */
+  is_show_bill.value = false
 }
 
 /** Kích hoạt 1 bước trong hành trình đơn hàng */
