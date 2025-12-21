@@ -69,20 +69,11 @@ function handleMessageEvent(event: MessageEvent) {
    *  🆕 LOGIC BỔ SUNG – Native → forward iframe
    * ================================================= */
 
-  /** DEBUG: Check postMessage từ mobile app */
+  /** Nhận postMessage từ mobile app và forward vào iframe */
   if (PAYLOAD?.from === 'parent-app-check') {
-    alert(
-      `[DEBUG Chat.vue] Nhận được postMessage từ mobile!\nData: ${JSON.stringify(PAYLOAD)}`,
-    )
-    console.log('[DEBUG] parent-app-check received:', PAYLOAD)
-    return
-  }
-
-  if (PAYLOAD?.from === 'parent-app') {
     console.log('[BRIDGE] Receive from Native:', PAYLOAD)
-
     iframe_ref.value?.contentWindow?.postMessage(
-      PAYLOAD, // 👉 forward nguyên payload
+      { ...PAYLOAD, from: 'parent-app' }, // 👉 đổi from thành 'parent-app' khi forward
       '*', // production: IFRAME_ORIGIN
     )
     return
