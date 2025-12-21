@@ -17,8 +17,10 @@ import { useRoute } from 'vue-router'
 
 /** router */
 const route = useRoute()
+
 /** link iframe */
 const url = ref('')
+
 /** reference tới iframe */
 const iframe_ref = ref<HTMLIFrameElement | null>(null)
 
@@ -38,7 +40,10 @@ onMounted(() => {
   const IFRAME_URL = $HOST.iframe_url
 
   /** IFRAME SOURCE */
-  url.value = `${IFRAME_URL}/view-screen?page_id=${encodeURIComponent(ID)}`
+  // url.value = `${IFRAME_URL}/view-screen?page_id=${encodeURIComponent(ID)}`
+  url.value = `http://192.168.1.19:5174/view-screen?page_id=${encodeURIComponent(
+    ID,
+  )}`
 
   /** Xử lý sự kiện message */
   window.addEventListener('message', handleMessageEvent)
@@ -51,11 +56,36 @@ onUnmounted(() => {
 
 /** hàm xử lý sự kiện message */
 function handleMessageEvent(event: MessageEvent) {
-  const PAYLOAD =
-    typeof event.data === 'string' ? JSON.parse(event.data) : event.data
+  let PAYLOAD: any
+
+  /** Parse payload an toàn */
+  try {
+    PAYLOAD =
+      typeof event.data === 'string' ? JSON.parse(event.data) : event.data
+  } catch (e) {
+    return
+  }
+  /** =================================================
+   *  🆕 LOGIC BỔ SUNG – Native → forward iframe
+   * ================================================= */
+
+  if (PAYLOAD?.from === 'parent-app') {
+    console.log('[BRIDGE] Receive from Native:', PAYLOAD)
+
+    iframe_ref.value?.contentWindow?.postMessage(
+      PAYLOAD, // 👉 forward nguyên payload
+      '*', // production: IFRAME_ORIGIN
+    )
+    return
+  }
+  /** =================================================
+   *  LOGIC CŨ – GIỮ NGUYÊN (KHÔNG ĐỘNG)
+   * ================================================= */
 
   if (PAYLOAD?.status === 'READY') {
     const SAVED = localStorage.getItem(`${PAYLOAD.key}`)
+    console.log('SAVED', SAVED)
+
     if (SAVED && iframe_ref.value?.contentWindow) {
       iframe_ref.value.contentWindow.postMessage(
         {
@@ -63,7 +93,7 @@ function handleMessageEvent(event: MessageEvent) {
           type: 'CLIENT_ID',
           data_embed_chat: SAVED,
         },
-        '*', // 👉 không check domain
+        '*', // production thì check domain
       )
     }
   }

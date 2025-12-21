@@ -95,9 +95,15 @@ const BUSINESS_TYPES = [
 const $emit = defineEmits(['next', 'back'])
 
 const $props = defineProps({
+  /** cờ check có hiển thị nút back hay không */
   is_has_back: {
     type: Boolean,
     required: true,
+  },
+  /** cờ check đang chạy trên app native hay không */
+  is_native_app: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -118,9 +124,13 @@ function next() {
 
 /** lùi lại */
 function back() {
-  /** Gửi postMessage về mobile app để back về màn login */
-  window.parent.postMessage({ action: 'back_to_login' }, '*')
+  /** nếu là app native thì gửi postMessage về mobile app để back về màn login */
+  if ($props.is_native_app) {
+    window.parent.postMessage({ action: 'back_to_login' }, '*')
+    return
+  }
 
+  /** nếu là PC thì emit back để quay về step 0 (chọn organization) */
   $emit('back')
 }
 </script>

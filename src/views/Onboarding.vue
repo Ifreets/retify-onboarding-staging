@@ -39,7 +39,8 @@
             :key="current_step"
             @next="nextStep"
             @back="backStep"
-            :is_has_back="current_step === 1 && !!(organizations?.length > 1)"
+            :is_has_back="current_step === 1"
+            :is_native_app="is_native_app"
           />
         </Transition>
       </div>
@@ -76,6 +77,8 @@ const STEPS = [Step1, Step2, Step3]
 const current_step = ref(Number(localStorage.getItem('current_step')) || -1)
 /** loại animation */
 const transition_name = ref('slide-left')
+/** cờ check đang chạy trên app native hay không */
+const is_native_app = ref(false)
 /** danh sách các tổ chức */
 const organizations = ref<any[]>([])
 
@@ -224,6 +227,8 @@ function handleMessage(event: MessageEvent) {
   /** Kiem tra event data */
   if (data?.type === 'page.token_chatbox') {
     console.log(data, 'event data')
+    /** đánh dấu đang chạy trên app native */
+    is_native_app.value = true
     getChatbotToken(data.payload?.token)
   }
 }
