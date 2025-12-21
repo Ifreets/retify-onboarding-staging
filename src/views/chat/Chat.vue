@@ -6,6 +6,7 @@
     className="w-dvw h-dvh"
     title="Embedded Content"
     sandbox="allow-scripts allow-same-origin allow-popups"
+    @load="OnIframeLoad"
   />
 </template>
 
@@ -47,45 +48,72 @@ onMounted(() => {
 
   /** IFRAME SOURCE */
   url.value = `${IFRAME_URL}/view-screen?page_id=${encodeURIComponent(ID)}`
+  // url.value = `http://192.168.1.19:5174/view-screen?page_id=${encodeURIComponent(
+  //   ID,
+  // )}`
 
   /** Xử lý sự kiện message */
-  window.addEventListener('message', HandleMessageEvent)
+  window.addEventListener('message', handleMessageEvent)
 })
 
 onUnmounted(() => {
   /** Xóa sự kiện message */
-  window.removeEventListener('message', HandleMessageEvent)
+  window.removeEventListener('message', handleMessageEvent)
 })
+
+/** xử lý khi iframe load xong */
+function OnIframeLoad() {
+  console.log('[BRIDGE] Iframe loaded (native @load event)')
+
+  /** đợi thêm 1 giây để JS trong iframe khởi tạo xong */
+  setTimeout(() => {
+    console.log('[BRIDGE] Delayed flush after 1s')
+
+    /** đánh dấu iframe đã ready */
+    is_iframe_ready.value = true
+
+    /** flush tất cả pending messages */
+    FlushPendingMessages()
+  }, 1000)
+}
 
 /** forward message vào iframe */
 function ForwardToIframe(payload: any) {
   /** đổi from thành 'parent-app' khi forward */
   const FORWARD_PAYLOAD = { ...payload, from: 'parent-app' }
 
-  /** gửi message vào iframe */
-  iframe_ref.value?.contentWindow?.postMessage(FORWARD_PAYLOAD, '*')
+  /** lưu reference trước khi alert (alert có thể block) */
+  const CONTENT_WINDOW = iframe_ref.value?.contentWindow
 
-  console.log('[BRIDGE] Forwarded to iframe:', FORWARD_PAYLOAD)
+  /** DEBUG: Log tất cả message nhận được */
+  // console.log('[BRIDGE] Forwarding to iframe:', FORWARD_PAYLOAD)
+  // alert(`[DEBUG] Forwarding:\n${JSON.stringify(FORWARD_PAYLOAD)}`)
+
+  /** delay nhỏ sau alert rồi mới postMessage */
+  setTimeout(() => {
+    CONTENT_WINDOW?.postMessage(FORWARD_PAYLOAD, '*')
+    console.log('[BRIDGE] postMessage sent')
+  }, 100)
 }
 
 /** flush tất cả pending messages vào iframe */
 function FlushPendingMessages() {
-  /** nếu không có message thì return */
   if (pending_messages.value.length === 0) return
 
   console.log(
     `[BRIDGE] Flushing ${pending_messages.value.length} pending messages`,
   )
 
-  /** forward từng message trong queue */
-  pending_messages.value.forEach(payload => ForwardToIframe(payload))
+  pending_messages.value.forEach(payload => {
+    ForwardToIframe(payload)
+  })
 
   /** clear queue sau khi flush */
   pending_messages.value = []
 }
 
 /** hàm xử lý sự kiện message */
-function HandleMessageEvent(event: MessageEvent) {
+function handleMessageEvent(event: MessageEvent) {
   let PAYLOAD: any
 
   /** Parse payload an toàn */
@@ -95,14 +123,18 @@ function HandleMessageEvent(event: MessageEvent) {
   } catch (e) {
     return
   }
-
   /** =================================================
-   *  NHẬN MESSAGE TỪ MOBILE APP → FORWARD VÀO IFRAME
+   *  🆕 LOGIC BỔ SUNG – Native → forward iframe
    * ================================================= */
+
+  /** Nhận postMessage từ mobile app và forward vào iframe */
   if (PAYLOAD?.from === 'parent-app-check') {
     console.log('[BRIDGE] Receive from Native:', PAYLOAD)
+    alert(
+      `[1] Nhận từ mobile!\nis_iframe_ready: ${is_iframe_ready.value}\npending: ${pending_messages.value.length}\npayload: ${JSON.stringify(PAYLOAD)}`,
+    )
 
-    /** nếu iframe đã ready thì forward ngay */
+    /** nếu iframe đã ready (đã nhận READY) thì forward ngay */
     if (is_iframe_ready.value) {
       console.log('[BRIDGE] Iframe ready, forwarding immediately')
       ForwardToIframe(PAYLOAD)
@@ -110,27 +142,33 @@ function HandleMessageEvent(event: MessageEvent) {
       /** nếu chưa ready thì lưu vào queue, đợi iframe gửi status: READY */
       console.log('[BRIDGE] Iframe not ready, queuing message')
       pending_messages.value.push(PAYLOAD)
+      alert(
+        `[2] Đã lưu vào queue, chờ READY. Queue size: ${pending_messages.value.length}`,
+      )
     }
     return
   }
-
   /** =================================================
-   *  NHẬN SIGNAL READY TỪ IFRAME → FLUSH PENDING MESSAGES
+   *  LOGIC CŨ – GIỮ NGUYÊN (KHÔNG ĐỘNG)
    * ================================================= */
+
   if (PAYLOAD?.status === 'READY') {
     console.log('[BRIDGE] Iframe is READY')
-
+    alert(
+      `[3] Iframe READY!\npending messages: ${pending_messages.value.length}`,
+    )
     /** đánh dấu iframe đã ready */
     is_iframe_ready.value = true
 
-    /** delay 500ms để iframe setup xong listener rồi mới flush */
+    /** delay 3 giây để iframe setup xong listener rồi mới flush */
     setTimeout(() => {
-      console.log('[BRIDGE] Delayed flush after 500ms')
+      console.log('[BRIDGE] Delayed flush after 3s')
       FlushPendingMessages()
-    }, 500)
+    }, 1000)
 
-    /** xử lý data embed chat từ localStorage */
     const SAVED = localStorage.getItem(`${PAYLOAD.key}`)
+    console.log('SAVED', SAVED)
+
     if (SAVED && iframe_ref.value?.contentWindow) {
       iframe_ref.value.contentWindow.postMessage(
         {
@@ -138,30 +176,26 @@ function HandleMessageEvent(event: MessageEvent) {
           type: 'CLIENT_ID',
           data_embed_chat: SAVED,
         },
-        '*',
+        '*', // production thì check domain
       )
     }
-    return
   }
 
-  /** =================================================
-   *  NHẬN DATA TỪ IFRAME → LƯU VÀO LOCALSTORAGE
-   * ================================================= */
   if (PAYLOAD?.from === 'BBH-EMBED-IFRAME' && PAYLOAD.type === 'CLIENT_ID') {
-    console.log('[BRIDGE] Received data from iframe')
+    console.log('[BRIDGE] Iframe confirmed ready via BBH-EMBED-IFRAME')
 
-    /** đánh dấu iframe đã ready nếu chưa */
+    /** đánh dấu iframe đã ready */
     if (!is_iframe_ready.value) {
       is_iframe_ready.value = true
-      /** delay 500ms rồi flush pending messages */
-      setTimeout(() => FlushPendingMessages(), 500)
+      /** flush tất cả pending messages */
+      FlushPendingMessages()
     }
 
-    /** lưu data vào localStorage */
     localStorage.setItem(
       `${PAYLOAD.key}`,
       JSON.stringify(PAYLOAD.data_embed_chat),
     )
+
     console.log('[SDK] Saved:', PAYLOAD.data_embed_chat)
   }
 }
