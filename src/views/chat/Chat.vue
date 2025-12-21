@@ -120,30 +120,15 @@ function handleMessageEvent(event: MessageEvent) {
    *  🆕 LOGIC BỔ SUNG – Native → forward iframe
    * ================================================= */
 
-  /** Nhận signal IFRAME_READY từ iframe - iframe đã sẵn sàng nhận message */
-  if (PAYLOAD?.from === 'IFRAME_CHATBOT' && PAYLOAD?.type === 'IFRAME_READY') {
-    console.log('[BRIDGE] Received IFRAME_READY signal from iframe')
-
-    /** đánh dấu iframe đã ready */
-    is_iframe_ready.value = true
-
-    /** flush tất cả pending messages */
-    FlushPendingMessages()
-    return
-  }
-
   /** Nhận postMessage từ mobile app và forward vào iframe */
   if (PAYLOAD?.from === 'parent-app-check') {
     console.log('[BRIDGE] Receive from Native:', PAYLOAD)
 
-    /** nếu iframe đã ready thì forward ngay */
-    if (is_iframe_ready.value) {
+    /** chờ 3 giây để iframe load xong rồi mới forward */
+    setTimeout(() => {
+      console.log('[BRIDGE] Delayed forward after 3s')
       ForwardToIframe(PAYLOAD)
-    } else {
-      /** nếu chưa ready thì lưu vào queue, đợi IFRAME_READY */
-      console.log('[BRIDGE] Iframe not ready, queuing message')
-      pending_messages.value.push(PAYLOAD)
-    }
+    }, 3000)
     return
   }
   /** =================================================
