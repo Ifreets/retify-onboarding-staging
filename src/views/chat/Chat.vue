@@ -82,18 +82,10 @@ function ForwardToIframe(payload: any) {
   /** đổi from thành 'parent-app' khi forward */
   const FORWARD_PAYLOAD = { ...payload, from: 'parent-app' }
 
-  /** lưu reference trước khi alert (alert có thể block) */
-  const CONTENT_WINDOW = iframe_ref.value?.contentWindow
+  /** gửi message vào iframe */
+  iframe_ref.value?.contentWindow?.postMessage(FORWARD_PAYLOAD, '*')
 
-  /** DEBUG: Log tất cả message nhận được */
-  // console.log('[BRIDGE] Forwarding to iframe:', FORWARD_PAYLOAD)
-  alert(`[DEBUG] Forwarding:\n${JSON.stringify(FORWARD_PAYLOAD)}`)
-
-  /** delay nhỏ sau alert rồi mới postMessage */
-  setTimeout(() => {
-    CONTENT_WINDOW?.postMessage(FORWARD_PAYLOAD, '*')
-    console.log('[BRIDGE] postMessage sent')
-  }, 1500)
+  console.log('[BRIDGE] Forwarded to iframe:', FORWARD_PAYLOAD)
 }
 
 /** flush tất cả pending messages vào iframe */
@@ -130,22 +122,12 @@ function handleMessageEvent(event: MessageEvent) {
   /** Nhận postMessage từ mobile app và forward vào iframe */
   if (PAYLOAD?.from === 'parent-app-check') {
     console.log('[BRIDGE] Receive from Native:', PAYLOAD)
-    alert(
-      `[1] Nhận từ mobile!\nis_iframe_ready: ${is_iframe_ready.value}\npending: ${pending_messages.value.length}\npayload: ${JSON.stringify(PAYLOAD)}`,
-    )
 
-    /** nếu iframe đã ready (đã nhận READY) thì forward ngay */
-    if (is_iframe_ready.value) {
-      console.log('[BRIDGE] Iframe ready, forwarding immediately')
+    /** delay 3 giây để đảm bảo iframe load xong rồi mới forward */
+    setTimeout(() => {
+      console.log('[BRIDGE] Delayed forward after 3s')
       ForwardToIframe(PAYLOAD)
-    } else {
-      /** nếu chưa ready thì lưu vào queue, đợi iframe gửi status: READY */
-      console.log('[BRIDGE] Iframe not ready, queuing message')
-      pending_messages.value.push(PAYLOAD)
-      alert(
-        `[2] Đã lưu vào queue, chờ READY. Queue size: ${pending_messages.value.length}`,
-      )
-    }
+    }, 3000)
     return
   }
   /** =================================================
