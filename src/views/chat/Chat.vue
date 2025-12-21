@@ -86,6 +86,8 @@ function ForwardToIframe(payload: any) {
   if (FORWARD_PAYLOAD?.from || FORWARD_PAYLOAD?.status) {
     console.log('[BRIDGE] Forwarded to iframe:', FORWARD_PAYLOAD)
     alert(`[DEBUG ALL] Message received:\n${JSON.stringify(FORWARD_PAYLOAD)}`)
+    alert(`[DEBUG ALL] iframe_ref: ${iframe_ref.value}`)
+    console.log('[BRIDGE] Forwarded to iframe:', iframe_ref.value)
   }
 
   iframe_ref.value?.contentWindow?.postMessage(
