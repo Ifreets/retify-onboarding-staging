@@ -124,11 +124,15 @@ function handleMessageEvent(event: MessageEvent) {
   if (PAYLOAD?.from === 'parent-app-check') {
     console.log('[BRIDGE] Receive from Native:', PAYLOAD)
 
-    /** chờ 3 giây để iframe load xong rồi mới forward */
-    setTimeout(() => {
-      console.log('[BRIDGE] Delayed forward after 3s')
+    /** nếu iframe đã ready (đã nhận READY) thì forward ngay */
+    if (is_iframe_ready.value) {
+      console.log('[BRIDGE] Iframe ready, forwarding immediately')
       ForwardToIframe(PAYLOAD)
-    }, 3000)
+    } else {
+      /** nếu chưa ready thì lưu vào queue, đợi iframe gửi status: READY */
+      console.log('[BRIDGE] Iframe not ready, queuing message')
+      pending_messages.value.push(PAYLOAD)
+    }
     return
   }
   /** =================================================
