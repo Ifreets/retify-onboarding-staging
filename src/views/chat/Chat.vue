@@ -82,11 +82,16 @@ function ForwardToIframe(payload: any) {
   /** đổi from thành 'parent-app' khi forward */
   const FORWARD_PAYLOAD = { ...payload, from: 'parent-app' }
 
+  /** DEBUG: Log tất cả message nhận được */
+  if (FORWARD_PAYLOAD?.from || FORWARD_PAYLOAD?.status) {
+    console.log('[BRIDGE] Forwarded to iframe:', FORWARD_PAYLOAD)
+    alert(`[DEBUG ALL] Message received:\n${JSON.stringify(FORWARD_PAYLOAD)}`)
+  }
+
   iframe_ref.value?.contentWindow?.postMessage(
     FORWARD_PAYLOAD,
     '*', // production: IFRAME_ORIGIN
   )
-  console.log('[BRIDGE] Forwarded to iframe:', FORWARD_PAYLOAD)
 }
 
 /** flush tất cả pending messages vào iframe */
