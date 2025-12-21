@@ -82,9 +82,10 @@ function ForwardToIframe(payload: any) {
   /** đổi from thành 'parent-app' khi forward */
   const FORWARD_PAYLOAD = { ...payload, from: 'parent-app' }
 
-  /** gửi message vào iframe */
-  iframe_ref.value?.contentWindow?.postMessage(FORWARD_PAYLOAD, '*')
-
+  iframe_ref.value?.contentWindow?.postMessage(
+    FORWARD_PAYLOAD,
+    '*', // production: IFRAME_ORIGIN
+  )
   console.log('[BRIDGE] Forwarded to iframe:', FORWARD_PAYLOAD)
 }
 
@@ -123,7 +124,7 @@ function handleMessageEvent(event: MessageEvent) {
   if (PAYLOAD?.from === 'parent-app-check') {
     console.log('[BRIDGE] Receive from Native:', PAYLOAD)
 
-    /** delay 3 giây để đảm bảo iframe load xong rồi mới forward */
+    /** chờ 3 giây để iframe load xong rồi mới forward */
     setTimeout(() => {
       console.log('[BRIDGE] Delayed forward after 3s')
       ForwardToIframe(PAYLOAD)
@@ -136,17 +137,11 @@ function handleMessageEvent(event: MessageEvent) {
 
   if (PAYLOAD?.status === 'READY') {
     console.log('[BRIDGE] Iframe is READY')
-    alert(
-      `[3] Iframe READY!\npending messages: ${pending_messages.value.length}`,
-    )
     /** đánh dấu iframe đã ready */
     is_iframe_ready.value = true
 
-    /** delay 3 giây để iframe setup xong listener rồi mới flush */
-    setTimeout(() => {
-      console.log('[BRIDGE] Delayed flush after 3s')
-      FlushPendingMessages()
-    }, 1000)
+    /** flush tất cả pending messages */
+    FlushPendingMessages()
 
     const SAVED = localStorage.getItem(`${PAYLOAD.key}`)
     console.log('SAVED', SAVED)
