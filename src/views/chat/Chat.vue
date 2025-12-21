@@ -40,10 +40,10 @@ onMounted(() => {
   const IFRAME_URL = $HOST.iframe_url
 
   /** IFRAME SOURCE */
-  // url.value = `${IFRAME_URL}/view-screen?page_id=${encodeURIComponent(ID)}`
-  url.value = `http://192.168.1.19:5174/view-screen?page_id=${encodeURIComponent(
-    ID,
-  )}`
+  url.value = `${IFRAME_URL}/view-screen?page_id=${encodeURIComponent(ID)}`
+  // url.value = `http://192.168.1.19:5174/view-screen?page_id=${encodeURIComponent(
+  //   ID,
+  // )}`
 
   /** Xử lý sự kiện message */
   window.addEventListener('message', handleMessageEvent)
