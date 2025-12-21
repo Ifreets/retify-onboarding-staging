@@ -24,6 +24,12 @@ const url = ref('')
 /** reference tới iframe */
 const iframe_ref = ref<HTMLIFrameElement | null>(null)
 
+/** cờ check iframe đã ready chưa */
+const is_iframe_ready = ref(false)
+
+/** queue lưu các message từ mobile khi iframe chưa ready */
+const pending_messages = ref<any[]>([])
+
 onMounted(() => {
   /** Đường dẫn host của merchant */
   const $HOST: IEnv = ENV[import.meta.env.VITE_APP_ENV || 'development']
@@ -54,6 +60,34 @@ onUnmounted(() => {
   window.removeEventListener('message', handleMessageEvent)
 })
 
+/** forward message vào iframe */
+function ForwardToIframe(payload: any) {
+  /** đổi from thành 'parent-app' khi forward */
+  const FORWARD_PAYLOAD = { ...payload, from: 'parent-app' }
+
+  iframe_ref.value?.contentWindow?.postMessage(
+    FORWARD_PAYLOAD,
+    '*', // production: IFRAME_ORIGIN
+  )
+  console.log('[BRIDGE] Forwarded to iframe:', FORWARD_PAYLOAD)
+}
+
+/** flush tất cả pending messages vào iframe */
+function FlushPendingMessages() {
+  if (pending_messages.value.length === 0) return
+
+  console.log(
+    `[BRIDGE] Flushing ${pending_messages.value.length} pending messages`,
+  )
+
+  pending_messages.value.forEach(payload => {
+    ForwardToIframe(payload)
+  })
+
+  /** clear queue sau khi flush */
+  pending_messages.value = []
+}
+
 /** hàm xử lý sự kiện message */
 function handleMessageEvent(event: MessageEvent) {
   let PAYLOAD: any
@@ -72,10 +106,15 @@ function handleMessageEvent(event: MessageEvent) {
   /** Nhận postMessage từ mobile app và forward vào iframe */
   if (PAYLOAD?.from === 'parent-app-check') {
     console.log('[BRIDGE] Receive from Native:', PAYLOAD)
-    iframe_ref.value?.contentWindow?.postMessage(
-      { ...PAYLOAD, from: 'parent-app' }, // 👉 đổi from thành 'parent-app' khi forward
-      '*', // production: IFRAME_ORIGIN
-    )
+
+    /** nếu iframe đã ready thì forward ngay */
+    if (is_iframe_ready.value) {
+      ForwardToIframe(PAYLOAD)
+    } else {
+      /** nếu chưa ready thì lưu vào queue */
+      console.log('[BRIDGE] Iframe not ready, queuing message')
+      pending_messages.value.push(PAYLOAD)
+    }
     return
   }
   /** =================================================
@@ -83,6 +122,13 @@ function handleMessageEvent(event: MessageEvent) {
    * ================================================= */
 
   if (PAYLOAD?.status === 'READY') {
+    console.log('[BRIDGE] Iframe is READY')
+    /** đánh dấu iframe đã ready */
+    is_iframe_ready.value = true
+
+    /** flush tất cả pending messages */
+    FlushPendingMessages()
+
     const SAVED = localStorage.getItem(`${PAYLOAD.key}`)
     console.log('SAVED', SAVED)
 
