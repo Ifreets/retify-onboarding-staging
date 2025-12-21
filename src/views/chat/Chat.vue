@@ -82,9 +82,6 @@ function ForwardToIframe(payload: any) {
   /** đổi from thành 'parent-app' khi forward */
   const FORWARD_PAYLOAD = { ...payload, from: 'parent-app' }
 
-  /** DEBUG: Alert để check */
-  alert(`[DEBUG] Forwarding to iframe:\n${JSON.stringify(FORWARD_PAYLOAD)}`)
-
   iframe_ref.value?.contentWindow?.postMessage(
     FORWARD_PAYLOAD,
     '*', // production: IFRAME_ORIGIN
