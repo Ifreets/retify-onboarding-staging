@@ -93,7 +93,7 @@ function ForwardToIframe(payload: any) {
   setTimeout(() => {
     CONTENT_WINDOW?.postMessage(FORWARD_PAYLOAD, '*')
     console.log('[BRIDGE] postMessage sent')
-  }, 100)
+  }, 1500)
 }
 
 /** flush tất cả pending messages vào iframe */
