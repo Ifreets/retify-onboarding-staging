@@ -65,11 +65,16 @@ onUnmounted(() => {
 function OnIframeLoad() {
   console.log('[BRIDGE] Iframe loaded (native @load event)')
 
-  /** đánh dấu iframe đã ready */
-  is_iframe_ready.value = true
+  /** đợi thêm 1 giây để JS trong iframe khởi tạo xong */
+  setTimeout(() => {
+    console.log('[BRIDGE] Delayed flush after 1s')
 
-  /** flush tất cả pending messages */
-  FlushPendingMessages()
+    /** đánh dấu iframe đã ready */
+    is_iframe_ready.value = true
+
+    /** flush tất cả pending messages */
+    FlushPendingMessages()
+  }, 1000)
 }
 
 /** forward message vào iframe */
