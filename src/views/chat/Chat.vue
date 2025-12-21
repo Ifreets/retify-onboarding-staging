@@ -145,10 +145,20 @@ function handleMessageEvent(event: MessageEvent) {
   }
 
   if (PAYLOAD?.from === 'BBH-EMBED-IFRAME' && PAYLOAD.type === 'CLIENT_ID') {
+    console.log('[BRIDGE] Iframe confirmed ready via BBH-EMBED-IFRAME')
+
+    /** đánh dấu iframe đã ready */
+    if (!is_iframe_ready.value) {
+      is_iframe_ready.value = true
+      /** flush tất cả pending messages */
+      FlushPendingMessages()
+    }
+
     localStorage.setItem(
       `${PAYLOAD.key}`,
       JSON.stringify(PAYLOAD.data_embed_chat),
     )
+
     console.log('[SDK] Saved:', PAYLOAD.data_embed_chat)
   }
 }
