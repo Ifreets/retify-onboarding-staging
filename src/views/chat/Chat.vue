@@ -160,8 +160,11 @@ function handleMessageEvent(event: MessageEvent) {
     /** đánh dấu iframe đã ready */
     is_iframe_ready.value = true
 
-    /** flush tất cả pending messages */
-    FlushPendingMessages()
+    /** delay 500ms để iframe setup xong listener rồi mới flush */
+    setTimeout(() => {
+      console.log('[BRIDGE] Delayed flush after 500ms')
+      FlushPendingMessages()
+    }, 500)
 
     const SAVED = localStorage.getItem(`${PAYLOAD.key}`)
     console.log('SAVED', SAVED)
