@@ -123,6 +123,9 @@ function handleMessageEvent(event: MessageEvent) {
   /** Nhận postMessage từ mobile app và forward vào iframe */
   if (PAYLOAD?.from === 'parent-app-check') {
     console.log('[BRIDGE] Receive from Native:', PAYLOAD)
+    alert(
+      `[1] Nhận từ mobile!\nis_iframe_ready: ${is_iframe_ready.value}\npending: ${pending_messages.value.length}\npayload: ${JSON.stringify(PAYLOAD)}`,
+    )
 
     /** nếu iframe đã ready (đã nhận READY) thì forward ngay */
     if (is_iframe_ready.value) {
@@ -132,6 +135,9 @@ function handleMessageEvent(event: MessageEvent) {
       /** nếu chưa ready thì lưu vào queue, đợi iframe gửi status: READY */
       console.log('[BRIDGE] Iframe not ready, queuing message')
       pending_messages.value.push(PAYLOAD)
+      alert(
+        `[2] Đã lưu vào queue, chờ READY. Queue size: ${pending_messages.value.length}`,
+      )
     }
     return
   }
@@ -141,6 +147,9 @@ function handleMessageEvent(event: MessageEvent) {
 
   if (PAYLOAD?.status === 'READY') {
     console.log('[BRIDGE] Iframe is READY')
+    alert(
+      `[3] Iframe READY!\npending messages: ${pending_messages.value.length}`,
+    )
     /** đánh dấu iframe đã ready */
     is_iframe_ready.value = true
 
