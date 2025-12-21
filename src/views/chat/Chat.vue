@@ -87,7 +87,7 @@ function ForwardToIframe(payload: any) {
 
   /** DEBUG: Log tất cả message nhận được */
   // console.log('[BRIDGE] Forwarding to iframe:', FORWARD_PAYLOAD)
-  // alert(`[DEBUG] Forwarding:\n${JSON.stringify(FORWARD_PAYLOAD)}`)
+  alert(`[DEBUG] Forwarding:\n${JSON.stringify(FORWARD_PAYLOAD)}`)
 
   /** delay nhỏ sau alert rồi mới postMessage */
   setTimeout(() => {
