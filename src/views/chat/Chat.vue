@@ -6,6 +6,7 @@
     className="w-dvw h-dvh"
     title="Embedded Content"
     sandbox="allow-scripts allow-same-origin allow-popups"
+    @load="OnIframeLoad"
   />
 </template>
 
@@ -59,6 +60,17 @@ onUnmounted(() => {
   /** Xóa sự kiện message */
   window.removeEventListener('message', handleMessageEvent)
 })
+
+/** xử lý khi iframe load xong */
+function OnIframeLoad() {
+  console.log('[BRIDGE] Iframe loaded (native @load event)')
+
+  /** đánh dấu iframe đã ready */
+  is_iframe_ready.value = true
+
+  /** flush tất cả pending messages */
+  FlushPendingMessages()
+}
 
 /** forward message vào iframe */
 function ForwardToIframe(payload: any) {
