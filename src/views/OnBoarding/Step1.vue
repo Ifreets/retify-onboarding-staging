@@ -105,6 +105,11 @@ const $props = defineProps({
     type: Boolean,
     default: false,
   },
+  /** cờ check có nhiều tổ chức hay không */
+  is_multi_org: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 // store
@@ -124,13 +129,26 @@ function next() {
 
 /** lùi lại */
 function back() {
-  /** nếu là app native thì gửi postMessage về mobile app để back về màn login */
-  if ($props.is_native_app) {
-    window.parent.postMessage({ action: 'back_to_login' }, '*')
+  /** Case 1: Có select org -> back về select org */
+  if ($props.is_multi_org) {
+    $emit('back')
     return
   }
 
-  /** nếu là PC thì emit back để quay về step 0 (chọn organization) */
+  /** Case 2: Không có select org -> post message back -> login */
+  /** nếu là app native thì gửi postMessage về mobile app để back về màn login */
+  if ($props.is_native_app) {
+    const message = { action: 'back_to_login' }
+    // Check if running in React Native WebView
+    if ((window as any).ReactNativeWebView) {
+      ;(window as any).ReactNativeWebView.postMessage(JSON.stringify(message))
+    } else {
+      window.parent.postMessage(message, '*')
+    }
+    return
+  }
+
+  /** nếu là PC thì emit back */
   $emit('back')
 }
 </script>

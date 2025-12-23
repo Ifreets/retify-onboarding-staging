@@ -4,6 +4,13 @@
       v-if="current_step === 0 && organizations?.length > 1"
       class="flex flex-col gap-3"
     >
+      <button
+        v-if="is_native_app"
+        @click="backToLogin"
+        class="self-start py-1 px-3 rounded-md bg-slate-200 text-slate-700 text-xs font-semibold"
+      >
+        Back
+      </button>
       <li class="text-2xl font-semibold text-center">Select Organization</li>
       <div class="flex flex-col gap-2 overflow-y-auto h-[calc(100vh-200px)]">
         <li
@@ -41,6 +48,7 @@
             @back="backStep"
             :is_has_back="current_step === 1"
             :is_native_app="is_native_app"
+            :is_multi_org="organizations?.length > 1"
           />
         </Transition>
       </div>
@@ -230,6 +238,17 @@ function handleMessage(event: MessageEvent) {
     /** đánh dấu đang chạy trên app native */
     is_native_app.value = true
     getChatbotToken(data.payload?.token)
+  }
+}
+
+/** Back về màn login */
+function backToLogin() {
+  const message = { action: 'back_to_login' }
+  // Check if running in React Native WebView
+  if ((window as any).ReactNativeWebView) {
+    ;(window as any).ReactNativeWebView.postMessage(JSON.stringify(message))
+  } else {
+    window.parent.postMessage(message, '*')
   }
 }
 
