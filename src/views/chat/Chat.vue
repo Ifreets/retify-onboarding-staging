@@ -33,12 +33,6 @@ const pending_messages = ref<any[]>([])
 /** timer ID để cancel nếu READY đến sớm */
 let fallback_timer: ReturnType<typeof setTimeout> | null = null
 
-/** Map lưu retry timers theo message_id */
-const retry_timers = new Map<string, ReturnType<typeof setInterval>>()
-
-/** Map lưu timeout timers theo message_id */
-const timeout_timers = new Map<string, ReturnType<typeof setTimeout>>()
-
 onMounted(() => {
   /** Đường dẫn host của merchant */
   const $HOST: IEnv = ENV[import.meta.env.VITE_APP_ENV || 'development']
@@ -66,83 +60,18 @@ onUnmounted(() => {
   window.removeEventListener('message', HandleMessageEvent)
   /** Clear timer nếu còn */
   if (fallback_timer) clearTimeout(fallback_timer)
-  /** Clear tất cả retry timers */
-  retry_timers.forEach(timer => clearInterval(timer))
-  retry_timers.clear()
-  /** Clear tất cả timeout timers */
-  timeout_timers.forEach(timer => clearTimeout(timer))
-  timeout_timers.clear()
 })
 
-/** forward message vào iframe với retry mechanism + ACK */
+/** forward message vào iframe với delay 3s */
 function ForwardToIframe(payload: any) {
-  /** tạo unique message_id để track */
-  const message_id = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  /** đổi from thành 'parent-app' khi forward */
+  const FORWARD_PAYLOAD = { ...payload, from: 'parent-app' }
 
-  /** đổi from thành 'parent-app' và thêm message_id */
-  const FORWARD_PAYLOAD = { ...payload, from: 'parent-app', message_id }
-
-  /** retry config */
-  const RETRY_INTERVAL = 200 // ms
-  const MAX_DURATION = 5000 // ms
-  const MAX_ATTEMPTS = Math.floor(MAX_DURATION / RETRY_INTERVAL) // 25 lần
-
-  let attempt_count = 0
-
-  /** hàm cleanup timers */
-  const cleanup = () => {
-    const retry_timer = retry_timers.get(message_id)
-    const timeout_timer = timeout_timers.get(message_id)
-
-    if (retry_timer) {
-      clearInterval(retry_timer)
-      retry_timers.delete(message_id)
-    }
-    if (timeout_timer) {
-      clearTimeout(timeout_timer)
-      timeout_timers.delete(message_id)
-    }
-  }
-
-  /** hàm gửi message */
-  const sendMessage = () => {
-    attempt_count++
-
-    /** kiểm tra iframe có tồn tại không */
-    if (!iframe_ref.value?.contentWindow) {
-      console.warn(
-        `[BRIDGE] [${message_id}] Attempt ${attempt_count}: iframe not ready`,
-      )
-      return
-    }
-
-    /** gửi message */
-    iframe_ref.value.contentWindow.postMessage(FORWARD_PAYLOAD, '*')
-    console.log(
-      `[BRIDGE] [${message_id}] Attempt ${attempt_count}: Forwarded to iframe:`,
-      FORWARD_PAYLOAD,
-    )
-
-    /** nếu đã đạt max attempts thì dừng */
-    if (attempt_count >= MAX_ATTEMPTS) {
-      cleanup()
-      console.warn(`[BRIDGE] [${message_id}] Max retry attempts reached`)
-    }
-  }
-
-  /** gửi lần đầu ngay lập tức */
-  sendMessage()
-
-  /** retry mỗi 200ms */
-  const retry_timer = setInterval(sendMessage, RETRY_INTERVAL)
-  retry_timers.set(message_id, retry_timer)
-
-  /** dừng sau 5s */
-  const timeout_timer = setTimeout(() => {
-    cleanup()
-    console.warn(`[BRIDGE] [${message_id}] Timeout after ${MAX_DURATION}ms`)
-  }, MAX_DURATION)
-  timeout_timers.set(message_id, timeout_timer)
+  /** delay 3s để đảm bảo iframe listener đã sẵn sàng */
+  setTimeout(() => {
+    iframe_ref.value?.contentWindow?.postMessage(FORWARD_PAYLOAD, '*')
+    console.log('[BRIDGE] Forwarded to iframe:', FORWARD_PAYLOAD)
+  }, 3000)
 }
 
 /** flush tất cả pending messages vào iframe */
@@ -263,28 +192,6 @@ function HandleMessageEvent(event: MessageEvent) {
       JSON.stringify(PAYLOAD.data_embed_chat),
     )
     console.log('[SDK] Saved:', PAYLOAD.data_embed_chat)
-  }
-
-  /** =================================================
-   *  NHẬN ACK TỪ IFRAME → DỪNG RETRY
-   * ================================================= */
-  if (PAYLOAD?.type === 'MESSAGE_ACK' && PAYLOAD?.message_id) {
-    const message_id = PAYLOAD.message_id
-    console.log(`[BRIDGE] [${message_id}] Received ACK from iframe`)
-
-    /** cleanup retry timers cho message này */
-    const retry_timer = retry_timers.get(message_id)
-    const timeout_timer = timeout_timers.get(message_id)
-
-    if (retry_timer) {
-      clearInterval(retry_timer)
-      retry_timers.delete(message_id)
-      console.log(`[BRIDGE] [${message_id}] Stopped retry`)
-    }
-    if (timeout_timer) {
-      clearTimeout(timeout_timer)
-      timeout_timers.delete(message_id)
-    }
   }
 }
 </script>
