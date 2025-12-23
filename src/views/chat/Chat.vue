@@ -81,7 +81,11 @@ function OnIframeLoad() {
 function ForwardToIframe(payload: any) {
   /** đổi from thành 'parent-app' khi forward */
   const FORWARD_PAYLOAD = { ...payload, from: 'parent-app' }
-
+  alert(
+    `[DEBUG] Forwarding to iframe!\nPayload: ${JSON.stringify(
+      FORWARD_PAYLOAD,
+    )}\niframe_ref: ${!!iframe_ref.value}\ncontentWindow: ${!!iframe_ref.value?.contentWindow}`,
+  )
   iframe_ref.value?.contentWindow?.postMessage(
     FORWARD_PAYLOAD,
     '*', // production: IFRAME_ORIGIN
@@ -123,10 +127,16 @@ function handleMessageEvent(event: MessageEvent) {
   /** Nhận postMessage từ mobile app và forward vào iframe */
   if (PAYLOAD?.from === 'parent-app-check') {
     console.log('[BRIDGE] Receive from Native:', PAYLOAD)
+    alert(
+      `[DEBUG] Nhận message từ mobile!\nPayload: ${JSON.stringify(PAYLOAD)}\niframe_ref: ${!!iframe_ref.value}`,
+    )
 
     /** chờ 3 giây để iframe load xong rồi mới forward */
     setTimeout(() => {
       console.log('[BRIDGE] Delayed forward after 3s')
+      alert(
+        `[DEBUG] Sau 3s, sẽ forward!\niframe_ref: ${!!iframe_ref.value}\ncontentWindow: ${!!iframe_ref.value?.contentWindow}`,
+      )
       ForwardToIframe(PAYLOAD)
     }, 3000)
     return
