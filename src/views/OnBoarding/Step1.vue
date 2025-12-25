@@ -138,12 +138,12 @@ function back() {
   /** Case 2: Không có select org -> post message back -> login */
   /** nếu là app native thì gửi postMessage về mobile app để back về màn login */
   if ($props.is_native_app) {
-    const message = { action: 'back_to_login' }
+    const MESSAGE = { action: 'back_to_login' }
     // Check if running in React Native WebView
     if ((window as any).ReactNativeWebView) {
-      ;(window as any).ReactNativeWebView.postMessage(JSON.stringify(message))
+      ;(window as any).ReactNativeWebView.postMessage(JSON.stringify(MESSAGE))
     } else {
-      window.parent.postMessage(message, '*')
+      window.parent.postMessage(MESSAGE, '*')
     }
     return
   }
