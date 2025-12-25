@@ -67,8 +67,8 @@ import Step3 from '@/views/OnBoarding/Step3.vue'
 import Tabs from '@/views/OnBoarding/Tabs.vue'
 
 /** fake token chat bot để chạy trên pc */
-const MOCK_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmI1ZWNjZGIyZjk3NGRhNDkyNDBjNzM4YWI0MjZjNTQiLCJmYl9zdGFmZl9pZCI6IjEwNDkyMzQ4NzM0ODUwMjkiLCJpc19kaXNhYmxlIjpmYWxzZSwiX2lkIjoiNjcwMGI0ZGZkMDM4NTYwOTFlM2I5OGU3IiwiaWF0IjoxNzY1ODU3NTYyLCJleHAiOjMxNTUzNjU4NTc1NjJ9.i2fUFgpBpsv_9BLbtnSofBUQUDVMC6b8i_e11Hnjr1o'
+// const MOCK_TOKEN =
+//   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmI1ZWNjZGIyZjk3NGRhNDkyNDBjNzM4YWI0MjZjNTQiLCJmYl9zdGFmZl9pZCI6IjEwNDkyMzQ4NzM0ODUwMjkiLCJpc19kaXNhYmxlIjpmYWxzZSwiX2lkIjoiNjcwMGI0ZGZkMDM4NTYwOTFlM2I5OGU3IiwiaWF0IjoxNzY1ODU3NTYyLCJleHAiOjMxNTUzNjU4NTc1NjJ9.i2fUFgpBpsv_9BLbtnSofBUQUDVMC6b8i_e11Hnjr1o'
 // const MOCK_TOKEN =
 //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiODk5NzY3MzE1Mzk2MTcxIiwiX2lkIjoiNjg1ZTQ2MDg0ZGM3M2MwYjhkMTQzYTJlIiwiaWF0IjoxNzUxNTk4OTQyLCJleHAiOjMxNTUzNTE1OTg5NDJ9.iUqlmnVACz5uuW-CCgOGshbJr15g8gN5SJSO3Tj7zW8'
 
@@ -95,7 +95,7 @@ onMounted(() => {
   window.addEventListener('message', handleMessage)
 
   /** lấy token chatbot */
-  getChatbotToken(MOCK_TOKEN)
+  // getChatbotToken(MOCK_TOKEN)
 
   // khởi tạo các guias
   initData()
