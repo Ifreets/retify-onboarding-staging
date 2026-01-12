@@ -28,9 +28,6 @@ const iframe_ref = ref<HTMLIFrameElement | null>(null)
 /** cờ check iframe đã ready chưa */
 const is_iframe_ready = ref(false)
 
-/** queue lưu các message từ mobile khi iframe chưa ready */
-const pending_messages = ref<any[]>([])
-
 onMounted(() => {
   /** Đường dẫn host của merchant */
   const $HOST: IEnv = ENV[import.meta.env.VITE_APP_ENV || 'development']
@@ -48,9 +45,6 @@ onMounted(() => {
 
   /** IFRAME SOURCE */
   url.value = `${IFRAME_URL}/view-screen?page_id=${encodeURIComponent(ID)}`
-  // url.value = `http://192.168.1.19:5174/view-screen?page_id=${encodeURIComponent(
-  //   ID,
-  // )}`
 
   /** Xử lý sự kiện message */
   window.addEventListener('message', handleMessageEvent)
@@ -67,13 +61,7 @@ function OnIframeLoad() {
 
   /** đợi thêm 1 giây để JS trong iframe khởi tạo xong */
   setTimeout(() => {
-    console.log('[BRIDGE] Delayed flush after 1s')
-
-    /** đánh dấu iframe đã ready */
     is_iframe_ready.value = true
-
-    /** flush tất cả pending messages */
-    FlushPendingMessages()
   }, 1000)
 }
 
@@ -89,22 +77,6 @@ function ForwardToIframe(payload: any) {
   console.log('[BRIDGE] Forwarded to iframe:', FORWARD_PAYLOAD)
 }
 
-/** flush tất cả pending messages vào iframe */
-function FlushPendingMessages() {
-  if (pending_messages.value.length === 0) return
-
-  console.log(
-    `[BRIDGE] Flushing ${pending_messages.value.length} pending messages`,
-  )
-
-  pending_messages.value.forEach(payload => {
-    ForwardToIframe(payload)
-  })
-
-  /** clear queue sau khi flush */
-  pending_messages.value = []
-}
-
 /** hàm xử lý sự kiện message */
 function handleMessageEvent(event: MessageEvent) {
   let PAYLOAD: any
@@ -116,57 +88,67 @@ function handleMessageEvent(event: MessageEvent) {
   } catch (e) {
     return
   }
+
   /** =================================================
    *  🆕 LOGIC BỔ SUNG – Native → forward iframe
    * ================================================= */
 
   /** Nhận postMessage từ mobile app và forward vào iframe */
-  if (PAYLOAD?.from === 'parent-app') {
-    console.log('[BRIDGE] Receive from Native:', PAYLOAD)
+  /** Bỏ qua các message nội bộ (READY, BBH-EMBED-IFRAME) để tránh loop/xử lý sai */
+  const IS_INTERNAL =
+    PAYLOAD?.status === 'READY' ||
+    (PAYLOAD?.from === 'BBH-EMBED-IFRAME' && PAYLOAD?.type === 'CLIENT_ID')
+
+  if (!IS_INTERNAL) {
+    console.log('[BRIDGE] Receive from Native (auto-forward):', PAYLOAD)
 
     /** chờ 3 giây để iframe load xong rồi mới forward */
     setTimeout(() => {
       console.log('[BRIDGE] Delayed forward after 3s')
       ForwardToIframe(PAYLOAD)
-    }, 500)
+    }, 3000)
     return
   }
-  /** =================================================
-   *  LOGIC CŨ – GIỮ NGUYÊN (KHÔNG ĐỘNG)
-   * ================================================= */
 
+  /**
+   * LOGIC:
+   * 1. Iframe load xong -> gửi postMessage 'READY' kèm 'key'
+   * 2. Parent nhận 'READY' -> kiểm tra localStorage theo 'key'
+   * 3. Nếu có data -> gửi lại cho Iframe (type: 'CLIENT_ID')
+   */
   if (PAYLOAD?.status === 'READY') {
     console.log('[BRIDGE] Iframe is READY')
     /** đánh dấu iframe đã ready */
     is_iframe_ready.value = true
 
-    /** flush tất cả pending messages */
-    FlushPendingMessages()
+    /** Lấy thông tin cố định từ localStorage theo yêu cầu */
+    const DATA_SEND = {
+      user_name: localStorage.getItem('user_name'),
+      user_phone: localStorage.getItem('user_phone'),
+      user_email: localStorage.getItem('user_email'),
+      client_id: localStorage.getItem('client_id'),
+    }
 
-    const SAVED = localStorage.getItem(`${PAYLOAD.key}`)
-    console.log('SAVED', SAVED)
+    console.log('Sending INFO to iframe:', DATA_SEND)
 
-    if (SAVED && iframe_ref.value?.contentWindow) {
+    if (iframe_ref.value?.contentWindow) {
       iframe_ref.value.contentWindow.postMessage(
         {
           from: 'RETION_EMBED',
           type: 'CLIENT_ID',
-          data_embed_chat: SAVED,
+          data_embed_chat: JSON.stringify(DATA_SEND),
         },
         '*', // production thì check domain
       )
     }
   }
 
+  /** Logic lưu ngược lại từ Iframe vào localStorage (nếu cần) */
   if (PAYLOAD?.from === 'BBH-EMBED-IFRAME' && PAYLOAD.type === 'CLIENT_ID') {
     console.log('[BRIDGE] Iframe confirmed ready via BBH-EMBED-IFRAME')
 
     /** đánh dấu iframe đã ready */
-    if (!is_iframe_ready.value) {
-      is_iframe_ready.value = true
-      /** flush tất cả pending messages */
-      FlushPendingMessages()
-    }
+    is_iframe_ready.value = true
 
     localStorage.setItem(
       `${PAYLOAD.key}`,
