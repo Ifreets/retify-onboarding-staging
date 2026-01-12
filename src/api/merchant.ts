@@ -90,7 +90,7 @@ export class MerchantServiceAPI {
           [
             {
               title: 'New',
-              action: 'DRART_ORDER',
+              action: 'NEW_ORDER',
               bg_color: 'bg-black',
               text_color: 'text-white',
             },
@@ -144,7 +144,7 @@ export class MerchantServiceAPI {
           [
             {
               title: 'Đơn nháp',
-              action: 'DRART_ORDER',
+              action: 'NEW_ORDER',
               bg_color: 'bg-black',
               text_color: 'text-white',
             },

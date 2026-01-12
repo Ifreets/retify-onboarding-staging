@@ -7,7 +7,7 @@ export const ACTION_STATUS = [
   },
   {
     name: 'New Order',
-    value: 'DRART_ORDER',
+    value: 'NEW_ORDER',
     hiddend: false,
   },
   {
@@ -150,7 +150,7 @@ export const SORT_BY = [
 /** danh sách trạng thái đơn hàng để lọc */
 export const ORDER_STATUS = [
   {
-    value: 'DRART_ORDER',
+    value: 'NEW_ORDER',
     name: 'New Order',
   },
   {
