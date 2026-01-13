@@ -117,20 +117,6 @@ function openOrder(order: Order) {
 
 /** Lấy trạng thái cuối đang được kích hoạt */
 function getLastStatus(order: Order) {
-  /** hành trình đơn hàng */
-  const ORDER_JOURNEY = order.order_journey || []
-  /** trạng thái cuối cùng */
-  let last_status: ActionStep = {}
-  /** lặp qua mảng hành trình đơn hàng */
-  ORDER_JOURNEY?.forEach((step, index_step) => {
-    /** lặp qua các trạng thái của từng bước */
-    step?.forEach((status, index_status) => {
-      // nếu không có trạng thái hoạt động thì thôi
-      if (!status.is_active) return
-      // lưu lại trạng thái được kích hoạt
-      last_status = status
-    })
-  })
-  return last_status
+  return order.last_order_journey || {}
 }
 </script>
